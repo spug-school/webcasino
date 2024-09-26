@@ -10,7 +10,7 @@ class Database:
         config (dict): A dictionary containing the database connection parameters
         
     Examples:
-        db = Database({'host': 'localhost', 'user': 'root' ...})\n
+        db = Database(config, connect=True, setup=True)\n
         db.query('SELECT * FROM users')
     '''
     def __init__(self, config: dict, connect: bool = True, setup: bool = False):
@@ -46,8 +46,10 @@ class Database:
             self.connection.commit() # Commit any pending transactions
             self.connection.close()
             logging.info('Database connection closed')
+            return True
         except Exception as error:
             logging.error(f'Error closing the database connection:\n{error}')
+            return False
         
     def setup_database(self):
         '''
@@ -55,7 +57,7 @@ class Database:
         '''
         if self.setup_file is None or self.setup_file == '':
             logging.warning('No setup file provided')
-            return
+            return False
         
         try:
             with open(get_file_path(self.setup_file), 'r') as setup_file:
@@ -65,8 +67,10 @@ class Database:
             tables = [table[0] for table in self.query("SHOW TABLES")]
                         
             logging.info(f'Database `{self.connection.database}` setup successfully.\nTables: {tables}')
+            return True
         except Exception as error:
             logging.error(f'Error setting up the database:\n{error}')
+            return False
            
     def execute_script(self, script: str):
         '''
@@ -81,6 +85,7 @@ class Database:
                         self.connection.commit()
         except Exception as error:
             logging.error(f'Error executing script:\n{error}')
+            return False
              
     def query(self, query: str, fetch: bool = True, cursor_settings: dict = {}) -> dict:
         '''
@@ -97,3 +102,4 @@ class Database:
             }
         except Exception as error:
             logging.error(f'Error executing query `{query}`:\n{error}')
+            return False
