@@ -14,7 +14,7 @@ def main()-> None:
     foo = Cmd()
     selectedGame = foo.auth()
     print(selectedGame)
-    print(**config())
+    print(config())
 
 if __name__ == '__main__':
     main()

@@ -37,7 +37,7 @@ class Cmd:
         auth = self.parser.parse_args().auth
         username = auth.split(' ')[1]
         password = auth.split(' ')[2]
-        db = Database(**config())
+        db = Database(config())
         user = db.query(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
         if not user:
             return 'Invalid credentials'
@@ -48,7 +48,7 @@ class Cmd:
         print('Create an account')
         username = input('Enter username: ')
         password = input('Enter password: ')
-        db = Database(**config())
+        db = Database(config())
         db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
         return f'Username: {username}\nPassword: {password}'
 
