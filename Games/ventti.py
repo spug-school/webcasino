@@ -13,9 +13,8 @@ from time import sleep
 
 class Ventti:
     def __init__(self):
-        self.playing = True
         self.ventti = 21
-        self.max_turns = 4
+        self.max_turns = 2
         self.ranks = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K")
         self.suits = ("hertta", "ruutu", "risti", "pata")
         self.deck = []
@@ -123,6 +122,8 @@ class Ventti:
         else:
             print("Voitit pelin.")
 
+
+
 # Tekoälyn logiikka tulee tänne.
     def ai_logic(self):
         if not self.dealer_pass:
@@ -136,6 +137,36 @@ class Ventti:
                         self.hit_me()
             else:
                 self.dealer_pass = True
+
+    def full_game_analyze(self):
+        print(f"Pelaajan käsi: {self.player_hand}")
+        print(f"pelaajan pistetulo: {self.player_total}")
+        print(f"Jakajan käsi: {self.dealer_hand}")
+        print(f"Jakajan pistetulo: {self.dealer_total}")
+        print("Tarkistetaan, että kädessä olevat kortit eivät ole pakassa")
+        print("käydään läpi pelaajan käsi")
+        for obj in self.player_hand:
+            if obj in self.deck:
+                print(f"{obj} = True")
+            else:
+                print(f"{obj} = False")
+        print("Käydään läpi jakajan käsi")
+        for obj in self.dealer_hand:
+            if obj in self.deck:
+                print(f"{obj} = True")
+            else:
+                print(f"{obj} = False")
+        print("Tulostetaan nostojen määrä")
+        print(f"Pelaajan: {self.player_turn}")
+        print(f"Jakaja: {self.player_turn}")
+        if len(self.player_hand) != (2 + self.player_turn):
+            print("Pelaajan korttien määrä ei täsmää")
+            if len(self.player_hand) % (2 + self.player_turn) == 0:
+                print(f"Pelaajalla on {len(self.player_hand) % (2 + self.player_turn)} kortti liikaa")
+        if len(self.dealer_hand) != (2 + self.dealer_turn):
+            print("Jakajan korttien määrä ei täsmää")
+            if len(self.dealer_hand) % (2 + self.dealer_turn) == 0:
+                print(f"Pelaajalla on {len(self.dealer_hand) % (2 + self.dealer_turn)} kortti liikaa")
 
 
 # Pääfunktio pelin ajamiseen.
@@ -152,7 +183,6 @@ class Ventti:
             self.ai_logic()
             self.score_calculation()
             self.over_check()
-            shuffle(self.deck)
             sleep(1)
             print()
         self.is_winner()
@@ -160,3 +190,4 @@ class Ventti:
 if __name__ == "__main__":
     game = Ventti()
     game.run()
+    game.full_game_analyze()
