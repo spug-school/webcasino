@@ -32,7 +32,8 @@ class Database:
                 user = self.config['db_user'],
                 password = self.config['db_pass'],
                 autocommit = self.config['autocommit'],
-                collation = self.config['collation']
+                collation = self.config['collation'],
+                database = self.config.get('db_name', None)
             )
         except mysql.connector.Error as connection_error:
             logging.error(f'Error connecting to the database: {connection_error}')
@@ -87,13 +88,13 @@ class Database:
             logging.error(f'Error executing script:\n{error}')
             return False
              
-    def query(self, query: str, fetch: bool = True, cursor_settings: dict = {}) -> dict:
+    def query(self, query: str, values: tuple = (), fetch: bool = True, cursor_settings: dict = {}) -> dict:
         '''
         Executes singular `query` on the database
         '''
         try:
             cursor = self.connection.cursor(**cursor_settings)
-            cursor.execute(query)
+            cursor.execute(query, values)
             
             return {
                 'affected_rows': cursor.rowcount,

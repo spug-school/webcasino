@@ -14,18 +14,14 @@ CREATE TABLE `games` (
 
 CREATE TABLE `users` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `username` VARCHAR(50),
+  `username` VARCHAR(25),
   `password` VARCHAR(255),
-  `total_winnings` INTEGER,
-  `games_played` INTEGER,
-  `games_won` INTEGER,
-  `games_lost` INTEGER,
-  `is_banned` BOOLEAN
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `balance` (
-  `balance` INTEGER,
-  `user_id` INTEGER
+  `balance` INTEGER DEFAULT 1000,
+  `total_winnings` INTEGER DEFAULT 0,
+  `games_played` INTEGER DEFAULT 0,
+  `games_won` INTEGER DEFAULT 0,
+  `games_lost` INTEGER DEFAULT 0,
+  `is_banned` BOOLEAN DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `game_history` (
@@ -40,8 +36,6 @@ CREATE TABLE `game_history` (
 -- Foreign keys
 ALTER TABLE `games` ADD FOREIGN KEY (`player`) REFERENCES `users` (`id`);
 
-ALTER TABLE `balance` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
 ALTER TABLE `game_history` ADD FOREIGN KEY (`user`) REFERENCES `users` (`id`);
 
 ALTER TABLE `game_history` ADD FOREIGN KEY (`game`) REFERENCES `games` (`id`);
@@ -50,7 +44,7 @@ ALTER TABLE `game_history` ADD FOREIGN KEY (`game`) REFERENCES `games` (`id`);
 -- Test data 
 -- TODO: remove this
 INSERT INTO `users`
-    (`username`, `password`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
+    (`username`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
 VALUES
-    ('pekkapelaaja', '$2y$10$3Z6', 12, 29, 2, 27, 0),
-    ('ismolaitela69', 'salasana', 0, 200, 0, 200, 1);
+    ('pekkapelaaja', 5122, 12, 29, 2, 27, 0),
+    ('ismolaitela69', 1000, 0, 200, 0, 200, 1);
