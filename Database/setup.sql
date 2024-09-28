@@ -44,7 +44,7 @@ ALTER TABLE `game_history` ADD FOREIGN KEY (`game`) REFERENCES `games` (`id`);
 -- Test data 
 -- TODO: remove this
 INSERT INTO `users`
-    (`username`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
+    (`username`, `password`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
 VALUES
-    ('pekkapelaaja', 5122, 12, 29, 2, 27, 0),
-    ('ismolaitela69', 1000, 0, 200, 0, 200, 1);
+    ('pekkapelaaja', 'hyvä_salasana' 5122, 12, 29, 2, 27, 0),
+    ('ismolaitela69', '12345', 1000, 0, 200, 0, 200, 1);
