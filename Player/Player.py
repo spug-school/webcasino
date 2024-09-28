@@ -34,15 +34,16 @@ class Player:
     def __load_existing(self, username: str) -> dict|None:
         try:
             result = self.__db.query('SELECT * FROM users WHERE username = %s', (username,), cursor_settings={'dictionary': True})
-            return result[0] if result else None
+            return result[0] if result else False
         except mysql.connector.Error as error:
-            logging.error(f'Error loading player {self.__data.get('id')} data: {error}')
-            return None
+            logging.error(f'Error loading player {self.__data['id']} data: {error}')
+            return False
 
     def save(self):
         try:
             self.__db.query('UPDATE users SET total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, balance = %s WHERE username = %s', (self.__data['total_winnings'], self.__data['games_played'], self.__data['games_won'], self.__data['games_lost'], self.__data['balance'], self.__data['username']))
             self.__db.connection.commit()
+            logging.info(f'Player {self.__data['id']} data saved successfully')
         except mysql.connector.Error as error:
-            print(f'Error saving player {self.__data.get('id')} data: {error}')
+            logging.error(f'Error saving player {self.__data['id']} data: {error}')
             return False
