@@ -1,5 +1,5 @@
 import random
-from GameHelpers import GameHelpers
+from .GameHelpers import GameHelpers
 
 class Dice:
     '''
