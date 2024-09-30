@@ -16,6 +16,8 @@ class Ventti:
         self.dealer_turn = 0
         self.player_total = 0
         self.dealer_total = 0
+        self.player_has_ace = False
+        self.dealer_has_ace = False
         self.player_pass = False
         self.dealer_pass = False
         self.player_over = False
@@ -95,6 +97,10 @@ class Ventti:
     def score_calculation(self):
         self.player_total = 0
         self.dealer_total = 0
+        if self.player_has_ace:
+            self.player_total += 13
+        if self.dealer_has_ace:
+            self.dealer_total += 13
         for p_card in self.player_hand:
             self.player_total += p_card["value"]
         for d_card in self.dealer_hand:
