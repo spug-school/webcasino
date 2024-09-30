@@ -1,6 +1,4 @@
 # TODO saada aikaan funktio, jonka avulla ässä voidaan valita arvolla 14 tai 1
-# TODO Korjata jakajan tuloksen lasku. Ottaa tällä hetkkellä laskee jostain syystä pakan päällimmäisen kortin mukaan jakajan käteen
-#      ennenaikaisesti ja laskee tällöin tuloksen väärin. Tulos on kuitenkin oikea, mutta ennenaikainen.
 
 from random import shuffle
 from time import sleep
@@ -8,7 +6,7 @@ from time import sleep
 class Ventti:
     def __init__(self):
         self.ventti = 21
-        self.max_turns = 2
+        self.max_turns = 3
         self.ranks = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K")
         self.suits = ("hertta", "ruutu", "risti", "pata")
         self.deck = []
@@ -56,7 +54,7 @@ class Ventti:
             self.dealer_pass = True
         if not self.player_pass:
             if self.player_total > self.ventti:
-                print("BUST!")
+                print("Ylitit ventin!")
                 self.player_pass = True
                 self.player_over = True
             else:
@@ -118,7 +116,7 @@ class Ventti:
 
 
 
-# Tekoälyn logiikka tulee tänne.
+# Pelin logiikka tulee tänne.
     def ai_logic(self):
         if not self.dealer_pass:
             if self.dealer_turn < self.max_turns:
@@ -144,9 +142,9 @@ class Ventti:
             print()
         while not self.dealer_pass:
             self.hand_reveal()
-            self.ai_logic()
             self.score_calculation()
             self.over_check()
+            self.ai_logic()
             sleep(1)
             print()
         self.is_winner()
