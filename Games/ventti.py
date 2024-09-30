@@ -1,13 +1,7 @@
 # TODO saada aikaan funktio, jonka avulla ässä voidaan valita arvolla 14 tai 1
 # TODO Korjata jakajan tuloksen lasku. Ottaa tällä hetkkellä laskee jostain syystä pakan päällimmäisen kortin mukaan jakajan käteen
-#      ennenaikaisesti ja laskee tällöin tuloksen väärin.
+#      ennenaikaisesti ja laskee tällöin tuloksen väärin. Tulos on kuitenkin oikea, mutta ennenaikainen.
 
-"""
-Ventti: pelin idea on päästä mahdollisimman lähelle lukua 21. Toisin kuin black jackissä, kortit jaetaan pimeästi. Myös
-toisin kuin black jackissä ovat kuvat kuvakortit joidenka arvot vaihtelevat eli J on 11, Q on 12 ja K on 13. Tähän
-versioon ei vielä ole ässää ohjelmoitu, joten se on vain 1. Pelaaja ottaa sokkona vastaan kortteja ja pyrkii 21. Tämän
-jälkeen tulee jakajan vuoro ja hän pyrkii saamaan joko saman tai korkeamman pistetulon kuin pelaaja.
-"""
 from random import shuffle
 from time import sleep
 
@@ -138,36 +132,6 @@ class Ventti:
             else:
                 self.dealer_pass = True
 
-    def full_game_analyze(self):
-        print(f"Pelaajan käsi: {self.player_hand}")
-        print(f"pelaajan pistetulo: {self.player_total}")
-        print(f"Jakajan käsi: {self.dealer_hand}")
-        print(f"Jakajan pistetulo: {self.dealer_total}")
-        print("Tarkistetaan, että kädessä olevat kortit eivät ole pakassa")
-        print("käydään läpi pelaajan käsi")
-        for obj in self.player_hand:
-            if obj in self.deck:
-                print(f"{obj} = True")
-            else:
-                print(f"{obj} = False")
-        print("Käydään läpi jakajan käsi")
-        for obj in self.dealer_hand:
-            if obj in self.deck:
-                print(f"{obj} = True")
-            else:
-                print(f"{obj} = False")
-        print("Tulostetaan nostojen määrä")
-        print(f"Pelaajan: {self.player_turn}")
-        print(f"Jakaja: {self.player_turn}")
-        if len(self.player_hand) != (2 + self.player_turn):
-            print("Pelaajan korttien määrä ei täsmää")
-            if len(self.player_hand) % (2 + self.player_turn) == 0:
-                print(f"Pelaajalla on {len(self.player_hand) % (2 + self.player_turn)} kortti liikaa")
-        if len(self.dealer_hand) != (2 + self.dealer_turn):
-            print("Jakajan korttien määrä ei täsmää")
-            if len(self.dealer_hand) % (2 + self.dealer_turn) == 0:
-                print(f"Pelaajalla on {len(self.dealer_hand) % (2 + self.dealer_turn)} kortti liikaa")
-
 
 # Pääfunktio pelin ajamiseen.
     def run(self):
@@ -190,4 +154,3 @@ class Ventti:
 if __name__ == "__main__":
     game = Ventti()
     game.run()
-    game.full_game_analyze()
