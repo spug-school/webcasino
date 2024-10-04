@@ -52,11 +52,13 @@ class Database:
             logging.error(f'Error closing the database connection:\n{error}')
             return False
         
-    def setup_database(self):
+    def setup_database(self, file_path: str = None) -> bool:
         '''
         Runs the initital setup script for the db
         '''
-        if self.setup_file is None or self.setup_file == '':
+        file_path = file_path if file_path else self.setup_file
+        
+        if file_path is None or file_path == '':
             logging.warning('No setup file provided')
             return False
         
