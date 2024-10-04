@@ -27,6 +27,9 @@ class Player:
     
     def update_balance(self, amount: int):
         self.__data['balance'] += amount
+        
+    def set_banned(self):
+        self.__data['is_banned'] = True
     
     # TODO logic that tracks each game session (start of the game - leaving the game)
 
