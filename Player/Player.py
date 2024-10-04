@@ -13,6 +13,18 @@ class Player:
 
     def get_data(self) -> dict:
         return self.__data
+    
+    def get_balance(self) -> int:
+        '''
+        Needed so frequently that it's worth having a separate method for it
+        '''
+        return self.__data.get('balance')
+    
+    def get_username(self) -> str:
+        '''
+        As is this
+        '''
+        return self.__data.get('username', '')
 
     def update_total_winning(self, amount: int):
         self.__data['total_winnings'] += amount
@@ -68,10 +80,22 @@ class Player:
             return False
     
     def save(self):
+        '''
+        Used for saving the player's data from the temp object to the database
+        '''
         try:
-            self.__db.query('UPDATE users SET total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, balance = %s WHERE username = %s', (self.__data['total_winnings'], self.__data['games_played'], self.__data['games_won'], self.__data['games_lost'], self.__data['balance'], self.__data['username']))
+            query = '''
+                UPDATE users 
+                SET total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, balance = %s 
+                WHERE username = %s
+            '''
+            values = (self.__data['total_winnings'], self.__data['games_played'], self.__data['games_won'], self.__data['games_lost'], self.__data['balance'], self.__data['username'])
+            
+            self.__db.query(query, values)
             self.__db.connection.commit()
+            
             logging.info(f'Player {self.__data['id']} data saved successfully')
         except mysql.connector.Error as error:
             logging.error(f'Error saving player {self.__data['id']} data: {error}')
+            self.__db.connection.rollback()
             return False
