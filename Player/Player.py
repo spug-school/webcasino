@@ -11,6 +11,7 @@ class Player:
         self.__db = db_handler
         self.__data = self.__load_existing(username) if self.__load_existing(username) else self.__create_new(username)
 
+    # Getters
     def get_data(self) -> dict:
         return self.__data
     
@@ -25,7 +26,11 @@ class Player:
         As is this
         '''
         return self.__data.get('username', '')
+    
+    def get_ban_status(self) -> bool:
+        return self.__data.get('is_banned')
 
+    # Setters
     def update_total_winning(self, amount: int):
         self.__data['total_winnings'] += amount
 
@@ -43,8 +48,6 @@ class Player:
         
     def set_banned(self):
         self.__data['is_banned'] = True
-    
-    # TODO logic that tracks each game session (start of the game - leaving the game)
 
     # Db methods
     def __load_existing(self, username: str):
@@ -89,10 +92,13 @@ class Player:
         try:
             query = '''
                 UPDATE users 
-                SET total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, balance = %s 
+                SET username = %s, password = %s, balance = %s, total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, is_banned = %s
                 WHERE username = %s
             '''
-            values = (self.__data['total_winnings'], self.__data['games_played'], self.__data['games_won'], self.__data['games_lost'], self.__data['balance'], self.__data['username'])
+            
+            values = tuple(
+                self.get_data().get(key) for key in ('username', 'password', 'balance', 'total_winnings', 'games_played', 'games_won', 'games_lost', 'is_banned', 'username')
+            )
             
             self.__db.query(query, values)
             self.__db.connection.commit()

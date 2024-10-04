@@ -31,6 +31,9 @@ class GameHelpers:
             self.player.update_games_won()
         else: # loss
             self.player.update_games_lost()
+            
+            if self.player.get_balance() <= 0:
+                self.player.set_banned()
 
         self.player.update_games_played()
         self.player.update_balance(win_amount)
