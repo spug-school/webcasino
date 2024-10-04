@@ -19,18 +19,17 @@ class Dice:
     def __init__(self, player: dict):
         self.player = player
         self.name = 'Dice'
-        self.rules = 'The player has to guess the right value of the dice roll. The player himself determines the number of sides on the dice.'
+        self.rules = 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.'
         self.sides = 6
         self.helpers = GameHelpers(player)
 
-    def rollDice(self):
+    def rollDice(self) -> int:
         '''
         Rolls the dice and returns the result
         '''
         return random.randint(1, self.sides)
-    
 
-    def determineOutcome(self, guess: int, roll: int, bet: int):
+    def determineOutcome(self, guess: int, roll: int, bet: int) -> int:
         '''
         Determines the outcome of the game
         '''
@@ -40,30 +39,37 @@ class Dice:
         '''
         Runs the game and returns the player object when done
         '''
-        print(f'Welcome to the Dice game, {self.player['username']}!\n')
-
+        print(f'Tervetuloa nopanheittoon, {self.player['username']}!\n')
+        print(f'Pelin säännöt: {self.rules}\n')
+        
+        # game loop
+        dice_rolled = 0
+        
         while True:
             bet = self.helpers.getBet()
-            self.sides = int(input(f'Enter the number of sides on the dice: '))
+            self.sides = int(input(f'Montako sivua nopassa on: '))
 
             if self.sides < 2:
-                print('The dice must have at least 2 sides. Please enter a valid number of sides.\n')
+                print('Nopassa on oltava yli 2 sivua. Syötä muu luku.\n')
                 continue
 
-            guess = int(input(f'Enter your guess (1 - {self.sides}): '))
+            guess = int(input(f'Syötä arvauksesi (1 - {self.sides}): '))
             roll = self.rollDice()
+            
             outcome = self.determineOutcome(guess, roll, bet)
 
             if outcome > 0:
-                print(f'\nCongratulations! You guessed right! You have won {outcome}!\n')
+                print(f'\nOnnittelut! Arvasit oikein! Voitit {outcome} pistettä!\n')
                 self.helpers.updatePlayerBalance(outcome, getBalance=True)
             else:
-                print(f'\nYou have lost the game. The dice roll was {roll}.\n')
-
+                print(f'\nHävisit pelin. Oikea arvo oli {roll}.\n')
+            
+            dice_rolled += 1
+            
             if not self.helpers.playAgain():
                 break
 
-        return self.player
+        return self.player # return the updated player object
             
 # game = Dice({'id': 2, 'username': 'John', 'balance': 125})
 # game.startGame()

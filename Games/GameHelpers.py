@@ -9,13 +9,13 @@ class GameHelpers:
         self.player = player
 
     def getBet(self) -> int:
-        bet = int(input('Enter your bet: '))
+        bet = int(input('\nPanos: '))
         
         if bet <= self.player['balance']:
             self.updatePlayerBalance(bet * -1)
             return bet
         else:
-            print(f'Insufficient balance! Please enter a valid bet.\nCurrent balance: {self.player['balance']}')
+            print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player['balance']}')
             return self.getBet()
 
     def updatePlayerBalance(self, amount: int, getBalance: bool = False) -> int:
@@ -34,13 +34,13 @@ class GameHelpers:
             print(f'Out of balance! Cant play anymore.')
             return False
     
-        prompt = input('Play again? (y/n): ').lower()
+        prompt = str(input('Pelataanko uudestaan (k / e): ')).lower()
 
         match prompt:
-            case 'y':
+            case 'k':
                 return True
-            case 'n':
+            case 'e':
                 return False
             case _:
-                print(f'Invalid input. Please enter either "y" or "n".')
+                print(f'Virheellinen syöte. Syötä k tai e.')
                 return self.playAgain()
