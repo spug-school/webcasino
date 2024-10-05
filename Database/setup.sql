@@ -32,32 +32,32 @@ CREATE TABLE `game_types` (
   `rules` TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `active_games` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `game_type_id` INTEGER NOT NULL,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `user_id` INTEGER NOT NULL,
-  FOREIGN KEY (`game_type_id`) REFERENCES `game_types` (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE `game_history` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `bet` INTEGER,
   `win_amount` INTEGER,
   `played_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `user_id` INTEGER NOT NULL,
-  `game_id` INTEGER NOT NULL,
+  `game_type_id` INTEGER NOT NULL,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  FOREIGN KEY (`game_id`) REFERENCES `active_games` (`id`)
+  FOREIGN KEY (`game_type_id`) REFERENCES `game_types` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Indexes
-CREATE INDEX idx_user_id ON `active_games` (`user_id`);
-CREATE INDEX idx_game_type_id ON `active_games` (`game_type_id`);
 CREATE INDEX idx_user_id_history ON `game_history` (`user_id`);
-CREATE INDEX idx_game_id_history ON `game_history` (`game_id`);
+CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
 
+-- Table population
+INSERT INTO `game_types` 
+  (`name`, `rules`)
+VALUES
+  (`Ventti`, 'TODO'),
+  (`Nopanheitto`, 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.'),
+  (`Slots`, 'TODO'),
+  (`Ruletti`, 'TODO');
+
+
+-- Test data TODO remove
 -- Insert test data into `users` table
 INSERT INTO `users` (`username`, `password`)
 VALUES
