@@ -55,15 +55,22 @@ class Player:
         Handles loading the player's data from the database, if username matches
         '''
         try:
-            result = self.__db.query('SELECT * FROM users WHERE username = %s', (username,), cursor_settings={'dictionary': True})
-            result_data = result['result']
+            user_query = 'SELECT * FROM users WHERE username = %s'
+            profile_query = 'SELECT * FROM user_statistics WHERE user_id = %s'
             
-            if len(result_data) == 0:
+            user_result = self.__db.query(user_query, (username,), cursor_settings={'dictionary': True})
+            user_data = user_result['result']
+            
+            if len(user_data) == 0:
                 return False
             else:
-                return result_data[0] # returns the first row
+                user_data = user_data[0]
+                profile_result = self.__db.query(profile_query, (user_data['id'],), cursor_settings={'dictionary': True})
+                profile_data = profile_result['result'][0]
+                
+                return {**user_data, **profile_data} # Merge user and profile data
         except mysql.connector.Error as error:
-            logging.error(f'Error loading player {self.__data['id']} data: {error}')
+            logging.error(f'Error loading player {username} data: {error}')
             return False
 
     def __create_new(self, username: str, password: str = '') -> dict:
@@ -72,14 +79,27 @@ class Player:
         '''
         # TODO password handling
         try:
-            query = '''
+            user_query = '''
                 INSERT INTO users 
                 (username, password)
                 VALUES (%s, %s)
-                '''
-            self.__db.query(query, (username, password))
+            '''
+            
+            self.__db.query(user_query, (username, password))
             self.__db.connection.commit()
-            logging.info(f'New player {username} created successfully')
+            
+            user_id = self.__db.query('SELECT LAST_INSERT_ID()')['result'][0][0]
+            
+            profile_query = '''
+                INSERT INTO user_statistics 
+                (user_id)
+                VALUES (%s)
+                '''
+
+            self.__db.query(profile_query, (user_id,))
+            self.__db.connection.commit()
+            
+            logging.info(f'New player `{username}`, id:`{user_id}` created successfully')
             return self.__load_existing(username)
         except mysql.connector.Error as error:
             logging.error(f'Error creating new player {username}: {error}')
@@ -90,21 +110,40 @@ class Player:
         Used for saving the player's data from the temp object to the database
         '''
         try:
-            query = '''
+            user_query = '''
                 UPDATE users 
-                SET username = %s, password = %s, balance = %s, total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, is_banned = %s
-                WHERE username = %s
+                SET username = %s, password = %s
+                WHERE id = %s
             '''
             
-            values = tuple(
-                self.get_data().get(key) for key in ('username', 'password', 'balance', 'total_winnings', 'games_played', 'games_won', 'games_lost', 'is_banned', 'username')
+            profile_query = '''
+                UPDATE user_statistics 
+                SET balance = %s, total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, is_banned = %s
+                WHERE user_id = %s
+            '''
+            
+            user_values = (
+                self.__data['username'],
+                self.__data['password'],
+                self.__data['id']
             )
             
-            self.__db.query(query, values)
+            profile_values = (
+                self.__data['balance'],
+                self.__data['total_winnings'],
+                self.__data['games_played'],
+                self.__data['games_won'],
+                self.__data['games_lost'],
+                self.__data['is_banned'],
+                self.__data['id']
+            )
+            
+            self.__db.query(user_query, user_values)
+            self.__db.query(profile_query, profile_values)
             self.__db.connection.commit()
             
-            logging.info(f'Player {self.__data['id']} data saved successfully')
+            logging.info(f'Player {self.__data["id"]} data saved successfully')
         except mysql.connector.Error as error:
-            logging.error(f'Error saving player {self.__data['id']} data: {error}')
+            logging.error(f'Error saving player {self.__data["id"]} data: {error}')
             self.__db.connection.rollback()
             return False
