@@ -5,13 +5,6 @@ USE `cli_casino`;
 ALTER DATABASE `cli_casino` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Tables
-CREATE TABLE `games` (
-  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `name` VARCHAR(20),
-  `rules` text,
-  `player` INTEGER
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE `users` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `username` VARCHAR(25),
@@ -24,23 +17,26 @@ CREATE TABLE `users` (
   `is_banned` BOOLEAN DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `game_history` (
+CREATE TABLE `games` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-  `user` INTEGER,
-  `game` INTEGER,
-  `bet` INTEGER,
-  `win_amount` INTEGER,
-  `played_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+  `name` VARCHAR(20),
+  `rules` text,
+  `user_id` INTEGER NOT NULL,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Foreign keys
-ALTER TABLE `games` ADD FOREIGN KEY (`player`) REFERENCES `users` (`id`);
+CREATE TABLE `game_history` (
+  `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `bet` INTEGER,
+  `win_amount` INTEGER,
+  `played_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `user_id` INTEGER KEY NOT NULL,
+  `game_id` INTEGER KEY NOT NULL,
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  FOREIGN KEY (`game_id`) REFERENCES `games` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-ALTER TABLE `game_history` ADD FOREIGN KEY (`user`) REFERENCES `users` (`id`);
-
-ALTER TABLE `game_history` ADD FOREIGN KEY (`game`) REFERENCES `games` (`id`);
-
-
+-- Test data
 INSERT INTO `users` 
   (`username`, `password`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`) 
 VALUES
