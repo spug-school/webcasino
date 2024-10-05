@@ -13,13 +13,17 @@ class Cmd:
             version='CLI Casino 1.0'
         )
         self.parser.add_argument(
-            '--game',
-            help='Game list [blackjack, roulette, dice]'
-        )
-        self.parser.add_argument(
             '--auth',
-            help='Create an account'
+            help='Sign in or sign up to the casino'
         )
+
+    def run(self) -> str | None:
+        args = self.parser.parse_args()
+
+        if args.auth:
+            return self.auth()
+        else:
+            return self.parser.print_help()
 
     def auth(self) -> str:
         match self.parser.parse_args().auth.split(' ')[0]:

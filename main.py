@@ -17,7 +17,9 @@ def main()-> None:
         connect = True,
         setup = False
     )
-    cmd = Cmd(db).auth()
+
+
+    cmd = Cmd(db).run()
     print(cmd)
 
 if __name__ == '__main__':
