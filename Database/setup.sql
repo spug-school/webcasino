@@ -45,16 +45,6 @@ CREATE TABLE `game_history` (
 CREATE INDEX idx_user_id_history ON `game_history` (`user_id`);
 CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
 
--- Table population
-INSERT INTO `game_types` 
-  (`name`, `rules`)
-VALUES
-  (`Ventti`, 'TODO'),
-  (`Dice`, 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.'),
-  (`Slots`, 'TODO'),
-  (`Roulette`, 'TODO');
-
-
 -- Test data TODO remove
 -- Insert test data into `users` table
 INSERT INTO `users` (`username`, `password`)
@@ -104,65 +94,3 @@ VALUES
 (18, 18000, 17500, 180, 175, 5, 0),
 (19, 19000, 18500, 190, 185, 5, 0),
 (20, 20000, 19500, 200, 195, 5, 0);
-
--- Insert test data into `game_types` table
-INSERT INTO `game_types` (`name`, `description`)
-VALUES
-('Dice', 'A simple dice game'),
-('Blackjack', 'A classic card game'),
-('Roulette', 'A popular casino game'),
-('Poker', 'A strategic card game'),
-('Slots', 'A slot machine game'),
-('Baccarat', 'A comparing card game'),
-('Craps', 'A dice game'),
-('Keno', 'A lottery-like game'),
-('Bingo', 'A number matching game'),
-('Sic Bo', 'A Chinese dice game');
-
--- Insert test data into `active_games` table
-INSERT INTO `active_games` (`game_type_id`, `user_id`)
-VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
-(6, 6),
-(7, 7),
-(8, 8),
-(9, 9),
-(10, 10),
-(1, 11),
-(2, 12),
-(3, 13),
-(4, 14),
-(5, 15),
-(6, 16),
-(7, 17),
-(8, 18),
-(9, 19),
-(10, 20);
-
--- Insert test data into `game_history` table
-INSERT INTO `game_history` (`bet`, `win_amount`, `user_id`, `game_id`)
-VALUES
-(100, 200, 1, 1),
-(200, 400, 2, 2),
-(300, 600, 3, 3),
-(400, 800, 4, 4),
-(500, 1000, 5, 5),
-(600, 1200, 6, 6),
-(700, 1400, 7, 7),
-(800, 1600, 8, 8),
-(900, 1800, 9, 9),
-(1000, 2000, 10, 10),
-(1100, 2200, 11, 11),
-(1200, 2400, 12, 12),
-(1300, 2600, 13, 13),
-(1400, 2800, 14, 14),
-(1500, 3000, 15, 15),
-(1600, 3200, 16, 16),
-(1700, 3400, 17, 17),
-(1800, 3600, 18, 18),
-(1900, 3800, 19, 19),
-(2000, 4000, 20, 20);

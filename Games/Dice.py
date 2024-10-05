@@ -65,7 +65,7 @@ class Dice:
             self.helpers.update_player_values(game_won, outcome, save = True)
             
             # Save the game to the database
-            self.helpers.save_game_to_history()
+            self.helpers.save_game_to_history(bet = bet, win_amount = outcome)
             
             if not self.helpers.play_again():
                 break

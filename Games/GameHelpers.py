@@ -12,6 +12,9 @@ class GameHelpers:
         self.player = player # the whole class with the methods included
         self.db = db_handler
         self.game_info = game_info
+        
+        # Create the game type in the database
+        self.create_game_type()
 
     # Game related methods
     def get_bet(self) -> int:
@@ -41,6 +44,25 @@ class GameHelpers:
                 return self.play_again()
 
     # Database related methods
+    def create_game_type(self):
+        '''
+        Creates a new game type in the database. References the class name as the game type name
+        '''
+        try:
+            exists_query = 'SELECT * FROM game_types WHERE name = %s'
+            check_existance = self.db.query(exists_query, (self.game_info.get('name'),), cursor_settings={'dictionary': True})
+            
+            if len(check_existance['result']) > 0:
+                return
+            
+            query = 'INSERT INTO game_types (name, rules) VALUES (%s, %s)'
+            values = (self.game_info.get('name'), self.game_info.get('rules'))
+            
+            self.db.query(query, values)
+        except Exception as error:
+            logging.error(f'Error creating the game type: {error}')
+            return False
+    
     def update_player_values(self, won: bool, win_amount = int, save = True):
         '''
         Updates all the player values in bulk after a game has ended
@@ -64,13 +86,29 @@ class GameHelpers:
         if save: # save the updated values to the database
             self.player.save()
     
-    def save_game_to_history(self) -> bool:
+    def save_game_to_history(self, win_amount: int, bet: int) -> bool:
         '''
         Saves the game to the database. Returns success state boolean
         '''
         # TODO - save the game to the "game_history" table
         try:
-            player_id = self.player.get_data().get('id')
+            query = '''
+                INSERT INTO game_history
+                (bet, win_amount, played_at, user_id, game_type_id)
+                VALUES (%s, %s, %s, %s, %s)
+            '''
+            
+            user_id = self.player.get_data().get('id')
+            game_type_id = self.db.query('SELECT id FROM game_types WHERE name = %s', (self.game_info.get('name'),), cursor_settings={'dictionary': True})['result'][0].get('id')
+
+            values = (bet, win_amount, datetime.now(), int(user_id), int(game_type_id))
+            
+            result = self.db.query(query, values)
+            
+            if result['affected_rows'] > 0:
+                return True
+            else:
+                raise Exception('Unexpected error saving the game')
             
             # TODO
         except Exception as error:
