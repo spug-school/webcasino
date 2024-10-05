@@ -1,7 +1,16 @@
 import argparse
+from enum import Enum
 
-from Database.Database import Database
-from config import config
+class Games(Enum):
+    BLACKJACK = 1
+    DICE = 2
+    SLOTS = 3
+
+class MenuOptions(Enum):
+    PLAY = 1
+    LEADERBOARD = 2
+    HELP = 3
+    EXIT = 4
 
 class Cmd:
     def __init__(self, db) -> None:
@@ -48,7 +57,8 @@ class Cmd:
         if user.get('result') == []:
             return 'Invalid credentials'
 
-        return f'Welcome {username}'
+        print(f'Welcome {username}')
+        return self.gameMenu()
 
     def _register(self) -> str:
         print('Create an account')
@@ -61,5 +71,34 @@ class Cmd:
         db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
         return f'Username: {username}\nPassword: {password}'
 
-    def parse_args(self) -> argparse.Namespace:
-        return self.parser.parse_args()
+    def gameMenu(self):
+        for option in MenuOptions:
+            print(f'{option.value}. {option.name.capitalize()}')
+
+        option = int(input('Select an option: '))
+        print(MenuOptions(option))
+        print(MenuOptions.PLAY)
+        match MenuOptions(option):
+            case MenuOptions.PLAY:
+                return self.gameSelector()
+            case MenuOptions.LEADERBOARD:
+                print('Leaderboard')
+                return 'Leaderboard'
+            case MenuOptions.HELP:
+                print('Help')
+                return 'Help'
+            case MenuOptions.EXIT:
+                print('Goodbye')
+                return exit()
+
+
+    def gameSelector(self) -> str:
+        GAMES = ('blackjack', 'dice', 'slots')
+
+        print('Available games:')
+        for i, game in enumerate(GAMES):
+            print(f'{i+1}. {game.capitalize()}')
+        game = input('Select a game: ')
+        return GAMES[int(game)-1]
+
+

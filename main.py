@@ -18,6 +18,7 @@ def main()-> None:
         setup = False
     )
 
+    print(name)
 
     cmd = Cmd(db).run()
     print(cmd)
