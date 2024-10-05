@@ -1,3 +1,6 @@
+import logging
+from datetime import datetime
+
 class GameHelpers:
     '''
     Helpers: Setup some common game methods that can be used across different games. Should be only used within the game classes.
@@ -5,10 +8,12 @@ class GameHelpers:
     Attributes:
         player (dict): The current player object
     '''
-    def __init__(self, player: object):
+    def __init__(self, player: object, game_info: dict, db_handler: object):
         self.player = player # the whole class with the methods included
+        self.db = db_handler
+        self.game_info = game_info
 
-    def getBet(self) -> int:
+    def get_bet(self) -> int:
         bet = int(input('\nPanos: '))
         
         if bet <= self.player.get_balance():
@@ -16,9 +21,9 @@ class GameHelpers:
             return bet
         else:
             print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player.get_balance()}')
-            return self.getBet()
+            return self.get_bet()
 
-    def updatePlayerValues(self, won: bool, win_amount = int, save = True):
+    def update_player_values(self, won: bool, win_amount = int, save = True):
         '''
         Updates all the player values in bulk after a game has ended
         
@@ -41,7 +46,20 @@ class GameHelpers:
         if save:
             self.player.save()
     
-    def playAgain(self) -> bool:
+    def save_game(self) -> bool:
+        '''
+        Saves the game to the database. Returns success state boolean
+        '''
+        try:
+            player_id = self.player.get_data().get('id')
+            
+            # TODO
+        except Exception as error:
+            logging.error(f'Error saving the game: {error}')
+            return False
+            
+    
+    def play_again(self) -> bool:
         if self.player.get_balance() <= 0:
             print(f'Saldo ei riitä. Peli päättyi.\n')
             return False
@@ -55,4 +73,4 @@ class GameHelpers:
                 return False
             case _:
                 print(f'Virheellinen syöte. Syötä k tai e.')
-                return self.playAgain()
+                return self.play_again()
