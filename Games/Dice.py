@@ -35,7 +35,7 @@ class Dice:
         '''
         return bet * self.sides if guess == roll else 0
 
-    def startGame(self) -> dict:
+    def start_game(self) -> dict:
         '''
         Runs the game and returns the player object when done
         '''
@@ -65,7 +65,7 @@ class Dice:
             self.helpers.update_player_values(game_won, outcome, save = True)
             
             # Save the game to the database
-            self.helpers.save_game()
+            self.helpers.save_game_to_history()
             
             if not self.helpers.play_again():
                 break

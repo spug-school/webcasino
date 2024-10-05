@@ -21,8 +21,6 @@ CREATE TABLE `user_statistics` (
   `games_won` INTEGER DEFAULT 0,
   `games_lost` INTEGER DEFAULT 0,
   `is_banned` BOOLEAN DEFAULT 0,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -52,9 +50,9 @@ INSERT INTO `game_types`
   (`name`, `rules`)
 VALUES
   (`Ventti`, 'TODO'),
-  (`Nopanheitto`, 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.'),
+  (`Dice`, 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.'),
   (`Slots`, 'TODO'),
-  (`Ruletti`, 'TODO');
+  (`Roulette`, 'TODO');
 
 
 -- Test data TODO remove

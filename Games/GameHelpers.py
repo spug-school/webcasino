@@ -13,6 +13,7 @@ class GameHelpers:
         self.db = db_handler
         self.game_info = game_info
 
+    # Game related methods
     def get_bet(self) -> int:
         bet = int(input('\nPanos: '))
         
@@ -22,7 +23,24 @@ class GameHelpers:
         else:
             print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player.get_balance()}')
             return self.get_bet()
+        
+    def play_again(self) -> bool:
+        if self.player.get_balance() <= 0:
+            print(f'Saldo ei riitä. Peli päättyi.\n')
+            return False
+    
+        prompt = str(input('Pelataanko uudestaan (k / e): ')).lower()
 
+        match prompt:
+            case 'k':
+                return True
+            case 'e':
+                return False
+            case _:
+                print(f'Virheellinen syöte. Syötä k tai e.')
+                return self.play_again()
+
+    # Database related methods
     def update_player_values(self, won: bool, win_amount = int, save = True):
         '''
         Updates all the player values in bulk after a game has ended
@@ -43,13 +61,14 @@ class GameHelpers:
         self.player.update_games_played()
         self.player.update_balance(win_amount)
         
-        if save:
+        if save: # save the updated values to the database
             self.player.save()
     
-    def save_game(self) -> bool:
+    def save_game_to_history(self) -> bool:
         '''
         Saves the game to the database. Returns success state boolean
         '''
+        # TODO - save the game to the "game_history" table
         try:
             player_id = self.player.get_data().get('id')
             
@@ -57,20 +76,3 @@ class GameHelpers:
         except Exception as error:
             logging.error(f'Error saving the game: {error}')
             return False
-            
-    
-    def play_again(self) -> bool:
-        if self.player.get_balance() <= 0:
-            print(f'Saldo ei riitä. Peli päättyi.\n')
-            return False
-    
-        prompt = str(input('Pelataanko uudestaan (k / e): ')).lower()
-
-        match prompt:
-            case 'k':
-                return True
-            case 'e':
-                return False
-            case _:
-                print(f'Virheellinen syöte. Syötä k tai e.')
-                return self.play_again()
