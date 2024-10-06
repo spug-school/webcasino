@@ -1,6 +1,9 @@
 import argparse
 from enum import Enum
 
+from Games.Dice import Dice
+from Player import Player
+
 class Games(Enum):
     BLACKJACK = 1
     DICE = 2
@@ -13,8 +16,9 @@ class MenuOptions(Enum):
     EXIT = 4
 
 class Cmd:
-    def __init__(self, db) -> None:
+    def __init__(self, db):
         self.db = db
+        self.player = None
         self.parser = argparse.ArgumentParser(description="CLI CASINO")
         self.parser.add_argument(
             '--version',
@@ -26,7 +30,7 @@ class Cmd:
             help='Sign in or sign up to the casino'
         )
 
-    def run(self) -> str | None:
+    def run(self):
         args = self.parser.parse_args()
 
         if args.auth:
@@ -34,7 +38,7 @@ class Cmd:
         else:
             return self.parser.print_help()
 
-    def auth(self) -> str:
+    def auth(self):
         match self.parser.parse_args().auth.split(' ')[0]:
             case 'signup':
                 return self._register()
@@ -43,7 +47,7 @@ class Cmd:
             case _:
                 return 'Invalid argument'
 
-    def _signin(self) -> str:
+    def _signin(self):
         auth = self.parser.parse_args().auth
         if len(auth.split(' ')) == 3:
             username = auth.split(' ')[1]
@@ -56,6 +60,8 @@ class Cmd:
 
         if user.get('result') == []:
             return 'Invalid credentials'
+
+        self.player = Player(username, self.db)
 
         print(f'Welcome {username}')
         return self.gameMenu()
@@ -76,8 +82,7 @@ class Cmd:
             print(f'{option.value}. {option.name.capitalize()}')
 
         option = int(input('Select an option: '))
-        print(MenuOptions(option))
-        print(MenuOptions.PLAY)
+
         match MenuOptions(option):
             case MenuOptions.PLAY:
                 return self.gameSelector()
@@ -92,13 +97,19 @@ class Cmd:
                 return exit()
 
 
-    def gameSelector(self) -> str:
-        GAMES = ('blackjack', 'dice', 'slots')
-
+    def gameSelector(self):
         print('Available games:')
-        for i, game in enumerate(GAMES):
-            print(f'{i+1}. {game.capitalize()}')
-        game = input('Select a game: ')
-        return GAMES[int(game)-1]
+        for game in Games:
+            print(f'{game.value}. {game.name.capitalize()}')
+        game = int(input('Select a game: '))
 
-
+        match Games(game):
+            case Games.BLACKJACK:
+                print('Blackjack')
+                return 'Blackjack'
+            case Games.DICE:
+                print('Dice')
+                return Dice(self.player, self.db).start_game()
+            case Games.SLOTS:
+                print('Slots')
+                return 'Slots'

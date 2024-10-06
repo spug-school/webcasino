@@ -10,7 +10,7 @@ name = r"""
  \____||_____||___|  \____|/_/   \_\|____/|___||_| \_| \___/
 """
 
-def main()-> None:
+def main():
     db_configs = config()
     db = Database(
         config = db_configs,
