@@ -3,8 +3,6 @@ from time import sleep
 from .GameHelpers import GameHelpers
 import shutil
 
-from helpers.cli_example_helpers import header
-
 class Roulette:
     '''
     Game: Roulette
