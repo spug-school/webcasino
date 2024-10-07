@@ -17,18 +17,24 @@ class GameHelpers:
         self.create_game_type()
 
     # Game related methods
-    def get_bet(self) -> int:
-        bet = int(input('\nPanos: '))
+    def get_bet(self, balance: int) -> int:
+        bet = input(f'Panos (saldo: {balance}): ')
+
+        if not bet.isdigit() or int(bet) <= 0:
+            print('Virheellinen syöte. Syötä numero.')
+            return self.get_bet(balance)
         
-        if bet <= self.player.get_balance():
+        bet = int(bet)
+        
+        if bet <= balance:
             self.player.update_balance(-bet)
             return bet
         else:
             print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player.get_balance()}')
-            return self.get_bet()
+            return self.get_bet(balance)
         
-    def play_again(self) -> bool:
-        if self.player.get_balance() <= 0:
+    def play_again(self, balance: str) -> bool:
+        if balance <= 0:
             print(f'Saldo ei riitä. Peli päättyi.\n')
             return False
     
@@ -41,7 +47,11 @@ class GameHelpers:
                 return False
             case _:
                 print(f'Virheellinen syöte. Syötä k tai e.')
-                return self.play_again()
+                return self.play_again(balance)
+    
+    def game_intro(self, username: str):
+        print(f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n')
+        print(f'Pelin säännöt:\n\n{self.game_info.get("rules")})\n')
 
     # Database related methods
     def create_game_type(self):
@@ -90,7 +100,6 @@ class GameHelpers:
         '''
         Saves the game to the database. Returns success state boolean
         '''
-        # TODO - save the game to the "game_history" table
         try:
             query = '''
                 INSERT INTO game_history
@@ -109,8 +118,6 @@ class GameHelpers:
                 return True
             else:
                 raise Exception('Unexpected error saving the game')
-            
-            # TODO
         except Exception as error:
             logging.error(f'Error saving the game: {error}')
             return False
