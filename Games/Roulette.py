@@ -117,7 +117,6 @@ class Roulette:
         while True:
             # TODO Header / terminal reload here!!!
             # eg. header('Ruletti', self.player.get_balance())
-            header('Ruletti', self.player.get_balance())
             
             self.helpers.game_intro(self.player.get_username())
             
