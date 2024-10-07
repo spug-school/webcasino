@@ -2,7 +2,10 @@ import argparse
 from enum import Enum
 
 from Games.Dice import Dice
+from Games.ventti import Ventti
 from Player import Player
+from cli.Leaderboard import Leaderboard
+from cli.utils import clear_terminal, header
 
 class Games(Enum):
     BLACKJACK = 1
@@ -12,8 +15,9 @@ class Games(Enum):
 class MenuOptions(Enum):
     PLAY = 1
     LEADERBOARD = 2
-    HELP = 3
-    EXIT = 4
+    SETTINGS = 3
+    HELP = 4
+    EXIT = 5
 
 class Cmd:
     def __init__(self, db):
@@ -29,8 +33,9 @@ class Cmd:
             '--auth',
             help='Sign in or sign up to the casino'
         )
+        self._run()
 
-    def run(self):
+    def _run(self):
         args = self.parser.parse_args()
 
         if args.auth:
@@ -64,7 +69,6 @@ class Cmd:
 
         self.player = Player(username, self.db)
 
-        print(user.get('result'))
         print(f'Welcome {username}')
         return self.gameLoop()
 
@@ -82,8 +86,9 @@ class Cmd:
 
     def gameLoop(self):
         while True:
+            if self.player == 'after playing run this':
+                self.player.save()
             clear_terminal()
-            print('Welcome to the casino!')
             header('Main menu', self.player.get_balance())
             self.gameMenu()
 
@@ -98,7 +103,7 @@ class Cmd:
                 return self.gameSelector()
             case MenuOptions.LEADERBOARD:
                 print('Leaderboard')
-                return 'Leaderboard'
+                return Leaderboard(self.db).start_leaderboard()
             case MenuOptions.HELP:
                 print('Help')
                 return 'Help'
@@ -116,7 +121,7 @@ class Cmd:
         match Games(game):
             case Games.BLACKJACK:
                 print('Blackjack')
-                return 'Blackjack'
+                return Ventti().run()
             case Games.DICE:
                 print('Dice')
                 return Dice(self.player, self.db).start_game()
@@ -124,18 +129,3 @@ class Cmd:
                 print('Slots')
                 return 'Slots'
 
-# helpers
-def clear_terminal():
-    '''
-    Clears the terminal, and prints the logo
-    '''
-    import os
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(f'ca\n')
-
-def header(text: str, balance: int):
-    '''
-    Prints the header. Call this on the start of each loop
-    '''
-    # clear_termginal()
-    return print(f'{text}  |  Saldo: {balance}\n\n')

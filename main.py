@@ -20,7 +20,7 @@ def main():
 
     print(name)
 
-    cmd = Cmd(db).run()
+    cmd = Cmd(db)
     print(cmd)
 
 if __name__ == '__main__':
