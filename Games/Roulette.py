@@ -1,4 +1,5 @@
 import random
+from time import sleep
 from .GameHelpers import GameHelpers
 
 class Roulette:
@@ -9,7 +10,7 @@ class Roulette:
     def __init__(self, player: object, db_handler: object):
         self.player = player
         self.name = 'Ruletti'
-        self.rules = 'Pelaaja valitsee numeron sekä mahdollisesti värin, jolle panostaa. Voittokerroin on 36x panos, jos pelaaja arvaa oikean numeron. Väristä voittokerroin on 2x panos.'
+        self.rules = 'Pelaaja valitsee numeron sekä mahdollisesti värin, jolle panostaa. Voittokerroin on 36x panos, jos pelaaja arvaa oikean numeron. Oikean värin voittokerroin on 2x panos.'
         self.helpers = GameHelpers(player, {'name': self.name, 'rules': self.rules}, db_handler)
 
         # the betting options
@@ -27,6 +28,9 @@ class Roulette:
         }
         
     def spin_wheel(self) -> int:
+        print('\nPyörä pyörii...\n')
+        sleep(2)
+
         rolled_number = random.randint(0, 36)
         rolled_color = 'v' if rolled_number in self.colors['v'] else 'p' if rolled_number in self.colors['p'] else 'm'
 
@@ -87,27 +91,33 @@ class Roulette:
         '''
         Runs the game and returns the modified player object
         '''
-        print(f'Tervetuloa rulettiin, {self.player.get_username()}!\n')
-        print(f'Pelin säännöt: {self.rules}\n')
-
         while True:
-            number_guess = input(f'Numeroarvaus. Syötä tyhjä, jos arvaat vain väriä. (0 - 36): ')
-            color_guess = input(f'Väriarvaus. Syötä tyhjä, jos arvaat vain numeroa. (p/m): ')
+            # TODO Header / terminal reload here!!!
+            # eg. header('Ruletti', self.player.get_balance())
+            self.helpers.game_intro(self.player.get_username())
+
+            bet = self.helpers.get_bet(self.player.get_balance())
+
+            number_guess = input(f'Numeroarvaus\nSyötä tyhjä, jos arvaat vain väriä.\n(0 - 36): ')
+            color_guess = input(f'\nVäriarvaus\nSyötä tyhjä, jos arvaat vain numeroa.\n(p/m): ')
 
             if not self.validate_guesses(number_guess, color_guess):
-                print('Syötteissä on virheitä! Yritä uudelleen.\n')
+                self.player.update_balance(bet) # "refund" the bet
+                
+                # wait for a few seconds before continuing, so the player can read the error messages
+                sleep(3)
                 continue
 
-            bet = self.helpers.get_bet()
             roll = self.spin_wheel()
             
             outcome = self.determine_outcome(number_guess, color_guess, roll, bet)
+            net_winnings = outcome - bet
             game_won = outcome > 0
 
             if game_won:
                 # check which guess was correct
                 if color_guess == roll['color'] and not number_guess == str(roll['number']):
-                    print(f'\nVäriarvaus oli oikein! Voitit {outcome} pistettä!\n')
+                    print(f'\nVäriarvaus oli oikein! Voitit {net_winnings} pistettä!\n')
                 elif number_guess == str(roll['number']) and not color_guess == roll['color']:
                     print(f'\nNumeroarvaus oli oikein! Voitit {outcome} pistettä!\n')
                 else:
@@ -121,7 +131,7 @@ class Roulette:
             # Save the game to the database
             self.helpers.save_game_to_history(bet = bet, win_amount = outcome)
             
-            if not self.helpers.play_again():
+            if not self.helpers.play_again(self.player.get_balance()):
                 break
 
         return self.player
