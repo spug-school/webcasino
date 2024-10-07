@@ -217,7 +217,7 @@ class Player:
             logging.error(f'Error deleting the user {self.get_data().get("id", None)}: {error}')
             return False
         
-    def unban_account(self, balance_to_set: int = 0):
+    def unban_account(self, balance_to_set: int):
         '''
         Unbans the player's account
         '''
@@ -233,6 +233,8 @@ class Player:
             result = self.__db.query(query, values)
             
             if result['affected_rows'] > 0:
+                self.__data['is_banned'] = False
+                self.__data['balance'] = balance_to_set
                 return True
             else:
                 return False
