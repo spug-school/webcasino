@@ -22,8 +22,6 @@ class Dice:
         Runs the game and returns the player object when done
         '''
         while True:
-            # TODO Header / terminal reload here!!!
-            # eg. header('Nopanheitto', self.player.get_balance())
             self.helpers.game_intro(self.player.get_username())
             
             # check if the player wants to play the game or not
@@ -32,6 +30,11 @@ class Dice:
             
             # get the bet, amount of sides & the guess
             bet = self.helpers.get_bet(self.player.get_balance())
+            
+            # one more opportunity to exit the game before rolling the dice
+            if bet == 0:
+                break
+            
             self.sides = self.helpers.validate_input('\nKuinka monta sivua nopassa on (2 - 20): ', 'int', 2, 20)
             guess = self.helpers.validate_input(f'\nArvaa nopan arvo (1 - {self.sides}): ', 'int', 1, self.sides)
             
