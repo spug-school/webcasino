@@ -1,22 +1,23 @@
 import random
+from time import sleep
 from .GameHelpers import GameHelpers
 
-class Dice:
-    '''
-    Game: Dice
-    Description: The simplest dice game, where the player determines the number of sides on the dice and then guesses a value of the rolled dice.
-    '''
+class CoinFlip:
     def __init__(self, player: object, db_handler: object):
         self.player = player
-        self.helpers = GameHelpers(player, db_handler, 'dice')
-        self.sides = 6 # default value
-
-    def _roll_dice(self) -> int:
-        return random.randint(1, self.sides)
-
-    def _determine_outcome(self, guess: int, roll: int, bet: int) -> int:
-        return bet * self.sides if guess == roll else 0
-
+        self.helpers = GameHelpers(player, db_handler, 'coinflip')
+        
+        self.coin_sides = [
+            ('k', 'kruuna', '👑'),
+            ('c', 'klaava', '🍀'),         
+        ]
+        
+    def _flip_coin(self) -> str:
+        return random.choice(self.coin_sides)
+    
+    def _determine_outcome(self, guess: str, flip: str, bet: int) -> int:
+        return bet * 2 if guess == flip else 0
+    
     def start_game(self) -> object:
         '''
         Runs the game and returns the player object when done
@@ -28,27 +29,26 @@ class Dice:
             if not self.helpers.play_game():
                 break
             
-            # get the bet, amount of sides & the guess
             bet = self.helpers.get_bet(self.player.get_balance())
             
-            # one more opportunity to exit the game before rolling the dice
+            # one more opportunity to exit the game before flipping the coin
             if bet == 0:
                 break
             
-            self.sides = self.helpers.validate_input('\nKuinka monta sivua nopassa on (2 - 20): ', 'int', 2, 20)
-            guess = self.helpers.validate_input(f'\nArvaa nopan arvo (1 - {self.sides}): ', 'int', 1, self.sides)
+            guess = self.helpers.validate_input('\nArvaa kruuna vai klaava (k/c): ', 'str', 'k', 'c')
             
-            roll = self._roll_dice()
+            flip = self._flip_coin()
+            print(f'\nKolikonheiton tulos: {flip}\n')
             
-            outcome = self._determine_outcome(guess, roll, bet)
+            outcome = self._determine_outcome(guess, flip, bet)
             game_won = outcome > 0
             net_outcome = outcome - bet
-
+            
             if game_won:
                 print(f'\nOnnittelut! Arvasit oikein! Voitit {outcome} pistettä!\n')
             else:
-                print(f'\nHävisit pelin. Oikea arvo oli {roll}.\n')
-                
+                print(f'\nHävisit pelin. Kone arpoi {flip}.\n')
+            
             # Bulk-update the player values
             self.helpers.update_player_values(game_won, net_outcome, save = True)
             
@@ -57,5 +57,5 @@ class Dice:
             
             if not self.helpers.play_again(self.player.get_balance()):
                 break
-
-        return self.player # return the updated player object
+            
+        return self.player

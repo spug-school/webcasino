@@ -1,8 +1,6 @@
 DROP DATABASE IF EXISTS `cli_casino`;
-CREATE DATABASE `cli_casino`;
+CREATE DATABASE `cli_casino` CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
 USE `cli_casino`;
-
-ALTER DATABASE `cli_casino` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Tables
 CREATE TABLE `users` (
@@ -11,7 +9,7 @@ CREATE TABLE `users` (
   `password` VARCHAR(255) NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
 
 CREATE TABLE `user_statistics` (
   `user_id` INTEGER PRIMARY KEY,
@@ -22,13 +20,14 @@ CREATE TABLE `user_statistics` (
   `games_lost` INTEGER DEFAULT 0,
   `is_banned` BOOLEAN DEFAULT 0,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
 
 CREATE TABLE `game_types` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL UNIQUE,
+  `name_en` VARCHAR(50) NOT NULL UNIQUE,
   `rules` TEXT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
 
 CREATE TABLE `game_history` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -39,11 +38,21 @@ CREATE TABLE `game_history` (
   `game_type_id` INTEGER NOT NULL,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   FOREIGN KEY (`game_type_id`) REFERENCES `game_types` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
 
 -- Indexes
 CREATE INDEX idx_user_id_history ON `game_history` (`user_id`);
 CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
+
+-- Game types
+INSERT INTO `game_types` 
+  (`name`, `name_en`, `rules`)
+VALUES
+  ('nopanheitto', 'dice', 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.\n\n- Voittokerroin on silmälukujen lukumäärä'),
+  ('ruletti', 'roulette', 'Pelaaja arvaa värin sekä halutessaan kahta numeroa. Pelaaja asettaa jokaiselle arvaukselle (väri sekä numerot) oman erillisen panoksensa.\n\n- Numeroarvauksen voittokerroin = 36x\n- Väriarvauksen = 2x'),
+  ('ventti', 'twentyone', 'Pelaaja saa kaksi korttia, joista toinen on piilotettu. Pelaaja voi joko jäädä tai ottaa lisää kortteja. Tavoitteena on saada korttien summa mahdollisimman lähelle 21:ä, mutta ei yli. Pelaaja voittaa, jos hänen korttiensa summa on suurempi kuin jakajan korttien summa, mutta ei yli 21:ä.\n\n- Voittokerroin = 2x'),
+  ('hedelmäpeli', 'slots', 'Pelaaja asettaa panoksen ja painaa pelinappia. Pelissä on 4 rullaa, joissa on erilaisia symboleja. Jos rullat pysähtyvät samoihin symboleihin, pelaaja voittaa.\n\nVoittokertoimet:\n- 2 vierekkäistä symbolia = 1.5x\n- 3 vierekkäistä symbolia = 4x\n- 4 vierekkäistä symbolia = 16x'),
+  ('kolikonheitto', 'coinflip', 'Pelaaja valitsee joko kruunan tai klaavan. Jos pelaaja arvaa oikein, hän voittaa.\n\n- Voittokerroin = 2x');
 
 -- Test data TODO remove
 -- Insert test data into `users` table
@@ -70,12 +79,12 @@ VALUES
 ('oliver_clark', '0l1v3rCl@rk'),
 ('paula_roberts', 'P@ul@R0b3rts'),
 ('quentin_walker', 'Qu3nt1nW@lk3r'),
-('rachel_hall', 'R@ch3lH@ll!');
+('testbanned', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8');
 
 -- Insert test data into `user_statistics` table
 INSERT INTO `user_statistics` (`user_id`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
 VALUES
-(1, 1000, 500, 10, 5, 5, 0),
+(1, 9999999, 500, 10, 5, 5, 0),
 (2, 2000, 1500, 20, 15, 5, 0),
 (3, 3000, 2500, 30, 25, 5, 0),
 (4, 4000, 3500, 40, 35, 5, 0),
@@ -94,4 +103,5 @@ VALUES
 (17, 17000, 16500, 170, 165, 5, 0),
 (18, 18000, 17500, 180, 175, 5, 0),
 (19, 19000, 18500, 190, 185, 5, 0),
-(20, 20000, 19500, 200, 195, 5, 0);
+(20, 20000, 19500, 200, 195, 5, 0),
+(21, 16000, 25000, 100, 40, 20, 1);
