@@ -39,17 +39,18 @@ class Dice:
             
             outcome = self._determine_outcome(guess, roll, bet)
             game_won = outcome > 0
+            net_outcome = outcome - bet
 
             if game_won:
-                print(f'\nOnnittelut! Arvasit oikein! Voitit {outcome - bet} pistettä!\n')
+                print(f'\nOnnittelut! Arvasit oikein! Voitit {outcome} pistettä!\n')
             else:
                 print(f'\nHävisit pelin. Oikea arvo oli {roll}.\n')
                 
             # Bulk-update the player values
-            self.helpers.update_player_values(game_won, outcome, save = True)
+            self.helpers.update_player_values(game_won, net_outcome, save = True)
             
             # Save the game to the database
-            self.helpers.save_game_to_history(bet = bet, win_amount = outcome)
+            self.helpers.save_game_to_history(bet = bet, win_amount = net_outcome)
             
             if not self.helpers.play_again(self.player.get_balance()):
                 break
