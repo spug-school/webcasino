@@ -188,6 +188,7 @@ class GameHelpers:
             self.player.update_games_lost()
             
             if self.player.get_balance() <= 0:
+                self.player.update_balance(0) # dont allow negative balances
                 self.player.set_banned()
 
         self.player.update_games_played()
@@ -214,7 +215,7 @@ class GameHelpers:
             
             result = self.db.query(query, values)
             
-            if result['affected_rows'] > 0:
+            if result['affected_rows']:
                 return True
             else:
                 raise Exception('Unexpected error saving the game')
