@@ -213,5 +213,5 @@ class Ventti:
                 break
 
 if __name__ == "__main__":
-    game = Ventti({'id': 2, 'username': 'John', 'balance': 125})
+    game = Ventti({'id': 2, 'username': 'Tuukka', 'balance': 125})
     game.run()
