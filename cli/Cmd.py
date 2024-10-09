@@ -6,6 +6,7 @@ from Games.ventti import Ventti
 from Player.Player import Player
 from cli.GameHelp import GameHelp
 from cli.Leaderboard import Leaderboard
+from cli.PlayerProfile import PlayerProfile
 from cli.utils import clear_terminal, header
 
 class GameOptions(Enum):
@@ -106,9 +107,12 @@ class Cmd:
             case MenuOptions.LEADERBOARD:
                 print('Leaderboard')
                 return Leaderboard(self.db).start_leaderboard()
+            case MenuOptions.SETTINGS:
+                print("Asetukset")
+                return PlayerProfile(self.db, self.player).start_player_profile()
             case MenuOptions.HELP:
                 print('Help')
-                return GameHelp()
+                return GameHelp(self.db)
             case MenuOptions.EXIT:
                 print('Hyvasti')
                 return exit()

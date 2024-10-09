@@ -1,12 +1,13 @@
 from enum import Enum
 
+from cli.utils import heading
+
 class HelpOptions(Enum):
     BLACKJACK = 1
     DICE = 2
     ROULETTE = 3
     SLOTS = 4
     Exit = 5
-
 
 class GameHelp:
     def __init__(self, db):
@@ -24,20 +25,25 @@ class GameHelp:
 
             match HelpOptions(option):
                 case HelpOptions.BLACKJACK:
-                    print('Blackjack')
+                    print('Ventti')
+                    self._getHelp('ventti')
                 case HelpOptions.DICE:
-                    print('Dice')
+                    print(heading('Nopanheitto'))
+                    self._getHelp('nopanheitto')
                 case HelpOptions.ROULETTE:
-                    print('Roulette')
+                    print('Ruletti')
+                    self._getHelp('ruletti')
                 case HelpOptions.SLOTS:
-                    print('SLOTS')
+                    print('Hedelmäpeli')
+                    self._getHelp('hedelmäpeli')
                 case HelpOptions.Exit:
                     print('Palaa Main menu')
                     break
 
     def _getHelp(self,game: str):
         try:
-            helpData = self._db.query(f'SELECT * FROM help WHERE game = {game}')
-            return helpData.get('result')[0]
+            helpData = self._db.query(f'SELECT rules FROM game_types WHERE name = "{game}"')
+            print(f'{helpData.get('result')[0][0]} \n')
+            return 
         except Exception as error:
             print(f'get game help error occurred: {error}')

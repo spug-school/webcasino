@@ -16,6 +16,9 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
     print(f'{name}\n')
 
+def heading(text: str) -> str:
+    return f'\n\033[1m{text}\033[0m\n'
+
 def header(text: str, balance: int):
     '''
     Prints the header. Call this on the start of each loop
