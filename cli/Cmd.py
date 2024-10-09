@@ -46,13 +46,19 @@ class Cmd:
         )
         self.parser.add_argument(
             '--setup',
-            action="store_true",
-            help="Valmistele Casino cli tietokanta"
+            nargs='*',
+            help="Valmistele Casino cli tietokanta. Esim --setup, --setup test.sql"
         )
+
+        setup_args = self.parser.parse_args().setup
+        source_files = setup_args if setup_args else []
         self.db = Database(
             config = config,
             connect = True,
-            setup = self.parser.parse_args().setup
+            setup = {
+                'sql': True,
+                'source': source_files
+            }
         )
         self._create_game_menu() # creates the game selection menu
         self._run()
