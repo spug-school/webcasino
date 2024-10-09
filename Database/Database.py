@@ -1,6 +1,7 @@
 import mysql.connector
 import logging
 from helpers.get_file_path import get_file_path
+from cli.utils import box_wrapper
 
 class Database:
     '''
@@ -16,12 +17,12 @@ class Database:
     def __init__(self, config: dict, connect: bool = True, setup: bool = False):
         self.config = config
         self.setup_file = config.get('setup_file', None)
-        self.connection = self.create_connection() if connect else None
+        self.connection = self.create_connection(setup=setup) if connect else None
         
         if setup:
             self.setup_database()
         
-    def create_connection(self) -> mysql.connector.connection.MySQLConnection:
+    def create_connection(self, setup: bool = False) -> mysql.connector.connection.MySQLConnection:
         '''
         Creates a connection to the db, and returns the connection object
         '''
@@ -32,9 +33,9 @@ class Database:
                 user = self.config['db_user'],
                 password = self.config['db_pass'],
                 autocommit = self.config['autocommit'],
-                collation = self.config.get('collation', 'utf8mb4_unicode_ci'),
+                collation = self.config['collation'],
                 charset = 'utf8mb4',
-                database = self.config.get('db_name', None)
+                database = self.config['db_name'] if not setup else None
             )
         except mysql.connector.Error as connection_error:
             logging.error(f'Error connecting to the database: {connection_error}')
@@ -68,9 +69,10 @@ class Database:
                 setup_script = setup_file.read()
                 self.execute_script(setup_script)
                 
-            tables = [table[0] for table in self.query("SHOW TABLES")]
+            tables = [table[0] for table in self.query("SHOW TABLES")['result']]
                         
             logging.info(f'Database `{self.connection.database}` setup successfully.\nTables: {tables}')
+            box_wrapper(f'Database `{self.connection.database}` setup successfully.\nTables: {tables}')
             return True
         except Exception as error:
             logging.error(f'Error setting up the database:\n{error}')

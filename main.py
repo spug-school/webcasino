@@ -11,8 +11,7 @@ def main():
     # python main.py --auth "signup foo bar"
     # python main.py --auth "signin foo bar" --setup
     
-    cmd = Cmd(config())
-    print(cmd)
+    Cmd(config())
 
 if __name__ == '__main__':
     main()
