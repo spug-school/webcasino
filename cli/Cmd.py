@@ -100,8 +100,16 @@ class Cmd:
             self.player = Player(username, password, self.db)
             return f'Username: {username}\nPassword: {password}'
         return 'User already exists'
-
-    def gameLoop(self):
+    
+    def _create_game_menu(self):
+        '''
+        Creates the game menu enum based on the available games in the db
+        '''
+        global GameOptions
+        game_types = fetch_game_types(self.db)
+        GameOptions = create_game_options(game_types)
+    
+    def game_loop(self):
         while True:
             if self.player == 'after playing run this':
                 self.player.save()
