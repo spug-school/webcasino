@@ -56,7 +56,7 @@ class Cmd:
             config = config,
             connect = True,
             setup = {
-                'sql': True,
+                'sql': setup_args,
                 'source': source_files
             }
         )

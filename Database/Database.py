@@ -17,7 +17,7 @@ class Database:
     def __init__(self, config: dict, connect: bool = True, setup: dict = {}):
         self.config = config
         self.setup_file = config.get('setup_file', 'setup.sql')
-        self.connection = self.create_connection(setup = True if setup else None) if connect else None
+        self.connection = self.create_connection(setup = True if setup else False) if connect else None
         
         if setup and setup.get('sql', None):
             self.setup_database(
@@ -25,21 +25,32 @@ class Database:
                 source_files=setup.get('source', [])
             )
         
-    def create_connection(self, additional_params: dict = None, setup: bool = False) -> mysql.connector.connection.MySQLConnection:
+    def create_connection(self, setup: bool = False) -> mysql.connector.connection.MySQLConnection:
         '''
         Creates a connection to the db, and returns the connection object
         '''
         try: 
-            return mysql.connector.connect(
+            connection = mysql.connector.connect(
                 host=self.config['db_host'],
                 port=self.config['db_port'],
                 user=self.config['db_user'],
                 password=self.config['db_pass'],
                 autocommit=self.config['autocommit'],
                 collation=self.config['collation'],
-                charset='utf8mb4',
-                database=self.config['db_name'] if not setup else None
+                charset='utf8mb4'
             )
+
+            if setup:
+                # Create the database if it doesn't exist
+                cursor = connection.cursor()
+                cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{self.config['db_name']}`")
+                cursor.close()
+            
+            # Reconnect to the newly created database
+            connection.database = self.config['db_name']
+
+            logging.info(f'Connected to database `{connection.database}`')
+            return connection
         except mysql.connector.Error as connection_error:
             logging.error(f'Error connecting to the database: {connection_error}')
             return None
