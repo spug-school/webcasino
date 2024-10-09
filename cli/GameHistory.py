@@ -1,5 +1,6 @@
 import logging
 import tabulate
+from cli.utils import header
 
 # TODO 
 # In the beginning of each while() loop add the header() function call to clear
@@ -76,7 +77,7 @@ class GameHistory:
             rows.append([row[column['db_column']] for column in self.table_columns])
         
         # Align the columns
-        alignment = ['center'] * (len(headers) - 1)
+        alignment = ['center'] * len(headers)
         
         print(tabulate.tabulate(rows, headers, tablefmt='fancy_grid', colalign=alignment), '\n')
         
@@ -85,8 +86,6 @@ class GameHistory:
         Starts the game history menu
         '''
         while True:
-            # HEADER HERE! TODO
-            
             choice = input('Montako peliä näytetään: ')
             
             if not choice.isdigit() or int(choice) < 1:

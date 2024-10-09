@@ -26,8 +26,8 @@ class MenuOptions(Enum):
     PELIVALIKKO = 1
     TULOSTAULUKKO = 2
     OMA_PELIHISTORIA = 3
-    ASETUKSET = 4
-    OHJEET = 5
+    PROFIILI = 4
+    PELIEN_SÄÄNNÖT = 5
     LOPETA = 6
 
 class Cmd:
@@ -140,10 +140,10 @@ class Cmd:
             case MenuOptions.OMA_PELIHISTORIA:
                 header('Pelihistoria', self.player.get_balance())
                 return GameHistory(self.db, self.player).start_game_history()
-            case MenuOptions.ASETUKSET:
+            case MenuOptions.PROFIILI:
                 header('Omat asetukset', self.player.get_balance())
                 return PlayerProfile(self.db, self.player).start_player_profile()
-            case MenuOptions.OHJEET:
+            case MenuOptions.PELIEN_SÄÄNNÖT:
                 header('Pelien säännöt', self.player.get_balance())
                 return GameHelp(self.db, GameOptions)
             case MenuOptions.LOPETA:

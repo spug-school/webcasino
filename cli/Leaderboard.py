@@ -1,11 +1,6 @@
 import logging
 import tabulate
-
-# TODO 
-# In the beginning of each while() loop add the header() function call to clear
-# the terminal and print the header. For consistency.
-
-# Most likely it will be a helper from the CLI main class.
+from cli.utils import header
 
 class Leaderboard:
     def __init__(self, db_handler: object):
@@ -67,7 +62,7 @@ class Leaderboard:
         Determines the sort order based on the user's choice
         '''
         while True:
-            # HEADER HERE! TODO
+            header('Tulostaulun järjestys')
             
             sort_orders = [
                 'Laskeva',
@@ -80,7 +75,12 @@ class Leaderboard:
             for index, order in enumerate(sort_orders, start = 1):
                 print(f'{index})  {order}')
             
-            sort_choice = int(input(f'Syötä valintasi (1 - {len(sort_orders)}): '))
+            sort_choice = input(f'\nSyötä valintasi (1 - {len(sort_orders)}): ')
+            
+            try:
+                sort_choice = int(sort_choice)
+            except ValueError:
+                continue
             
             match sort_choice:
                 case 1:
@@ -96,6 +96,7 @@ class Leaderboard:
         '''
         Prints the leaderboard table
         '''
+        header('Tulostaulu')
         
         headers = ['#', 'Käyttäjänimi'] + [option['name'] for option in self.filter_options if option['db_column']] + ['Voitto-%']
         rows = []
@@ -116,14 +117,19 @@ class Leaderboard:
         '''
         
         while True:
-            # HEADER HERE! TODO
+            header('Tulostaulun järjestys')
             
             print('Valitse haluamasi järjestyskriteeri:\n')
             
             for index, option in enumerate(self.filter_options, start = 1):
                 print(f'{index})  {option.get("name")} {"\n" if option == self.filter_options[-2] else ""}')
 
-            filter_choice = int(input(f'Syötä valintasi (1 - {len(self.filter_options)}): '))
+            filter_choice = input(f'\nSyötä valintasi (1 - {len(self.filter_options)}): ')
+            
+            try:
+                filter_choice = int(filter_choice)
+            except ValueError:
+                continue
             
             if filter_choice == len(self.filter_options): # back to main menu
                 break
@@ -135,7 +141,7 @@ class Leaderboard:
 
                 self.print_table(data, self.filter_options[filter_choice - 1].get('name'), sort_order)
                 
-                input('Palaa takaisin painamalla <Enter>\n')
+                input('\nPalaa takaisin painamalla <Enter>\n')
                 continue
             else: # invalid choice
                 print(f'Virheellinen valinta! Valitse numerolla 1 - {len(self.filter_options)}\n')
