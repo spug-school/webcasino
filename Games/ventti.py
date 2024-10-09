@@ -192,7 +192,6 @@ class Ventti:
                 self.hand_reveal()
                 self.score_calculation()
                 self.over_check()
-                sleep(2)
                 self.hit_me()
                 self.clear()
             while not self.dealer_pass:
