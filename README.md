@@ -47,9 +47,10 @@ This project is part of the first year engineering studies of 4 eager informatio
 
 ```
 options:
-  -h, --help   show this help message and exit
-  --version    show program's version number and exit
-  --auth AUTH  Sign in or sign up to the casino
+  -h, --help     show this help message and exit
+  --version      show program's version number and exit
+  --auth AUTH    Kirjaudu tai rekisteröidy casino cli
+  --setup SETUP  Valmistele Casino cli tietokanta
 ```
 
 signup to casino

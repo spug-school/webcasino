@@ -3,11 +3,11 @@ from enum import Enum
 from cli.utils import heading
 
 class HelpOptions(Enum):
-    BLACKJACK = 1
-    DICE = 2
-    ROULETTE = 3
-    SLOTS = 4
-    Exit = 5
+    VENTTI = 1
+    NOPPAPELI = 2
+    RULETTI = 3
+    HEDELMAPELI = 4
+    KOLIKOHEITTO = 5
 
 class GameHelp:
     def __init__(self, db):
@@ -16,29 +16,34 @@ class GameHelp:
 
     def run(self):
         while True:
-            print('Welcome to the Casino Help Section')
-            print('Here are the games you can play:')
+            print(heading('Tervetuloa pelien ohjeet osion!'))
+            print('Tässä on pelit joista on ohjeet.')
+            print('Voit valita pelin ohjeen valitsemalla sen numeroa.\n')
             for game in HelpOptions:
                 print(f'{game.value}. {game.name}')
 
-            option = int(input('Which game do you want to get help? '))
+            try:
+                option = int(input('\nMistä pelistä haluassa apua? <palaa napsauttaessa ENTER>: '))
+            except ValueError:
+                return
 
             match HelpOptions(option):
-                case HelpOptions.BLACKJACK:
+                case HelpOptions.VENTTI:
                     print('Ventti')
                     self._getHelp('ventti')
-                case HelpOptions.DICE:
+                case HelpOptions.NOPPAPELI:
                     print(heading('Nopanheitto'))
                     self._getHelp('nopanheitto')
-                case HelpOptions.ROULETTE:
+                case HelpOptions.RULETTI:
                     print('Ruletti')
                     self._getHelp('ruletti')
-                case HelpOptions.SLOTS:
+                case HelpOptions.HEDELMAPELI:
                     print('Hedelmäpeli')
                     self._getHelp('hedelmäpeli')
-                case HelpOptions.Exit:
-                    print('Palaa Main menu')
-                    break
+                case HelpOptions.KOLIKOHEITTO:
+                    print('Kolikoheitto')
+                    self._getHelp('kolikoheitto')
+
 
     def _getHelp(self,game: str):
         try:

@@ -3,6 +3,9 @@ from enum import Enum
 
 from Games.Dice import Dice
 from Games.ventti import Ventti
+from Games.Roulette import Roulette
+from Games.CoinFlip import CoinFlip
+from Games.Slots import Slots
 from Player.Player import Player
 from cli.GameHelp import GameHelp
 from cli.Leaderboard import Leaderboard
@@ -11,16 +14,17 @@ from cli.utils import clear_terminal, header
 
 class GameOptions(Enum):
     VENTTI = 1
-    DICE = 2
-    ROULETTE = 3
-    SLOTS = 4
+    NOPPAPELI = 2
+    RULETTI = 3
+    HEDELMAPELI = 4
+    KOLIKOHEITTO = 5
 
 class MenuOptions(Enum):
-    PLAY = 1
-    LEADERBOARD = 2
-    SETTINGS = 3
-    HELP = 4
-    EXIT = 5
+    PELAA = 1
+    TULOSTAULUKKO = 2
+    ASETUKSET = 3
+    OHJEET = 4
+    LOPETA = 5
 
 class Cmd:
     def __init__(self, db):
@@ -34,14 +38,24 @@ class Cmd:
         )
         self.parser.add_argument(
             '--auth',
-            help='Sign in or sign up to the casino'
+            help='Kirjaudu tai rekisteröidy casino cli'
+        )
+        self.parser.add_argument(
+            '--setup',
+            action="store_true",
+            help="Valmistele Casino cli tietokanta"
         )
         self._run()
 
     def _run(self):
         args = self.parser.parse_args()
 
-        if args.auth:
+        if args.setup:
+            # TODO: ei toimi
+            print('Setting up database...')
+            self.db.setup_database('./Database/setup.sql')
+            return
+        elif args.auth:
             return self.auth()
         else:
             return self.parser.print_help()
@@ -53,9 +67,8 @@ class Cmd:
             case 'signin':
                 return self._signin()
             case _:
-                return 'Invalid argument'
+                return 'Väärä argumentti'
 
-    # TODO: refactor to use the Player class
     def _signin(self):
         auth = self.parser.parse_args().auth
         if len(auth.split(' ')) == 3:
@@ -92,29 +105,40 @@ class Cmd:
             if self.player == 'after playing run this':
                 self.player.save()
             clear_terminal()
-            header(f'Welcome {self.player.get_username()}', self.player.get_balance())
+            header(f'Tervetuloa {self.player.get_username()}', self.player.get_balance())
             self.gameMenu()
 
     def gameMenu(self):
         for option in MenuOptions:
             print(f'{option.value}. {option.name.capitalize()}')
 
-        option = int(input('Valitse toiminto: '))
+        try:
+            retry = 0
+            while retry < 3:
+                try:
+                    option = int(input('Valitse toiminto: '))
+                    break
+                except ValueError:
+                    print('Virheellinen valinta')
+                    retry += 1
+        except ValueError:
+            print('yritit kolmesti')
+
 
         match MenuOptions(option):
-            case MenuOptions.PLAY:
+            case MenuOptions.PELAA:
                 return self.gameSelector()
-            case MenuOptions.LEADERBOARD:
-                print('Leaderboard')
+            case MenuOptions.TULOSTAULUKKO:
+                print('Tulostaulukko')
                 return Leaderboard(self.db).start_leaderboard()
-            case MenuOptions.SETTINGS:
+            case MenuOptions.ASETUKSET:
                 print("Asetukset")
                 return PlayerProfile(self.db, self.player).start_player_profile()
-            case MenuOptions.HELP:
-                print('Help')
+            case MenuOptions.OHJEET:
+                print('Ohjeet')
                 return GameHelp(self.db)
-            case MenuOptions.EXIT:
-                print('Hyvasti')
+            case MenuOptions.LOPETA:
+                print('Hyvästi')
                 return exit()
 
 
@@ -122,16 +146,21 @@ class Cmd:
         print('Saatavilla olevat pelit:')
         for game in GameOptions:
             print(f'{game.value}. {game.name.capitalize()}')
-        game = int(input('Valitse peli: '))
+
+        try:
+            game = int(input('Valitse peli: '))
+
+        except ValueError:
+            return
 
         match GameOptions(game):
             case GameOptions.VENTTI:
-                print('Ventti')
                 return Ventti(self.player, self.db).start_game()
             case GameOptions.DICE:
-                print('Dice')
                 return Dice(self.player, self.db).start_game()
             case GameOptions.ROULETTE:
-                print('Roulette')
-                return 'Roulette'
-
+                return Roulette(self.player, self.db).start_game()
+            case GameOptions.HEDELMAPELI:
+                return Slots(self.player, self.db).start_game()
+            case GameOptions.KOLIKOHEITTO:
+                return CoinFlip(self.player, self.db).start_game()
