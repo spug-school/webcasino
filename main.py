@@ -1,3 +1,4 @@
+from Database.Database import Database
 from cli.main import Cmd
 from config import config
 
@@ -10,11 +11,14 @@ name = r"""
 """
 
 def main()-> None:
-    print(name)
-    foo = Cmd()
-    selectedGame = foo.auth()
-    print(selectedGame)
-    print(config())
+    db_configs = config()
+    db = Database(
+        config = db_configs,
+        connect = True,
+        setup = False
+    )
+    cmd = Cmd(db).auth()
+    print(cmd)
 
 if __name__ == '__main__':
     main()

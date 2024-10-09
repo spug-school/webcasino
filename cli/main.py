@@ -4,7 +4,8 @@ from Database.Database import Database
 from config import config
 
 class Cmd:
-    def __init__(self) -> None:
+    def __init__(self, db) -> None:
+        self.db = db
         self.parser = argparse.ArgumentParser(description="CLI CASINO")
         self.parser.add_argument(
             '--version',
@@ -19,10 +20,6 @@ class Cmd:
             '--auth',
             help='Create an account'
         )
-        self.parser.add_argument(
-            '--balance',
-            help='my current balance'
-        )
 
     def auth(self) -> str:
         match self.parser.parse_args().auth.split(' ')[0]:
@@ -35,11 +32,16 @@ class Cmd:
 
     def _signin(self) -> str:
         auth = self.parser.parse_args().auth
-        username = auth.split(' ')[1]
-        password = auth.split(' ')[2]
-        db = Database(config())
+        if len(auth.split(' ')) == 3:
+            username = auth.split(' ')[1]
+            password = auth.split(' ')[2]
+        else:
+            username = input('Enter username: ')
+            password = input('Enter password: ')
+        db = self.db
         user = db.query(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
-        if not user:
+
+        if user.get('result') == []:
             return 'Invalid credentials'
 
         return f'Welcome {username}'
@@ -48,12 +50,12 @@ class Cmd:
         print('Create an account')
         username = input('Enter username: ')
         password = input('Enter password: ')
-        db = Database(config())
+        db = self.db
+        user = db.query(f"SELECT username FROM users WHERE username = '{username}'")
+        if user.get('result')[0][0] == username:
+            return 'User already exists'
         db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
         return f'Username: {username}\nPassword: {password}'
-
-    def balance(self) -> str:
-        return self.parser.parse_args().balance
 
     def parse_args(self) -> argparse.Namespace:
         return self.parser.parse_args()
