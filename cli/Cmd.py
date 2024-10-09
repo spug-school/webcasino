@@ -45,17 +45,18 @@ class Cmd:
             action="store_true",
             help="Valmistele Casino cli tietokanta"
         )
+        self.db = Database(
+            config = config,
+            connect = True,
+            setup = self.parser.parse_args().setup
+        )
+        self._create_game_menu() # creates the game selection menu
         self._run()
 
     def _run(self):
         args = self.parser.parse_args()
 
-        if args.setup:
-            # TODO: ei toimi
-            print('Setting up database...')
-            self.db.setup_database('./Database/setup.sql')
-            return
-        elif args.auth:
+        if args.auth:
             return self.auth()
         else:
             return self.parser.print_help()
