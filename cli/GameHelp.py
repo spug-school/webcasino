@@ -1,54 +1,41 @@
 from enum import Enum
 
-from cli.utils import heading
-
-class HelpOptions(Enum):
-    VENTTI = 1
-    NOPPAPELI = 2
-    RULETTI = 3
-    HEDELMAPELI = 4
-    KOLIKOHEITTO = 5
+from cli.utils import header, get_prompt, box_wrapper
 
 class GameHelp:
-    def __init__(self, db):
+    def __init__(self, db, game_options: Enum):
         self._db = db
+        self.help_options = game_options
         self.run()
 
     def run(self):
         while True:
-            print(heading('Tervetuloa pelien ohjeet osion!'))
-            print('Tässä on pelit joista on ohjeet.')
-            print('Voit valita pelin ohjeen valitsemalla sen numeroa.\n')
-            for game in HelpOptions:
-                print(f'{game.value}. {game.name}')
+            header('Pelien säännöt')
+            
+            print('Valitse peli josta haluat lukea säännöt.\n')
+            for game in self.help_options:
+                if game == self.help_options.TAKAISIN:
+                    print()
+                
+                print(f'{game.value}. {game.name.capitalize()}')
 
-            try:
-                option = int(input('\nMistä pelistä haluassa apua? <palaa napsauttaessa ENTER>: '))
-            except ValueError:
+            option = get_prompt(f'\n\nValitse peli (1 - {len(self.help_options)}): ', 1, len(self.help_options), is_numeric=True)
+
+            if option == len(self.help_options):
                 return
+            else:
+                print(self.help_options(option).name.capitalize())
+                self._getHelp(self.help_options(option).name.lower())
 
-            match HelpOptions(option):
-                case HelpOptions.VENTTI:
-                    print('Ventti')
-                    self._getHelp('ventti')
-                case HelpOptions.NOPPAPELI:
-                    print(heading('Nopanheitto'))
-                    self._getHelp('nopanheitto')
-                case HelpOptions.RULETTI:
-                    print('Ruletti')
-                    self._getHelp('ruletti')
-                case HelpOptions.HEDELMAPELI:
-                    print('Hedelmäpeli')
-                    self._getHelp('hedelmäpeli')
-                case HelpOptions.KOLIKOHEITTO:
-                    print('Kolikoheitto')
-                    self._getHelp('kolikoheitto')
-
-
-    def _getHelp(self,game: str):
+    def _getHelp(self, game: str):
         try:
-            helpData = self._db.query(f'SELECT rules FROM game_types WHERE name = "{game}"')
-            print(f'{helpData.get('result')[0][0]} \n')
+            header(f'{game.capitalize()} - säännöt')
+            
+            game = game.lower()
+            helpData = self._db.query('SELECT rules FROM game_types WHERE name = %s', (game,))
+            box_wrapper(f'{helpData.get('result')[0][0]}')
+            
+            input('Paina <Enter> palataksesi takaisin.')
             return 
         except Exception as error:
             print(f'get game help error occurred: {error}')

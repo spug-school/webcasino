@@ -1,34 +1,37 @@
 import argparse
 from enum import Enum
 
+# player class
+from Player.Player import Player
+
+# database class
+from Database.Database import Database
+
+# games
 from Games.Dice import Dice
 from Games.ventti import Ventti
-from Games.Roulette import Roulette
 from Games.CoinFlip import CoinFlip
+from Games.Roulette import Roulette
 from Games.Slots import Slots
-from Player.Player import Player
+
+# cli parts
+from cli.common.GameOptions import GameOptions, create_game_options
 from cli.GameHelp import GameHelp
 from cli.Leaderboard import Leaderboard
 from cli.PlayerProfile import PlayerProfile
-from cli.utils import clear_terminal, header
-
-class GameOptions(Enum):
-    VENTTI = 1
-    NOPPAPELI = 2
-    RULETTI = 3
-    HEDELMAPELI = 4
-    KOLIKOHEITTO = 5
+from cli.GameHistory import GameHistory
+from cli.utils import clear_terminal, header, fetch_game_types, get_prompt
 
 class MenuOptions(Enum):
-    PELAA = 1
+    PELIVALIKKO = 1
     TULOSTAULUKKO = 2
-    ASETUKSET = 3
-    OHJEET = 4
-    LOPETA = 5
+    OMA_PELIHISTORIA = 3
+    ASETUKSET = 4
+    OHJEET = 5
+    LOPETA = 6
 
 class Cmd:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, config: dict):
         self.player = None
         self.parser = argparse.ArgumentParser(description="CLI CASINO")
         self.parser.add_argument(
@@ -79,17 +82,8 @@ class Cmd:
             username = input('Enter username: ')
             password = input('Enter password: ')
 
-
-        # while True:
-            # try:
         self.player = Player(username, password, self.db)
-     # `           break
-            # except Exception as error:
-            #     print(f'Virheellinen salasana! Yritä uudelleen.\n')
-            #     return error
-
-        print(f'Welcome {username}')
-        return self.gameLoop()
+        return self.game_loop()
 
     def _register(self) -> str:
         print('Create an account')
@@ -113,63 +107,73 @@ class Cmd:
         while True:
             if self.player == 'after playing run this':
                 self.player.save()
-            clear_terminal()
-            header(f'Tervetuloa {self.player.get_username()}', self.player.get_balance())
-            self.gameMenu()
+            header(f'Tervetuloa, {self.player.get_username()}', self.player.get_balance())
+            self.main_menu()
 
-    def gameMenu(self):
+    def main_menu(self):
         for option in MenuOptions:
-            print(f'{option.value}. {option.name.capitalize()}')
-
+            if option == MenuOptions.LOPETA:
+                print()
+                
+            fixed_option_name = option.name.replace('_', ' ').capitalize()
+            print(f'{option.value}. {fixed_option_name}')
+            
         try:
             retry = 0
             while retry < 3:
                 try:
-                    option = int(input('Valitse toiminto: '))
+                    option = get_prompt(f'\n\nValitse toiminto (1 - {len(MenuOptions)}): ', 1, len(MenuOptions))
                     break
                 except ValueError:
-                    print('Virheellinen valinta')
+                    print(f'Virheellinen valinta! Valitse numerolla 1 - {len(MenuOptions)}')
                     retry += 1
         except ValueError:
-            print('yritit kolmesti')
-
+            print('Yritit kolmesti')
 
         match MenuOptions(option):
-            case MenuOptions.PELAA:
-                return self.gameSelector()
+            case MenuOptions.PELIVALIKKO:
+                header('Valitse peli', self.player.get_balance())
+                return self.game_selection()
             case MenuOptions.TULOSTAULUKKO:
-                print('Tulostaulukko')
+                header('Tulostaulukot', self.player.get_balance())
                 return Leaderboard(self.db).start_leaderboard()
+            case MenuOptions.OMA_PELIHISTORIA:
+                header('Pelihistoria', self.player.get_balance())
+                return GameHistory(self.db, self.player).start_game_history()
             case MenuOptions.ASETUKSET:
-                print("Asetukset")
+                header('Omat asetukset', self.player.get_balance())
                 return PlayerProfile(self.db, self.player).start_player_profile()
             case MenuOptions.OHJEET:
-                print('Ohjeet')
-                return GameHelp(self.db)
+                header('Pelien säännöt', self.player.get_balance())
+                return GameHelp(self.db, GameOptions)
             case MenuOptions.LOPETA:
-                print('Hyvästi')
+                print(f'\nTervetuloa uudelleen, {self.player.get_username()}!\n')
+                self.player.save() # save the player's data once more before exiting
                 return exit()
 
+    def game_selection(self):
+        for option in GameOptions:
+            if option == GameOptions.TAKAISIN:
+                print()
+                
+            print(f'{option.value}. {option.name.capitalize()}')
+            
+        option = get_prompt(f'\n\nValitse peli (1 - {len(GameOptions)}): ', 1, len(GameOptions), is_numeric=True)
 
-    def gameSelector(self):
-        print('Saatavilla olevat pelit:')
-        for game in GameOptions:
-            print(f'{game.value}. {game.name.capitalize()}')
-
-        try:
-            game = int(input('Valitse peli: '))
-
-        except ValueError:
-            return
-
-        match GameOptions(game):
+        match GameOptions(option):
+            case GameOptions.NOPANHEITTO:
+                return Dice(self.player, self.db).start_game()
+            case GameOptions.RULETTI:
+                return Roulette(self.player, self.db).start_game()
             case GameOptions.VENTTI:
                 return Ventti(self.player, self.db).start_game()
-            case GameOptions.DICE:
-                return Dice(self.player, self.db).start_game()
-            case GameOptions.ROULETTE:
-                return Roulette(self.player, self.db).start_game()
-            case GameOptions.HEDELMAPELI:
+            case GameOptions.HEDELMÄPELI:
                 return Slots(self.player, self.db).start_game()
-            case GameOptions.KOLIKOHEITTO:
+            case GameOptions.KOLIKONHEITTO:
                 return CoinFlip(self.player, self.db).start_game()
+            case GameOptions.TAKAISIN:
+                return self.game_loop()
+            case _ if option == len(GameOptions):
+                return self.game_loop()
+            case _:
+                print(f'Virheellinen valinta! Valitse numerolla 1 - {len(GameOptions)}')
