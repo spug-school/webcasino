@@ -10,7 +10,7 @@ class GameHelp:
 
     def run(self):
         while True:
-            header('Pelien säännöt')
+            header('Pelien säännöt', hide_balance=True)
             
             print('Valitse peli josta haluat lukea säännöt.\n')
             for game in self.help_options:
@@ -29,7 +29,7 @@ class GameHelp:
 
     def _getHelp(self, game: str):
         try:
-            header(f'{game.capitalize()} - säännöt')
+            header(f'{game.capitalize()} - säännöt', hide_balance=True)
             
             game = game.lower()
             helpData = self._db.query('SELECT rules FROM game_types WHERE name = %s', (game,))

@@ -62,7 +62,7 @@ class Leaderboard:
         Determines the sort order based on the user's choice
         '''
         while True:
-            header('Tulostaulun järjestys')
+            header('Tulostaulun järjestys', hide_balance=True)
             
             sort_orders = [
                 'Laskeva',
@@ -96,7 +96,7 @@ class Leaderboard:
         '''
         Prints the leaderboard table
         '''
-        header('Tulostaulu')
+        header('Tulostaulu', hide_balance=True)
         
         headers = ['#', 'Käyttäjänimi'] + [option['name'] for option in self.filter_options if option['db_column']] + ['Voitto-%']
         rows = []
@@ -117,7 +117,7 @@ class Leaderboard:
         '''
         
         while True:
-            header('Tulostaulun järjestys')
+            header('Tulostaulun suodatin', hide_balance=True)
             
             print('Valitse haluamasi järjestyskriteeri:\n')
             
