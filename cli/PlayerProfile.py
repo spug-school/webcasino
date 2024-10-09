@@ -1,6 +1,7 @@
 import logging
 import tabulate
 import sys
+import time
 from cli.utils import header
 
 class PlayerProfile:
@@ -83,7 +84,7 @@ class PlayerProfile:
                     input('Palaa takaisin painamalla <Enter>\n')
                     continue
                 case 2:
-                    header('Muuta käyttäjätietoja')
+                    header('Muuta käyttäjätietoja', hide_balance=True)
                     
                     profile_update_menu = (
                         'Vaihda käyttäjänimi',
@@ -132,16 +133,19 @@ class PlayerProfile:
                         case 3:
                             header('Poista käyttäjä', hide_balance=True)
                             
-                            confirm = input('Haluatko varmasti poistaa käyttäjän? (k/e): ')
+                            confirm = input('Haluatko varmasti poistaa käyttäjän? (k / e): ')
                             
                             if confirm.lower() == 'k':
                                 if self.player.delete_account():
-                                    print('Käyttäjä poistettu.\n')
+                                    time.sleep(1)
+                                    print('\nKäyttäjä poistettu.\n')
                                     print('Kiitos peliemme pelaamisesta!\n')
+                                    time.sleep(1)
                                     
                                     sys.exit() # just close the program, we dont allow unauthorized access
                             else:
                                 print('Käyttäjä ei poistettu.\n')
+                                time.sleep(1)
                         case 4:
                             header('Kumoa porttikielto', hide_balance=True)
                             
@@ -158,8 +162,7 @@ class PlayerProfile:
                                     print('Porttikiellon poisto epäonnistui.\n')
                             else:
                                 print('Käyttäjä ei ole porttikiellossa!\n')
-                                
-                            self.player.save()
+                                time.sleep(1)
                         case 5:
                             self.player.save()
                             break

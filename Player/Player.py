@@ -185,7 +185,7 @@ class Player:
         '''
         try:
             query_values = (self.get_data().get('id'),)
-            self.__db.begin_transaction()
+            self.__db.connection.start_transaction()
             
             # first, delete the user's statistics
             query_stats = '''
@@ -206,14 +206,14 @@ class Player:
             '''
             result = self.__db.query(query_user, query_values)
             
-            self.__db.commit_transaction()
+            self.__db.connection.commit()
             
             if result['affected_rows'] > 0:
                 return True
             else:
                 return False
         except Exception as error:
-            self.__db.rollback_transaction() # go back if we encounter an issue
+            self.__db.connection.rollback() # go back if we encounter an issue
             logging.error(f'Error deleting the user {self.get_data().get("id", None)}: {error}')
             return False
         
