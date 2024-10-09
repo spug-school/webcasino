@@ -2,7 +2,6 @@ import random
 import time
 from .GameHelpers import GameHelpers
 
-
 class Slots:
     # We start by initializing the Slots class with player information and game settings.
     # First we have the player object which contains information such as the player's account balance.
