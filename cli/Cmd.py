@@ -4,13 +4,15 @@ from enum import Enum
 from Games.Dice import Dice
 from Games.ventti import Ventti
 from Player.Player import Player
+from cli.GameHelp import GameHelp
 from cli.Leaderboard import Leaderboard
 from cli.utils import clear_terminal, header
 
-class Games(Enum):
+class GameOptions(Enum):
     BLACKJACK = 1
     DICE = 2
-    SLOTS = 3
+    ROULETTE = 3
+    SLOTS = 4
 
 class MenuOptions(Enum):
     PLAY = 1
@@ -74,7 +76,6 @@ class Cmd:
         print(f'Welcome {username}')
         return self.gameLoop()
 
-    # TODO: refactor to use the Player class
     def _register(self) -> str:
         print('Create an account')
         username = input('Enter username: ')
@@ -89,15 +90,15 @@ class Cmd:
         while True:
             if self.player == 'after playing run this':
                 self.player.save()
-            # clear_terminal()
-            header('Main menu', self.player.get_balance())
+            clear_terminal()
+            header(f'Welcome {self.player.get_username()}', self.player.get_balance())
             self.gameMenu()
 
     def gameMenu(self):
         for option in MenuOptions:
             print(f'{option.value}. {option.name.capitalize()}')
 
-        option = int(input('Select an option: '))
+        option = int(input('Valitse toiminto: '))
 
         match MenuOptions(option):
             case MenuOptions.PLAY:
@@ -107,26 +108,28 @@ class Cmd:
                 return Leaderboard(self.db).start_leaderboard()
             case MenuOptions.HELP:
                 print('Help')
-                return 'Help'
+                return GameHelp()
             case MenuOptions.EXIT:
-                print('Goodbye')
+                print('Hyvasti')
                 return exit()
 
 
     def gameSelector(self):
-        print('Available games:')
-        for game in Games:
+        print('Saatavilla olevat pelit:')
+        for game in GameOptions:
+            if game == GameOptions.BLACKJACK:
+                print('3. Ventti (muistuttaa blackjackia)')
             print(f'{game.value}. {game.name.capitalize()}')
-        game = int(input('Select a game: '))
+        game = int(input('Valitse peli: '))
 
-        match Games(game):
-            case Games.BLACKJACK:
-                print('Blackjack')
+        match GameOptions(game):
+            case GameOptions.BLACKJACK:
+                print('Ventti')
                 return Ventti().run()
-            case Games.DICE:
+            case GameOptions.DICE:
                 print('Dice')
-                return Dice(self.player, self.db).start_game()
-            case Games.SLOTS:
-                print('Slots')
-                return 'Slots'
+                return Dice(self.player, self.db).startGame()
+            case GameOptions.ROULETTE:
+                print('Roulette')
+                return 'Roulette'
 

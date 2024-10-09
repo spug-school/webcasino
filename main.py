@@ -1,5 +1,5 @@
 from Database.Database import Database
-from cli.main import Cmd
+from cli.Cmd import Cmd
 from config import config
 
 name = r"""
