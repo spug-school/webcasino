@@ -2,6 +2,7 @@ from random import shuffle
 from time import sleep
 from os import system, name
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class Ventti:
     def __init__(self, player: object, db_handler: object):
@@ -27,14 +28,6 @@ class Ventti:
         self.player_over = False
         self.dealer_over = False
         self.player_win = False
-
-    # Tätä ei lopullisessa versiossa tarvita, koska 
-    # cli:ssä tulee olemaan joku oma vastaava metodi
-    def clear(self):
-        if name == 'nt':
-            _ = system('cls')
-        else:
-            _ = system('clear')
 
 # Nollaa kaikki pelin arvot
     def game_stat_reset(self):
@@ -67,8 +60,11 @@ class Ventti:
     def shuffle_deck(self):
         for i in range(len(self.suits)):
             for j in range(len(self.ranks)):
-                self.deck.append({"suit":self.suits[i],"rank":self.ranks[j], "value":j+1})
-                shuffle(self.deck)
+                value = j + 1
+                if self.ranks[j] in ["J", "Q", "K"]:
+                    value = 10
+                self.deck.append({"suit": self.suits[i], "rank": self.ranks[j], "value": value})
+        shuffle(self.deck)
 
 # Funktio jolla jaetaan kortit jakajalle ja pelaajalle. Ajetaan vain kerran pelin alussa.
     def first_deal(self):
@@ -159,10 +155,10 @@ class Ventti:
     def is_winner(self, bet: int) -> int:
         if self.player_over or self.dealer_over:
             if self.player_over:
-                print("Jakaja voitti pelin!")
+                print("Jakaja voitti pelin!\n")
             else:
                 winnings = bet * 2
-                print(f"Onnittelut! Voitit pelin ja {winnings} pistettä!")
+                print(f"Onnittelut! Voitit pelin ja {winnings} pistettä!\n")
                 self.player_win = True
                 return winnings  # return the winnings
         else:
@@ -170,11 +166,10 @@ class Ventti:
                 print("Jakaja voitti pelin!")
             else:
                 winnings = bet * 2
-                print(f"Onnittelut! Voitit pelin ja {winnings} pistettä!")
+                print(f"Onnittelut! Voitit pelin ja {winnings} pistettä!\n")
                 self.player_win = True
                 return winnings  # return the winnings
-        
-        print()    
+         
         return 0 # return 0 if the player lost
 
 # Pelin logiikka tulee tänne.
@@ -198,11 +193,14 @@ class Ventti:
         Runs the game and returns the player object when done
         '''
         while True:
+            self.game_stat_reset()
             self.helpers.game_intro(self.player.get_username())
             
             # check if the player wants to play the game or not
             if not self.helpers.play_game():
                 break
+            
+            header('Ventti', self.player.get_balance())
             
             # get the bet, amount of sides & the guess
             bet = self.helpers.get_bet(self.player.get_balance())
@@ -216,7 +214,6 @@ class Ventti:
                 self.score_calculation()
                 self.over_check()
                 self.hit_me()
-                # self.clear()
             
             # dealers turn
             while not self.dealer_pass:
@@ -226,14 +223,13 @@ class Ventti:
                 sleep(1)
                 self.ai_logic()
                 sleep(1)
-                # self.clear()
             
             outcome = self.is_winner(bet)
             game_won = outcome > 0
             net_outcome = outcome - bet
 
             # Bulk-update the player values
-            self.helpers.update_player_values(game_won, net_outcome, save = True)
+            self.helpers.update_player_values(game_won, outcome, save = True)
             
             # Save the game to the database
             self.helpers.save_game_to_history(bet = bet, win_amount = net_outcome)

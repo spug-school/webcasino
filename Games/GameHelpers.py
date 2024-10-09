@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 import shutil
+from cli.utils import header, box_wrapper as box_wrap
 
 class GameHelpers:
     '''
@@ -64,7 +65,14 @@ class GameHelpers:
             
             else:
                 print('Syötteen tyyppi on virheellinen.\n')
-            
+                
+    def box_wrapper(self, text: str, min_width: int = 75, max_width: int = 75):
+        '''
+        Wraps the text in a box
+        '''
+        # just a wrapper for the box_wrapper function
+        box_wrap(text, min_width, max_width)
+        
     def get_bet(self, balance: int, bet_to_text: str = None) -> int:
         if not bet_to_text:
             bet = input(f'\nTämänhetkinen saldo: {balance}\nPanos (syötä tyhjä peruuttaaksesi): ')
@@ -82,6 +90,7 @@ class GameHelpers:
         
         if bet <= balance:
             self.player.update_balance(-bet)
+            self.player.save()
             return bet
         else:
             print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player.get_balance()}')
@@ -104,48 +113,10 @@ class GameHelpers:
                 return self.play_again(balance)
     
     def game_intro(self, username: str):
+        header(f'{self.game_info.get("name").capitalize()}', self.player.get_balance())
         print(f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n\n')
         print(f'Pelin säännöt:')
-        self.box_wrapper(self.game_info.get('rules'))
-        
-    def box_wrapper(self, text: str, min_width: int = 75, max_width: int = 75):
-        '''
-        Creates a nice box-like wrapper for a wanted text.
-        Used in displaying the game rules, for example
-        
-        Could be located elsewhere tho - TODO
-        '''
-        terminal_width = shutil.get_terminal_size().columns
-        padding = 4 # padding on both sides
-        
-        # fix the max width to the terminal width
-        if terminal_width < max_width:
-            max_width = terminal_width - padding
-        
-        paragraphs = text.split('\n')
-        wrapped_lines = []
-
-        for paragraph in paragraphs:
-            words = paragraph.split()
-            current_line = ""
-
-            for word in words:
-                if len(current_line) + len(word) + 1 <= max_width:
-                    current_line += (word + " ")
-                else:
-                    wrapped_lines.append(current_line.strip())
-                    current_line = word + " "
-            wrapped_lines.append(current_line.strip())
-
-        # determine the width of the box
-        box_width = max(max(len(line) for line in wrapped_lines) + padding, min_width)
-
-        print('+' + '-' * box_width + '+')
-
-        for line in wrapped_lines:
-            print(f'| {line.ljust(box_width - padding//2)} |')
-
-        print('+' + '-' * box_width + '+\n')
+        box_wrap(self.game_info.get('rules'))
     
     # ------------------------
     # Database related methods
@@ -170,26 +141,30 @@ class GameHelpers:
             logging.error(f'Error creating the game type: {error}')
             return False
     
-    def update_player_values(self, won: bool, win_amount = int, save = True):
+    def update_player_values(self, won: bool, win_amount: int, save: bool = True):
         '''
         Updates all the player values in bulk after a game has ended
         
         @param won: bool: Whether the player won the game or not
-        @param win_amount: int: The amount the player won
+        @param win_amount: int: The net outcome of the game (amount won minus the bet)
         @param save: bool: Whether to save the updated values to the database or not
         '''
         if won: # win
             self.player.update_total_winning(win_amount)
             self.player.update_games_won()
+            self.player.update_balance(win_amount) # update balance with net outcome
         else: # loss
             self.player.update_games_lost()
             
             if self.player.get_balance() <= 0:
-                self.player.update_balance(0) # dont allow negative balances
                 self.player.set_banned()
-
+        
+        # win & loss
         self.player.update_games_played()
-        self.player.update_balance(win_amount)
+        
+        if self.player.get_balance() <= 0:
+            self.player.update_balance(0) # don't allow negative balances
+
         
         if save: # save the updated values to the database
             self.player.save()

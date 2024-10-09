@@ -1,5 +1,6 @@
 import random
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class Dice:
     '''
@@ -28,6 +29,8 @@ class Dice:
             if not self.helpers.play_game():
                 break
             
+            header('Nopanheitto', self.player.get_balance())
+            
             # get the bet, amount of sides & the guess
             bet = self.helpers.get_bet(self.player.get_balance())
             
@@ -50,7 +53,7 @@ class Dice:
                 print(f'\nHävisit pelin. Oikea arvo oli {roll}.\n')
                 
             # Bulk-update the player values
-            self.helpers.update_player_values(game_won, net_outcome, save = True)
+            self.helpers.update_player_values(game_won, outcome, save = True)
             
             # Save the game to the database
             self.helpers.save_game_to_history(bet = bet, win_amount = net_outcome)

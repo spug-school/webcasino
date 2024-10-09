@@ -1,6 +1,7 @@
 import logging
 import tabulate
 import sys
+from cli.utils import header
 
 class PlayerProfile:
     def __init__(self, db_handler: object, player: object):
@@ -63,7 +64,7 @@ class PlayerProfile:
         Starts the player profile view
         '''
         while True:
-            # HEADER HERE! TODO
+            header('Oma profiili', hide_balance=True)
             
             profile_menu = self._profile_menu()
             
@@ -74,12 +75,16 @@ class PlayerProfile:
             
             match menu_choice:
                 case 1:
+                    header('Omat statistiikat', hide_balance=True)
+                    
                     player_stats = self.__get_stats()
                     self._show_stats(player_stats)
                     
                     input('Palaa takaisin painamalla <Enter>\n')
                     continue
                 case 2:
+                    header('Muuta käyttäjätietoja')
+                    
                     profile_update_menu = (
                         'Vaihda käyttäjänimi',
                         'Vaihda salasana',
@@ -95,6 +100,8 @@ class PlayerProfile:
                     
                     match update_choice:
                         case 1:
+                            header('Vaihda käyttäjänimi', hide_balance=True)
+                            
                             new_name = input('Syötä uusi käyttäjänimi: ')
                             
                             if not new_name:
@@ -105,7 +112,11 @@ class PlayerProfile:
                                     print('Käyttäjänimi vaihdettu.\n')
                                 else:
                                     print('Käyttäjänimen vaihto epäonnistui.\n')
+                                    
+                            self.player.save()
                         case 2:
+                            header('Vaihda salasana', hide_balance=True)
+                            
                             new_password = input('Syötä uusi salasana: ')
                             
                             if not new_password:
@@ -116,7 +127,11 @@ class PlayerProfile:
                                     print('Salasana vaihdettu.\n')
                                 else:
                                     print('Salasanan vaihto epäonnistui.\n')
+                            
+                            self.player.save()
                         case 3:
+                            header('Poista käyttäjä', hide_balance=True)
+                            
                             confirm = input('Haluatko varmasti poistaa käyttäjän? (k/e): ')
                             
                             if confirm.lower() == 'k':
@@ -128,6 +143,8 @@ class PlayerProfile:
                             else:
                                 print('Käyttäjä ei poistettu.\n')
                         case 4:
+                            header('Kumoa porttikielto', hide_balance=True)
+                            
                             if self.player.get_ban_status() == 1:
                                 balance_to_return = int(input('Syötä palautettava saldo (max. 1000): '))
                                 
@@ -141,11 +158,11 @@ class PlayerProfile:
                                     print('Porttikiellon poisto epäonnistui.\n')
                             else:
                                 print('Käyttäjä ei ole porttikiellossa!\n')
-                        case 5:
-                            print(self.player.get_data())
+                                
                             self.player.save()
-                            print(self.player.get_data())
-                            # break
+                        case 5:
+                            self.player.save()
+                            break
                         case _:
                             print(f'Virheellinen valinta! Valitse numerolla 1 - {len(profile_update_menu)}\n')
                 case 3:
