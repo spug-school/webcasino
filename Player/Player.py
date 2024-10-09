@@ -235,6 +235,7 @@ class Player:
             if result['affected_rows'] > 0:
                 self.__data['is_banned'] = False
                 self.__data['balance'] = balance_to_set
+                self.save()
                 return True
             else:
                 return False

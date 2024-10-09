@@ -55,7 +55,7 @@ class CoinFlip:
                 print(f'\nHävisit pelin.\n')
             
             # Bulk-update the player values
-            self.helpers.update_player_values(game_won, net_outcome, save = True)
+            self.helpers.update_player_values(game_won, outcome, save = True)
             
             # Save the game to the database
             self.helpers.save_game_to_history(bet = bet, win_amount = net_outcome)

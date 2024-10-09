@@ -1,5 +1,6 @@
 import argparse
 from enum import Enum
+from time import sleep
 
 # player class
 from Player.Player import Player
@@ -133,6 +134,12 @@ class Cmd:
         match MenuOptions(option):
             case MenuOptions.PELIVALIKKO:
                 header('Valitse peli', self.player.get_balance())
+                
+                if self.player.get_ban_status() == 1:
+                    print('Sinulla on aktiivinen porttikielto, et pääse pelaamaan.\n')
+                    sleep(3)
+                    return self.game_loop()
+                
                 return self.game_selection()
             case MenuOptions.TULOSTAULUKKO:
                 header('Tulostaulukot', self.player.get_balance())

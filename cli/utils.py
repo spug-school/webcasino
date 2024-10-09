@@ -21,13 +21,13 @@ def clear_terminal():
 def heading(text: str) -> str:
     return f'\n\033[1m{text}\033[0m\n'
 
-def header(text: str, balance: int = None, clear: bool = True):
+def header(text: str, balance: int = 0, clear: bool = True, hide_balance: bool = False) -> None:
     '''
     Prints the header. Call this on the start of each loop
     '''
     if clear:
         clear_terminal()
-    return print(f'{text}  {f"|  Saldo: {balance}" if balance else ''}\n\n')
+    return print(f'{text}  {f"|  Saldo: {balance}" if not hide_balance else ''}\n\n')
 
 def fetch_game_types(db: object) -> list:
     '''

@@ -127,7 +127,7 @@ class Slots:
                 print(f'\nHävisit. Parempaa onnea ensi kerralla!\n')
 
             # We update the game_helpers stuff to save the game history in the database.
-            self.helpers.update_player_values(game_won, net_outcome, save=True)
+            self.helpers.update_player_values(game_won, outcome, save=True)
             self.helpers.save_game_to_history(bet=bet, win_amount=net_outcome)
 
             if not self.helpers.play_again(self.player.get_balance()):

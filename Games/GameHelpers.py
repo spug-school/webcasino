@@ -90,6 +90,7 @@ class GameHelpers:
         
         if bet <= balance:
             self.player.update_balance(-bet)
+            self.player.save()
             return bet
         else:
             print(f'Saldosi on vajaa! Syötä sopiva määrä.\nSaldo: {self.player.get_balance()}')
@@ -140,26 +141,30 @@ class GameHelpers:
             logging.error(f'Error creating the game type: {error}')
             return False
     
-    def update_player_values(self, won: bool, win_amount = int, save = True):
+    def update_player_values(self, won: bool, win_amount: int, save: bool = True):
         '''
         Updates all the player values in bulk after a game has ended
         
         @param won: bool: Whether the player won the game or not
-        @param win_amount: int: The amount the player won
+        @param win_amount: int: The net outcome of the game (amount won minus the bet)
         @param save: bool: Whether to save the updated values to the database or not
         '''
         if won: # win
             self.player.update_total_winning(win_amount)
             self.player.update_games_won()
+            self.player.update_balance(win_amount) # update balance with net outcome
         else: # loss
             self.player.update_games_lost()
             
             if self.player.get_balance() <= 0:
-                self.player.update_balance(0) # dont allow negative balances
                 self.player.set_banned()
-
+        
+        # win & loss
         self.player.update_games_played()
-        self.player.update_balance(win_amount)
+        
+        if self.player.get_balance() <= 0:
+            self.player.update_balance(0) # don't allow negative balances
+
         
         if save: # save the updated values to the database
             self.player.save()
