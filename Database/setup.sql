@@ -54,54 +54,12 @@ VALUES
   ('hedelmäpeli', 'slots', 'Pelaaja asettaa panoksen ja painaa pelinappia. Pelissä on 4 rullaa, joissa on erilaisia symboleja. Jos rullat pysähtyvät samoihin symboleihin, pelaaja voittaa.\n\nPyöräytyksen hinta: 10 pistettä\n\nVoittokertoimet:\n- 3 samaa symbolia = 5x\n- 4 samaa symbolia = 25x'),
   ('kolikonheitto', 'coinflip', 'Pelaaja valitsee joko kruunan tai klaavan. Jos pelaaja arvaa oikein, hän voittaa.\n\n- Voittokerroin = 2x');
 
--- Test data TODO remove
--- Insert test data into `users` table
-INSERT INTO `users` (`username`, `password`)
+-- Insert admin on setup
+INSERT INTO `users` (`id`, `username`, `password`)
 VALUES
 -- password is 'password' in sha256
-('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'),
-('john_doe', 'P@ssw0rd123'),
-('jane_smith', 'S3cur3P@ss'),
-('alice_jones', 'Al1c3J0n3s!'),
-('bob_brown', 'B0bBr0wn#'),
-('charlie_davis', 'Ch@rl13D@v!s'),
-('david_clark', 'D@v1dCl@rk$'),
-('emily_miller', 'Em1lyM!ll3r'),
-('frank_wilson', 'Fr@nkW1ls0n'),
-('grace_lee', 'Gr@c3L33!'),
-('henry_moore', 'H3nryM00r3'),
-('isabella_taylor', 'Is@b3ll@T@yl0r'),
-('jack_anderson', 'J@ckAnd3rs0n'),
-('karen_thomas', 'K@r3nTh0m@s'),
-('larry_martin', 'L@rryM@rt1n'),
-('maria_white', 'M@r1@Wh1t3'),
-('nancy_harris', 'N@nc7H@rr1s'),
-('oliver_clark', '0l1v3rCl@rk'),
-('paula_roberts', 'P@ul@R0b3rts'),
-('quentin_walker', 'Qu3nt1nW@lk3r'),
-('testbanned', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8');
+(1, 'admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8');
 
--- Insert test data into `user_statistics` table
-INSERT INTO `user_statistics` (`user_id`, `balance`, `total_winnings`, `games_played`, `games_won`, `games_lost`, `is_banned`)
+INSERT INTO `user_statistics` (`user_id`, `balance`)
 VALUES
-(1, 9999999, 500, 10, 5, 5, 0),
-(2, 2000, 1500, 20, 15, 5, 0),
-(3, 3000, 2500, 30, 25, 5, 0),
-(4, 4000, 3500, 40, 35, 5, 0),
-(5, 5000, 4500, 50, 45, 5, 0),
-(6, 6000, 5500, 60, 55, 5, 0),
-(7, 7000, 6500, 70, 65, 5, 0),
-(8, 8000, 7500, 80, 75, 5, 0),
-(9, 9000, 8500, 90, 85, 5, 0),
-(10, 10000, 9500, 100, 95, 5, 0),
-(11, 11000, 10500, 110, 105, 5, 0),
-(12, 12000, 11500, 120, 115, 5, 0),
-(13, 13000, 12500, 130, 125, 5, 0),
-(14, 14000, 13500, 140, 135, 5, 0),
-(15, 15000, 14500, 150, 145, 5, 0),
-(16, 16000, 15500, 160, 155, 5, 0),
-(17, 17000, 16500, 170, 165, 5, 0),
-(18, 18000, 17500, 180, 175, 5, 0),
-(19, 19000, 18500, 190, 185, 5, 0),
-(20, 20000, 19500, 200, 195, 5, 0),
-(21, 16000, 25000, 100, 40, 20, 1);
+(1, 99999999);
