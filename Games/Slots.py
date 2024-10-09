@@ -11,7 +11,7 @@ class Slots:
     def __init__(self, player: object, db_handler: object, spins_per_column=4, columns=4):
         self.player = player
         self.helpers = GameHelpers(player, db_handler, 'slots')
-        # We store tje spins_per_column and columns as attributes of the class
+        # We store tje spins_per_column and columns as attributes of the class.
         # So they can be used outside the __init__ method.
         self.spins_per_column = spins_per_column
         self.columns = columns
