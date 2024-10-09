@@ -1,5 +1,6 @@
 import random
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class Dice:
     '''
@@ -27,6 +28,8 @@ class Dice:
             # check if the player wants to play the game or not
             if not self.helpers.play_game():
                 break
+            
+            header('Nopanheitto', self.player.get_balance())
             
             # get the bet, amount of sides & the guess
             bet = self.helpers.get_bet(self.player.get_balance())

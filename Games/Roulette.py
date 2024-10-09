@@ -1,6 +1,7 @@
 import random
 from time import sleep
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class Roulette:
     '''
@@ -71,7 +72,7 @@ class Roulette:
 
         # Check number guesses
         for number_guess, number_bet in zip(number_guesses, number_bets):
-            if number_guess.isdigit() and int(number_guess) == roll['number']:
+            if int(number_guess) == roll['number']:
                 total_winnings += number_bet * 36
 
         # Check color guess
@@ -85,9 +86,6 @@ class Roulette:
         Runs the game and returns the player object when done
         '''
         while True:
-            # TODO Header / terminal reload here!!!
-            # eg. header('Ruletti', self.player.get_balance())
-            
             self.helpers.game_intro(self.player.get_username())
             
             # print the last 20 rolls (randomly created at this point of time, will get updated when the game is played)
@@ -97,8 +95,11 @@ class Roulette:
             if not self.helpers.play_game():
                 break
             
+            header('Ruletti', self.player.get_balance())
+            self._print_history()
+            
             # get the guesses
-            color_guess = self.helpers.validate_input(f'\nVäriarvaus\nSyötä tyhjä, jos arvaat vain numeroa. (p/m): ', 'str', allowed_values = ['p', 'm', ''])
+            color_guess = self.helpers.validate_input(f'\nVäriarvaus\nSyötä tyhjä, jos arvaat vain numeroa. (p / m): ', 'str', allowed_values = ['p', 'm', ''])
             number_guesses = [
                 self.helpers.validate_input(
                     prompt = f'\nNumeroarvaus {i+1}\nSyötä tyhjä, jos arvaat vain väriä.\n(0 - 36): ',

@@ -1,6 +1,7 @@
 import random
 import time
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class Slots:
     # We start by initializing the Slots class with player information and game settings.
@@ -103,11 +104,14 @@ class Slots:
     # The "main" method that runs the Slot machine's game loop.
     def start_game(self) -> object:
 
-        while True:
+        while True:        
             self.helpers.game_intro(self.player.get_username())
             # If the player doesn't want to play the game we break (their legs). Also known as exiting the game.
             if not self.helpers.play_game():
                 break
+            
+            header('Hedelmäpeli', self.player.get_balance())
+            
             # The cost of using the slot machine.
             bet = 10
             # Here we call the _spin_reels to run the slot machine.

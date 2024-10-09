@@ -1,6 +1,7 @@
 import random
 from time import sleep
 from .GameHelpers import GameHelpers
+from cli.utils import header
 
 class CoinFlip:
     def __init__(self, player: object, db_handler: object):
@@ -13,6 +14,8 @@ class CoinFlip:
         ]
         
     def _flip_coin(self) -> str:
+        print('\nKolikkoa heitetään...\n')
+        sleep(random.randint(1 * 10, 3 * 10) / 10) # sleep for a random time between 0.5 and 1 seconds
         return random.choice(self.coin_sides)
     
     def _determine_outcome(self, guess: str, flip: str, bet: int) -> int:
@@ -22,12 +25,14 @@ class CoinFlip:
         '''
         Runs the game and returns the player object when done
         '''
-        while True:
+        while True:            
             self.helpers.game_intro(self.player.get_username())
             
             # check if the player wants to play the game or not
             if not self.helpers.play_game():
                 break
+            
+            header('Kolikonheitto', self.player.get_balance())
             
             bet = self.helpers.get_bet(self.player.get_balance())
             
@@ -35,7 +40,7 @@ class CoinFlip:
             if bet == 0:
                 break
             
-            guess = self.helpers.validate_input('\nArvaa kruuna vai klaava (k/c): ', 'str', 'k', 'c')
+            guess = self.helpers.validate_input('\nArvaa kruuna vai klaava (k / c): ', 'str', 'k', 'c')
             
             flip = self._flip_coin()
             print(f'\nKolikonheiton tulos: {flip[1].capitalize()} {flip[2]}')
