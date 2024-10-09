@@ -3,7 +3,7 @@ from enum import Enum
 
 from Games.Dice import Dice
 from Games.ventti import Ventti
-from Player import Player
+from Player.Player import Player
 from cli.Leaderboard import Leaderboard
 from cli.utils import clear_terminal, header
 
@@ -61,13 +61,15 @@ class Cmd:
         else:
             username = input('Enter username: ')
             password = input('Enter password: ')
-        db = self.db
-        user = db.query(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
 
-        if user.get('result') == []:
-            return 'Invalid credentials'
 
-        self.player = Player(username, self.db)
+        # while True:
+            # try:
+        self.player = Player(username, password, self.db)
+     # `           break
+            # except Exception as error:
+            #     print(f'Virheellinen salasana! Yritä uudelleen.\n')
+            #     return error
 
         print(f'Welcome {username}')
         return self.gameLoop()
@@ -79,8 +81,7 @@ class Cmd:
         password = input('Enter password: ')
         user = self.db.query(f"SELECT username FROM users WHERE username = '{username}'")
         if user.get('result') == []:
-            self.db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
-            self.db.query(f"INSERT INTO user_statistics (user_id) VALUES ((SELECT id FROM users WHERE username = '{username}'))")
+            self.player = Player(username, password, self.db)
             return f'Username: {username}\nPassword: {password}'
         return 'User already exists'
 
@@ -88,7 +89,7 @@ class Cmd:
         while True:
             if self.player == 'after playing run this':
                 self.player.save()
-            clear_terminal()
+            # clear_terminal()
             header('Main menu', self.player.get_balance())
             self.gameMenu()
 
