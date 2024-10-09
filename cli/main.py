@@ -47,6 +47,7 @@ class Cmd:
             case _:
                 return 'Invalid argument'
 
+    # TODO: refactor to use the Player class
     def _signin(self):
         auth = self.parser.parse_args().auth
         if len(auth.split(' ')) == 3:
@@ -63,19 +64,28 @@ class Cmd:
 
         self.player = Player(username, self.db)
 
+        print(user.get('result'))
         print(f'Welcome {username}')
-        return self.gameMenu()
+        return self.gameLoop()
 
+    # TODO: refactor to use the Player class
     def _register(self) -> str:
         print('Create an account')
         username = input('Enter username: ')
         password = input('Enter password: ')
-        db = self.db
-        user = db.query(f"SELECT username FROM users WHERE username = '{username}'")
-        if user.get('result')[0][0] == username:
-            return 'User already exists'
-        db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
-        return f'Username: {username}\nPassword: {password}'
+        user = self.db.query(f"SELECT username FROM users WHERE username = '{username}'")
+        if user.get('result') == []:
+            self.db.query(f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
+            self.db.query(f"INSERT INTO user_statistics (user_id) VALUES ((SELECT id FROM users WHERE username = '{username}'))")
+            return f'Username: {username}\nPassword: {password}'
+        return 'User already exists'
+
+    def gameLoop(self):
+        while True:
+            clear_terminal()
+            print('Welcome to the casino!')
+            header('Main menu', self.player.get_balance())
+            self.gameMenu()
 
     def gameMenu(self):
         for option in MenuOptions:
@@ -113,3 +123,19 @@ class Cmd:
             case Games.SLOTS:
                 print('Slots')
                 return 'Slots'
+
+# helpers
+def clear_terminal():
+    '''
+    Clears the terminal, and prints the logo
+    '''
+    import os
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f'ca\n')
+
+def header(text: str, balance: int):
+    '''
+    Prints the header. Call this on the start of each loop
+    '''
+    # clear_termginal()
+    return print(f'{text}  |  Saldo: {balance}\n\n')
