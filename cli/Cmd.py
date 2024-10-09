@@ -10,7 +10,7 @@ from cli.PlayerProfile import PlayerProfile
 from cli.utils import clear_terminal, header
 
 class GameOptions(Enum):
-    BLACKJACK = 1
+    VENTTI = 1
     DICE = 2
     ROULETTE = 3
     SLOTS = 4
@@ -121,18 +121,16 @@ class Cmd:
     def gameSelector(self):
         print('Saatavilla olevat pelit:')
         for game in GameOptions:
-            if game == GameOptions.BLACKJACK:
-                print('3. Ventti (muistuttaa blackjackia)')
             print(f'{game.value}. {game.name.capitalize()}')
         game = int(input('Valitse peli: '))
 
         match GameOptions(game):
-            case GameOptions.BLACKJACK:
+            case GameOptions.VENTTI:
                 print('Ventti')
-                return Ventti().run()
+                return Ventti(self.player, self.db).start_game()
             case GameOptions.DICE:
                 print('Dice')
-                return Dice(self.player, self.db).startGame()
+                return Dice(self.player, self.db).start_game()
             case GameOptions.ROULETTE:
                 print('Roulette')
                 return 'Roulette'
