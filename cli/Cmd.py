@@ -9,25 +9,18 @@ from Player.Player import Player
 from Database.Database import Database
 
 # cli parts
+from cli.views.CLIView import CLIView # base class for views
+from cli.views import * # import all views
+
+# menu enums
+from cli.common.MenuOptions import MenuOptions, ViewClasses
 from cli.common.GameOptions import GameOptions, GameClasses, create_game_options
-from cli.GameHelp import GameHelp
-from cli.Leaderboard import Leaderboard
-from cli.PlayerProfile import PlayerProfile
-from cli.GameHistory import GameHistory
 
 # games
-from Games import *
+from Games import * # import all games
  
 # common utils
 from cli.common.utils import header, fetch_game_types, get_prompt
-
-class MenuOptions(Enum):
-    PELIVALIKKO = 1
-    TULOSTAULUKKO = 2
-    OMA_PELIHISTORIA = 3
-    PROFIILI = 4
-    PELIEN_SÄÄNNÖT = 5
-    LOPETA = 6
 
 class Cmd:
     def __init__(self, config: dict):
@@ -125,45 +118,32 @@ class Cmd:
             fixed_option_name = option.name.replace('_', ' ').capitalize()
             print(f'{option.value}. {fixed_option_name}')
             
-        try:
-            retry = 0
-            while retry < 3:
-                try:
-                    option = get_prompt(f'\n\nValitse toiminto (1 - {len(MenuOptions)}): ', 'int', 1, len(MenuOptions), allow_empty = False)
-                    break
-                except ValueError:
-                    print(f'Virheellinen valinta! Valitse numerolla 1 - {len(MenuOptions)}')
-                    retry += 1
-        except ValueError:
-            print('Yritit kolmesti')
-
-        match MenuOptions(option):
-            case MenuOptions.PELIVALIKKO:
-                header('Valitse peli', self.player.get_balance())
-                
-                if self.player.get_ban_status() == 1:
-                    print('Sinulla on aktiivinen porttikielto, et pääse pelaamaan.\n')
-                    sleep(3)
-                    return self.game_loop()
-                
-                return self.game_selection()
-            case MenuOptions.TULOSTAULUKKO:
-                header('Tulostaulukot', self.player.get_balance())
-                return Leaderboard(self.db).start_leaderboard()
-            case MenuOptions.OMA_PELIHISTORIA:
-                header('Pelihistoria', self.player.get_balance())
-                return GameHistory(self.db, self.player).start_game_history()
-            case MenuOptions.PROFIILI:
-                header('Omat asetukset', self.player.get_balance())
-                return PlayerProfile(self.db, self.player).start_player_profile()
-            case MenuOptions.PELIEN_SÄÄNNÖT:
-                header('Pelien säännöt', self.player.get_balance())
-                return GameHelp(self.db, GameOptions)
-            case MenuOptions.LOPETA:
-                print(f'\nTervetuloa uudelleen, {self.player.get_username()}!\n')
-                self.player.save() # save the player's data once more before exiting
-                return exit()
-
+        option = get_prompt(f'\n\nValitse toiminto (1 - {len(MenuOptions)}): ', 'int', 1, len(MenuOptions), allow_empty = False)
+        selected_option = MenuOptions(option)
+        
+        if selected_option == MenuOptions.PELIVALIKKO:
+            header('Valitse peli', self.player.get_balance())
+            
+            if self.player.get_ban_status() == 1:
+                print('Sinulla on aktiivinen porttikielto, et pääse pelaamaan.\n')
+                sleep(3)
+                return self.game_loop()
+            
+            return self.game_selection()
+        elif selected_option == MenuOptions.LOPETA:
+            print(f'\nTervetuloa uudelleen, {self.player.get_username()}!\n')
+            self.player.save() # save the player's data once more before exiting
+            return exit()
+        elif selected_option.name in ViewClasses:
+            view_class = ViewClasses[selected_option.name]
+            if view_class:
+                if selected_option == MenuOptions.PELIEN_SÄÄNNÖT:
+                    return view_class(self.db, self.player, GameOptions).run()
+                else:
+                    return view_class(self.db, self.player).run()
+        else:
+            print(f'Virheellinen valinta! Valitse numerolla 1 - {len(MenuOptions)}')
+            
     def game_selection(self):
         for option in GameOptions:
             if option == GameOptions.TAKAISIN:
@@ -174,7 +154,6 @@ class Cmd:
         option = get_prompt(f'\n\nValitse peli (1 - {len(GameOptions)}): ', 'int', 1, len(GameOptions), allow_empty = False)
 
         if option in GameOptions:
-            print(GameOptions)
             game_option_name = GameOptions(option).name
             game_class_name = GameClasses[game_option_name].value
             
