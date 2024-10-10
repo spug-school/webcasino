@@ -103,6 +103,10 @@ class Leaderboard:
         
         for index, row in enumerate(data, start=1):
             win_percentage = (row['games_won'] / row['games_played'] * 100) if row['games_played'] > 0 else 0
+            
+            if win_percentage > 100:
+                win_percentage = 100
+                
             rows.append([index] + list(row.values()) + [f"{win_percentage:.2f}%"])
         
         # Align the columns
