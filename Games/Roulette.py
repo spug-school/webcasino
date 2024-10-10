@@ -1,18 +1,18 @@
 import random
 from time import sleep
-from .GameHelpers import GameHelpers
-from cli.utils import header
+from .Game import Game
+from cli.common.utils import header
+from typing import override
 
-class Roulette:
+class Roulette(Game):
     '''
     Game: Roulette
     Description: The simplest form of single guess roulette, where the player chooses a number to bet on and then spins the wheel. self.colors are not included in this version, but the number multiplier is faithful, with 0 in the pool too.
     '''
     def __init__(self, player: object, db_handler: object):
-        self.player = player
-        self.helpers = GameHelpers(player, db_handler, 'roulette')
+        super().__init__(player, db_handler, self.__class__.__name__.lower())
         
-        # betting options
+        # Game specific attributes
         self.colors = {
             'v': [0],
             'p': [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
@@ -23,9 +23,12 @@ class Roulette:
             'm': 'musta',
             'v': 'vihreä'
         }
-        self.number_guesses = 2 # hard coded value for the amount of number guesses the player can make
         
-        self.roll_history_rolls = 10 # the amount of rolls to keep in the history
+        # Constant values
+        self.color_guesses = 1
+        self.number_guesses = 2
+        self.roll_history_rolls = 10
+        
         self.roll_history = self._create_initial_history()
         
     def _create_initial_history(self) -> list:
@@ -44,10 +47,43 @@ class Roulette:
         history_str = "  |  ".join([f'{roll["number"]}-{self.color_names[roll["color"][0]][0].upper()}' for roll in self.roll_history])
         print(f'Viimeiset {self.roll_history_rolls} pyöräytystä:')
         
-        self.helpers.box_wrapper(history_str)
+        self.box_wrapper(history_str)
+    
+    def _get_color(self, number: int) -> str:
+        return 'v' if number in self.colors['v'] else 'p' if number in self.colors['p'] else 'm'
         
+    def _get_guesses(self, guess_type: str, guess_count: int, valid_values: tuple) -> list:
+        '''
+        Get the guesses from the player.
+        The guess_type is either 'Väri' or 'Numero'.
+        '''
+        
+        input_type = 'str' if guess_type == 'Väri' else 'int'
+        min_value = valid_values[0] if guess_type == 'Numero' else None
+        max_value = valid_values[1] if guess_type == 'Numero' else None
+        allowed_values = valid_values if guess_type == 'Väri' else None
+        
+        valid_range = f'{min_value} - {max_value}' if guess_type == 'Numero' else ' / '.join(valid_values)
+
+        return [
+            self.validate_input(
+                prompt=f'{guess_type}arvaus {i+1}. Syötä tyhjä, jos et arvaa. ({valid_range}): ',
+                input_type=input_type,
+                min_value=min_value,
+                max_value=max_value,
+                allowed_values=allowed_values,
+                allow_empty=True
+            ) for i in range(guess_count)
+        ]
+        
+    def _get_bets(self, guesses: dict) -> list:
+        color_bet = [0] if not guesses['color'] else [self.get_bet(self.player.get_balance(), f'Panos väriarvaukselle ({self.color_names[guesses["color"][i]]})') for i in range(self.color_guesses)]
+        number_bets = [0, 0] if not guesses['number'] else [self.get_bet(self.player.get_balance(), f'Panos numeroarvaukselle {i+1} ({guesses["number"][i]})') for i in range(self.number_guesses)]
+        
+        return color_bet + number_bets
+                
     def _spin_wheel(self) -> int:
-        print('\nPyörä pyörii...\n')
+        print('\n\nPyörä pyörii...\n')
         
         sleep(random.randint(1 * 10, 3 * 10) / 10) # sleep for a random time between 0.5 and 1 seconds
 
@@ -67,92 +103,57 @@ class Roulette:
         
         return roll
 
-    def _determine_outcome(self, number_guesses, number_bets, color_guess, color_bet, roll: int) -> int:
+    def _determine_outcome(self, guesses: list, bets: list, roll: int) -> int:
         total_winnings = 0
 
-        # Check number guesses
-        for number_guess, number_bet in zip(number_guesses, number_bets):
-            if int(number_guess) == roll['number']:
-                total_winnings += number_bet * 36
+        for guess, bet in zip(guesses, bets):
+            if isinstance(guess, int) and guess == roll['number']:
+                total_winnings += bet * 36
 
-        # Check color guess
-        if color_guess is not None and color_guess == roll['color']:
-            total_winnings += color_bet * 2
+            elif isinstance(guess, str) and guess == roll['color']:
+                if guess == 'v':
+                    total_winnings += bet * 36
+                else:
+                    total_winnings += bet * 2
 
         return total_winnings
+    
+    @override
+    def game_specific_logic(self) -> dict:
+        '''
+        Game-specific logic for: Roulette
+        '''
+        self._print_history()
         
-    def start_game(self) -> object:
-        '''
-        Runs the game and returns the player object when done
-        '''
-        while True:
-            self.helpers.game_intro(self.player.get_username())
-            
-            # print the last 20 rolls (randomly created at this point of time, will get updated when the game is played)
-            self._print_history()
-            
-            # check if the player wants to play the game or not
-            if not self.helpers.play_game():
-                break
-            
-            header('Ruletti', self.player.get_balance())
-            self._print_history()
-            
-            # get the guesses
-            color_guess = self.helpers.validate_input(f'\nVäriarvaus\nSyötä tyhjä, jos arvaat vain numeroa. (p / m): ', 'str', allowed_values = ['p', 'm', ''])
-            number_guesses = [
-                self.helpers.validate_input(
-                    prompt = f'\nNumeroarvaus {i+1}\nSyötä tyhjä, jos arvaat vain väriä.\n(0 - 36): ',
-                    input_type = 'int',
-                    min_value = 0,
-                    max_value = 36,
-                    allow_empty = True
-                ) for i in range(self.number_guesses)
-            ]
-            
-            # allow the player to exit the game before betting
-            if not any(number_guesses) and color_guess == '':
-                break
-
-            # get separate bets for each guess
-            color_bet = self.helpers.get_bet(self.player.get_balance(), 'Panos väriarvaukselle')
-            
-            if not any(number_guesses):
-                number_bets = [0, 0]
-            else:
-                number_bets = [self.helpers.get_bet(self.player.get_balance(), f'Panos numeroarvaukselle {i+1} ({number_guesses[i]})') for i in range(self.number_guesses)]
-
-            total_bet = sum(number_bets) + color_bet
-
-            # one more opportunity to exit the game before spinning the wheel
-            if total_bet == 0:
-                break
-
-            roll = self._spin_wheel()
-            print(f'\nPyörä pyörähti! Numero: {roll["number"]}, väri: {self.color_names[roll["color"]]}\n')
-            
-            outcome = self._determine_outcome(number_guesses, number_bets, color_guess, color_bet, roll)
-            game_won = outcome > 0
-            net_outcome = outcome - total_bet
-
-            # print the right outcome message based on correct guesses
-            if game_won:
-                if color_guess == roll['color'] and not any(number_guess == str(roll['number']) for number_guess in number_guesses):
-                    print(f'\nVäriarvaus oli oikein! Voitit {outcome} pistettä!\n')
-                elif any(number_guess == str(roll['number']) for number_guess in number_guesses) and not color_guess == roll['color']:
-                    print(f'\nNumeroarvaus oli oikein! Voitit {outcome} pistettä!\n')
-                else:
-                    print(f'\nMolemmat arvauksesi olivat oikein! Voitit {outcome} pistettä!\n')
-            else:
-                print(f'\nArvaukset menivät pieleen. Parempi onni ensi kerralla!\n')
-                
-            # Bulk-update the player values
-            self.helpers.update_player_values(game_won, outcome, save = True)
-            
-            # Save the game to the database
-            self.helpers.save_game_to_history(bet = total_bet, win_amount = net_outcome)
-            
-            if not self.helpers.play_again(self.player.get_balance()):
-                break
-
-        return self.player
+        # get the guesses before bets
+        print('\nArvaukset:')
+        color_guesses = self._get_guesses('Väri', self.color_guesses, tuple(self.colors.keys()))
+        number_guesses = self._get_guesses('Numero', self.number_guesses, (0, 36))
+        guesses = color_guesses + number_guesses
+        
+        if not any(number_guesses) and not any(color_guesses):
+            return None
+        
+        # get the bets
+        print('\nPanostus:')
+        bets = self._get_bets({
+            'color': color_guesses,
+            'number': number_guesses
+        })
+        total_bet = sum(bets)
+        
+        # one last chance to leave the game before spinning the wheel
+        # -> all bets == 0
+        if total_bet == 0:
+            return None
+        
+        roll = self._spin_wheel()
+        print(f'\nPyörä pyörähti! Numero: {roll["number"]}, väri: {self.color_names[roll["color"]]}\n')
+        
+        outcome = self._determine_outcome(guesses, bets, roll)
+        
+        return {
+            'won': outcome > 0,
+            'win_amount': outcome,
+            'bet': total_bet
+        }
