@@ -1,4 +1,4 @@
-import shutil
+import shutil, os
 
 name = r"""
   ____  _      ___    ____     _     ____  ___  _   _   ___
@@ -14,9 +14,7 @@ def clear_terminal():
     '''
     Clears the terminal, and prints the logo
     '''
-    import os
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(f'{name}\n')
 
 def heading(text: str) -> str:
     return f'\n\033[1m{text}\033[0m\n'
@@ -27,7 +25,7 @@ def header(text: str, balance: int = 0, clear: bool = True, hide_balance: bool =
     '''
     if clear:
         clear_terminal()
-    return print(f'{text}  {f"|  Saldo: {balance}" if not hide_balance else ''}\n\n')
+    return print(f'{name}\n\n{text}  {f"|  Saldo: {balance}" if not hide_balance else ''}\n\n')
 
 def fetch_game_types(db: object) -> list:
     '''

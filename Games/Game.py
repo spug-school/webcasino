@@ -92,6 +92,9 @@ class Game(ABC):
         print(f'Pelin säännöt:')
         box_wrap(self.game_info.get('rules'))
     
+    # --------------------------------
+    # Main game loop
+    # --------------------------------
     def run_game(self) -> object:
         '''
         Play the game and return the modified player object
