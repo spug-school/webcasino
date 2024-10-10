@@ -1,15 +1,15 @@
 from random import shuffle
 from time import sleep
 from os import system, name
-from .GameHelpers import GameHelpers
-from cli.utils import header
+from .Game import Game
+from cli.common.utils import header
+from typing import override
 
-class Ventti:
+class Twentyone(Game):
     def __init__(self, player: object, db_handler: object):
-        self.player = player
-        self.helpers = GameHelpers(player, db_handler, 'twentyone')
-        
-        # game options
+        super().__init__(player, db_handler, self.__class__.__name__.lower())
+
+        # Game specific attributes
         self.ventti = 21
         self.max_turns = 3
         self.ranks = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
@@ -28,6 +28,7 @@ class Ventti:
         self.player_over = False
         self.dealer_over = False
         self.player_win = False
+
 
 # Nollaa kaikki pelin arvot
     def game_stat_reset(self):
@@ -188,57 +189,39 @@ class Ventti:
 
 
 # Pääfunktio pelin ajamiseen.
-    def start_game(self) -> object:
+    @override
+    def game_specific_logic(self) -> dict:
         '''
-        Runs the game and returns the player object when done
+        Game specific logic for: Twentyone
         '''
-        while True:
-            self.game_stat_reset()
-            self.helpers.game_intro(self.player.get_username())
+        
+        self.game_stat_reset()
+        
+        bet = self.get_bet(self.player.get_balance())
+        
+        # start the game
+        self.first_deal()
+        
+        # the players turn
+        while not self.player_pass:
+            self.hand_reveal()
+            self.score_calculation()
+            self.over_check()
+            self.hit_me()
             
-            # check if the player wants to play the game or not
-            if not self.helpers.play_game():
-                break
-            
-            header('Ventti', self.player.get_balance())
-            
-            # get the bet, amount of sides & the guess
-            bet = self.helpers.get_bet(self.player.get_balance())
-            
-            # start the game
-            self.first_deal()
-            
-            # the players turn
-            while not self.player_pass:
-                self.hand_reveal()
-                self.score_calculation()
-                self.over_check()
-                self.hit_me()
-            
-            # dealers turn
-            while not self.dealer_pass:
-                self.hand_reveal()
-                self.score_calculation()
-                self.over_check()
-                sleep(1)
-                self.ai_logic()
-                sleep(1)
-            
-            outcome = self.is_winner(bet)
-            game_won = outcome > 0
-            net_outcome = outcome - bet
-
-            # Bulk-update the player values
-            self.helpers.update_player_values(game_won, outcome, save = True)
-            
-            # Save the game to the database
-            self.helpers.save_game_to_history(bet = bet, win_amount = net_outcome)
-            
-            if not self.helpers.play_again(self.player.get_balance()):
-                break
-
-        return self.player # return the updated player object
-
-# if __name__ == "__main__":
-#     game = Ventti({'id': 2, 'username': 'Tuukka', 'balance': 125})
-#     game.run()
+        # dealers turn
+        while not self.dealer_pass:
+            self.hand_reveal()
+            self.score_calculation()
+            self.over_check()
+            sleep(1)
+            self.ai_logic()
+            sleep(1)
+        
+        outcome = self.is_winner(bet)
+        
+        return {
+            'won': outcome > 0,
+            'win_amount': outcome,
+            'bet': bet
+        }

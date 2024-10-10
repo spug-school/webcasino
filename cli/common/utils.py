@@ -1,4 +1,4 @@
-import shutil
+import shutil, os
 
 name = r"""
   ____  _      ___    ____     _     ____  ___  _   _   ___
@@ -14,9 +14,7 @@ def clear_terminal():
     '''
     Clears the terminal, and prints the logo
     '''
-    import os
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(f'{name}\n')
 
 def heading(text: str) -> str:
     return f'\n\033[1m{text}\033[0m\n'
@@ -27,7 +25,7 @@ def header(text: str, balance: int = 0, clear: bool = True, hide_balance: bool =
     '''
     if clear:
         clear_terminal()
-    return print(f'{text}  {f"|  Saldo: {balance}" if not hide_balance else ''}\n\n')
+    return print(f'{name}\n\n{text}  {f"|  Saldo: {balance}" if not hide_balance else ''}\n\n')
 
 def fetch_game_types(db: object) -> list:
     '''
@@ -44,25 +42,56 @@ def fetch_game_types(db: object) -> list:
     except Exception as error:
         return []
     
-def get_prompt(prompt: str, start: str, end: str, values: tuple = (), is_numeric: bool = True) -> str:
+def get_prompt(prompt: str, input_type: str = 'str', min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False, sanitize: bool = False) -> str | int | None:
     '''
-    Gets the user's choice validated
+    Validates / sanitizes the input based on the type and constraints provided.
+    
+    Parameters:
+    - prompt (str): The prompt to display to the user.
+    - input_type (str): The type of input expected ('str' or 'int').
+    - min_value (int): The minimum value for integer inputs.
+    - max_value (int): The maximum value for integer inputs.
+    - allowed_values (tuple): A tuple of allowed values for string inputs.
+    - allow_empty (bool): Whether to allow empty inputs.
+    - sanitize (bool): Whether to sanitize the input by removing blacklisted characters.
+    
+    Returns:
+    - str | int | None: The validated and/or sanitized input.
     '''
+    blacklisted_chars = [
+        ';', 
+        '"', 
+        "'", 
+        ' '
+    ]
+    
     while True:
-        choice = input(prompt)
-        if is_numeric:
-            if choice.isnumeric():
-                if int(choice) >= int(start) and int(choice) <= int(end):
-                    return int(choice)
+        input_value = input(prompt)
+        
+        if allow_empty and (input_value == '' or input_value.isspace()):
+            return None
+        
+        if input_type == 'int':
+            try:
+                value = int(input_value)
+                if (min_value is not None and value < min_value) or (max_value is not None and value > max_value):
+                    print(f'\nArvon on oltava {min_value} - {max_value}!\n')
                 else:
-                    print(f'Virheellinen syöte. Syötä numero {start} - {end}')
+                    return value
+            except ValueError:
+                print('\nVirheellinen syöte! Syötä numero!\n')
+        
+        elif input_type == 'str':
+            if allowed_values and input_value.lower() not in allowed_values:
+                print(f'\nValinnan on oltava {"/".join(allowed_values)}.')
             else:
-                print(f'Virheellinen syöte. Syötä numero {start} - {end}')
+                if sanitize:
+                    return ''.join(char for char in input_value if char not in blacklisted_chars) # don't lower a sanitized input
+                else:
+                    return input_value.lower()
+            
         else:
-            if choice in values:
-                return choice
-            else:
-                print(f'Virheellinen syöte. Syötä {" / ".join(values)}')
+            print('Syötteen tyyppi on virheellinen.\n')
                 
 def box_wrapper(text: str, min_width: int = 75, max_width: int = 75):
     '''
