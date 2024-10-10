@@ -16,7 +16,7 @@ class Slots:
         # So they can be used outside the __init__ method.
         self.spins_per_column = spins_per_column
         self.columns = columns
-        self.game_cost = 10 # The cost of playing the game.
+        self.game_cost = 100 # The cost of playing the game.
         
         # Here we make a list of symbols that the slot machine will use. graphemica.com is a good place to find them.
         # Currently, we have 5 different symbols and as a result, the chance of winning jackpot is 0.8%.
@@ -116,6 +116,8 @@ class Slots:
             
             # The cost of using the slot machine.
             bet = self.game_cost
+            self.player.update_balance(-bet)
+
             # Here we call the _spin_reels to run the slot machine.
             final_row = self._spin_reels()
             # Here we determine if player won something.
