@@ -29,7 +29,7 @@ class Cmd:
         self.parser.add_argument(
             '--version',
             action='version',
-            version='CLI Casino 1.0'
+            version='CLI Casino 1.1'
         )
         self.parser.add_argument(
             '--auth',
