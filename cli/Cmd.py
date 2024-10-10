@@ -8,20 +8,18 @@ from Player.Player import Player
 # database class
 from Database.Database import Database
 
-# games
-from Games.Dice import Dice
-from Games.ventti import Ventti
-from Games.CoinFlip import CoinFlip
-from Games.Roulette import Roulette
-from Games.Slots import Slots
-
 # cli parts
-from cli.common.GameOptions import GameOptions, create_game_options
+from cli.common.GameOptions import GameOptions, GameClasses, create_game_options
 from cli.GameHelp import GameHelp
 from cli.Leaderboard import Leaderboard
 from cli.PlayerProfile import PlayerProfile
 from cli.GameHistory import GameHistory
-from cli.utils import clear_terminal, header, fetch_game_types, get_prompt
+
+# games
+from Games import *
+ 
+# common utils
+from cli.common.utils import header, fetch_game_types, get_prompt
 
 class MenuOptions(Enum):
     PELIVALIKKO = 1
@@ -49,23 +47,25 @@ class Cmd:
             nargs='*',
             help="Valmistele Casino cli tietokanta. Esim --setup, --setup test.sql"
         )
+        self._run(config = config)
 
-        setup_args = self.parser.parse_args().setup
-        source_files = setup_args if setup_args else []
+    def _run(self, config: dict):
+        args = self.parser.parse_args()
+        
+        # create a db instance
         self.db = Database(
             config = config,
             connect = True,
             setup = {
-                'sql': setup_args,
-                'source': source_files
+                'sql': args.setup,
+                'source': args.setup if args.setup else []
             }
         )
-        self._create_game_menu() # creates the game selection menu
-        self._run()
+        
+        # create the game selection options
+        self._create_games()
 
-    def _run(self):
-        args = self.parser.parse_args()
-
+        # check if the auth argument is present
         if args.auth:
             return self.auth()
         else:
@@ -86,34 +86,34 @@ class Cmd:
             username = auth.split(' ')[1]
             password = auth.split(' ')[2]
         else:
-            username = input('Enter username: ')
-            password = input('Enter password: ')
+            username = get_prompt('Enter username: ', 'str', allow_empty = False, sanitize = True)
+            password = get_prompt('Enter password: ', 'str', allow_empty = False, sanitize = True)
 
         self.player = Player(username, password, self.db)
         return self.game_loop()
 
     def _register(self) -> str:
-        print('Create an account')
-        username = input('Enter username: ')
-        password = input('Enter password: ')
-        user = self.db.query(f"SELECT username FROM users WHERE username = '{username}'")
-        if user.get('result') == []:
+        username = get_prompt('Enter username: ', 'str', allow_empty = False, sanitize = True)
+        password = get_prompt('Enter password: ', 'str', allow_empty = False, sanitize = True)
+        
+        check_exists = self.db.query('SELECT username FROM users WHERE username = %s', (username,))
+        
+        if not check_exists['result_group']: # user does not exist -> create it
             self.player = Player(username, password, self.db)
-            return f'Username: {username}\nPassword: {password}'
+            return True
+        
         return 'User already exists'
     
-    def _create_game_menu(self):
+    def _create_games(self):
         '''
         Creates the game menu enum based on the available games in the db
         '''
-        global GameOptions
+        global GameOptions, GameClasses
         game_types = fetch_game_types(self.db)
-        GameOptions = create_game_options(game_types)
+        GameOptions, GameClasses = create_game_options(game_types)
     
     def game_loop(self):
         while True:
-            if self.player == 'after playing run this':
-                self.player.save()
             header(f'Tervetuloa, {self.player.get_username()}', self.player.get_balance())
             self.main_menu()
 
@@ -129,7 +129,7 @@ class Cmd:
             retry = 0
             while retry < 3:
                 try:
-                    option = get_prompt(f'\n\nValitse toiminto (1 - {len(MenuOptions)}): ', 1, len(MenuOptions))
+                    option = get_prompt(f'\n\nValitse toiminto (1 - {len(MenuOptions)}): ', 'int', 1, len(MenuOptions), allow_empty = False)
                     break
                 except ValueError:
                     print(f'Virheellinen valinta! Valitse numerolla 1 - {len(MenuOptions)}')
@@ -171,22 +171,18 @@ class Cmd:
                 
             print(f'{option.value}. {option.name.capitalize()}')
             
-        option = get_prompt(f'\n\nValitse peli (1 - {len(GameOptions)}): ', 1, len(GameOptions), is_numeric=True)
+        option = get_prompt(f'\n\nValitse peli (1 - {len(GameOptions)}): ', 'int', 1, len(GameOptions), allow_empty = False)
 
-        match GameOptions(option):
-            case GameOptions.NOPANHEITTO:
-                return Dice(self.player, self.db).start_game()
-            case GameOptions.RULETTI:
-                return Roulette(self.player, self.db).start_game()
-            case GameOptions.VENTTI:
-                return Ventti(self.player, self.db).start_game()
-            case GameOptions.HEDELMÄPELI:
-                return Slots(self.player, self.db).start_game()
-            case GameOptions.KOLIKONHEITTO:
-                return CoinFlip(self.player, self.db).start_game()
-            case GameOptions.TAKAISIN:
-                return self.game_loop()
-            case _ if option == len(GameOptions):
-                return self.game_loop()
-            case _:
-                print(f'Virheellinen valinta! Valitse numerolla 1 - {len(GameOptions)}')
+        if option in GameOptions:
+            print(GameOptions)
+            game_option_name = GameOptions(option).name
+            game_class_name = GameClasses[game_option_name].value
+            
+            game_class = globals()[game_class_name]
+            
+            # start the game
+            return game_class(self.player, self.db).run_game()
+        elif option == GameOptions.TAKAISIN or option == len(GameOptions):
+            return self.game_loop()
+        else:
+            print(f'Virheellinen valinta! Valitse numerolla 1 - {len(GameOptions)}')
