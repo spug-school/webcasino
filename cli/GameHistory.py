@@ -1,6 +1,6 @@
 import logging
 import tabulate
-from cli.utils import header
+from cli.common.utils import header
 
 # TODO 
 # In the beginning of each while() loop add the header() function call to clear

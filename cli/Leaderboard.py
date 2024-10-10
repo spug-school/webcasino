@@ -1,6 +1,6 @@
 import logging
 import tabulate
-from cli.utils import header
+from cli.common.utils import header
 
 class Leaderboard:
     def __init__(self, db_handler: object):

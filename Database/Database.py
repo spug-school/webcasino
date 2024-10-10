@@ -1,7 +1,7 @@
 import mysql.connector
 import logging
 from helpers.get_file_path import get_file_path
-from cli.utils import box_wrapper
+from cli.common.utils import box_wrapper
 
 class Database:
     '''

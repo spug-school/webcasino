@@ -2,7 +2,7 @@ import logging
 import tabulate
 import sys
 import time
-from cli.utils import header
+from cli.common.utils import header
 
 class PlayerProfile:
     def __init__(self, db_handler: object, player: object):

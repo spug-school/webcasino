@@ -1,6 +1,6 @@
 from enum import Enum
 
-from cli.utils import header, get_prompt, box_wrapper
+from cli.common.utils import header, get_prompt, box_wrapper
 
 class GameHelp:
     def __init__(self, db, game_options: Enum):
