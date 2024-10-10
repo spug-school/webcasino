@@ -1,38 +1,21 @@
 import logging
 import tabulate
+from cli.views.CLIView import CLIView
 from cli.common.utils import header
 
-# TODO 
-# In the beginning of each while() loop add the header() function call to clear
-# the terminal and print the header. For consistency.
-
-# Most likely it will be a helper from the CLI main class.
-
-class GameHistory:
+class GameHistory(CLIView):
+    view_name = 'Oma pelihistoria'
+    
     def __init__(self, db_handler: object, player: object):
-        self.db = db_handler
-        self.player = player
+        super().__init__(db_handler, player, self.view_name)
         
-        # default amount
+        # View specific attributes
         self.history_rows = 100
-        
         self.table_columns = [
-            {
-                'db_column': 'name',
-                'name': 'Peli'
-            },
-            {
-                'db_column': 'bet',
-                'name': 'Panos'
-            },
-            {
-                'db_column': 'win_amount',
-                'name': 'Voitto'
-            },
-            {
-                'db_column': 'played_at',
-                'name': 'Ajankohta'
-            }
+            {'db_column': 'name', 'name': 'Peli'},
+            {'db_column': 'bet', 'name': 'Panos'},
+            {'db_column': 'win_amount', 'name': 'Voitto'},
+            {'db_column': 'played_at', 'name': 'Ajankohta'}
         ]
         
     def get_game_history(self, amount: int) -> list:
