@@ -153,6 +153,9 @@ class Cmd:
             
         option = get_prompt(f'\n\nValitse peli (1 - {len(GameOptions)}): ', 'int', 1, len(GameOptions), allow_empty = False)
 
+        if option == GameOptions.TAKAISIN.value or option == len(GameOptions):
+            return self.game_loop()
+        
         if option in GameOptions:
             game_option_name = GameOptions(option).name
             game_class_name = GameClasses[game_option_name].value
@@ -161,7 +164,5 @@ class Cmd:
             
             # start the game
             return game_class(self.player, self.db).run_game()
-        elif option == GameOptions.TAKAISIN or option == len(GameOptions):
-            return self.game_loop()
         else:
             print(f'Virheellinen valinta! Valitse numerolla 1 - {len(GameOptions)}')
