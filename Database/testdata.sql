@@ -51,6 +51,7 @@ insert into `users` (username, password, created_at, updated_at) values ( 'cmcki
 insert into `users` (username, password, created_at, updated_at) values ( 'tpothecary1b', '0edefb2afc67848e71c86ab1812914c8471d247365388b75e2c23907181dd982', '2024-02-18 17:51:33', '2024-07-15 20:15:06');
 insert into `users` (username, password, created_at, updated_at) values ( 'dlanham1c', '2ac2e56dd2231076f289812d86f915b55daa96e44d915a32c817d74822601f64', '2023-11-06 18:09:36', '2024-10-03 02:44:55');
 insert into `users` (username, password, created_at, updated_at) values ( 'ptice1d', '0889672c63e3d6b0811a99d60c08c9a6af7a98bafb74e3730d9a5dc320607431', '2024-04-11 09:15:15', '2024-06-15 02:51:06');
+insert into `users` (username, password, created_at, updated_at) values ( 'aleksipelaa', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', '2024-04-11 09:15:15', '2024-06-15 02:51:06');
 
 -- `users` statistics
 insert into `user_statistics` (user_id, balance, total_winnings, games_played, games_won, games_lost, is_banned) values (2, 93331, 245886, 442, 437, 477, 0);
@@ -103,6 +104,7 @@ insert into `user_statistics` (user_id, balance, total_winnings, games_played, g
 insert into `user_statistics` (user_id, balance, total_winnings, games_played, games_won, games_lost, is_banned) values (49, 94478, 385234, 20, 326, 382, 0);
 insert into `user_statistics` (user_id, balance, total_winnings, games_played, games_won, games_lost, is_banned) values (50, 16529, 150267, 657, 382, 244, 0);
 insert into `user_statistics` (user_id, balance, total_winnings, games_played, games_won, games_lost, is_banned) values (51, 51687, 35334, 627, 371, 115, 0);
+insert into `user_statistics` (user_id, balance, total_winnings, games_played, games_won, games_lost, is_banned) values (52, 2500, 51200, 70, 46, 24, 0);
 
 -- Game history
 insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1218, 45119, '2024-07-08 02:06:07', 40, 4);
@@ -605,3 +607,10 @@ insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) v
 insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (7249, 44867, '2023-12-22 02:17:31', 5, 2);
 insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (9553, 34325, '2024-07-02 14:07:23', 38, 4);
 insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (236, 21181, '2023-12-17 18:15:06', 2, 1);
+
+-- User 52 (demo user)
+insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1000, 2000, '2024-10-02 13:18:36', 52, 4);
+insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1000, 4000, '2024-05-18 11:57:07', 52, 1);
+insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1000, 25000, '2024-09-30 14:18:36', 52, 3);
+insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1000, 2000, '2024-09-30 15:20:36', 52, 5);
+insert into `game_history` (bet, win_amount, played_at, user_id, game_type_id) values (1000, 0, '2024-09-30 16:18:36', 52, 2);
