@@ -22,7 +22,7 @@ class Game(ABC):
         }
         
     @abstractmethod
-    def game_specific_logic(self) -> dict:
+    def start_game(self) -> dict:
         '''
         This method should be implemented in the game class to handle the game-specific logic
         
@@ -108,8 +108,8 @@ class Game(ABC):
             
             header(self.game_info.get('name').capitalize(), self.player.get_balance())
             
-            # game-specific logic
-            outcome = self.game_specific_logic()
+            # game-specific logic happens here
+            outcome = self.start_game()
             
             # cancel if the outcome is not valid (False or None)
             # this can be for example if the player cancels the game via

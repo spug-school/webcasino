@@ -1,7 +1,7 @@
 from random import shuffle
 from time import sleep
 from os import system, name
-from .Game import Game
+from ..Game import Game
 from cli.common.utils import header
 from typing import override
 
@@ -190,7 +190,7 @@ class Twentyone(Game):
 
 # Pääfunktio pelin ajamiseen.
     @override
-    def game_specific_logic(self) -> dict:
+    def start_game(self) -> dict:
         '''
         Game specific logic for: Twentyone
         '''

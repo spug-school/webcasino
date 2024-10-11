@@ -91,6 +91,7 @@ class Database:
                     self.execute_script(source_script)
 
             logging.info(f'Database `{self.connection.database}` setup successfully.\nTables: {tables}')
+            print('\n')
             box_wrapper(f'Database `{self.connection.database}` setup successfully.\nTables: {tables}')
 
             if source_files:

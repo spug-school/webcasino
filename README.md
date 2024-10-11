@@ -45,29 +45,27 @@ This project is part of the first year engineering studies of 4 eager informatio
 
 ## Usage
 
+### CLI startup flags
 ```
-options:
-  -h, --help     show this help message and exit
-  --version      show program's version number and exit
-  --auth AUTH    Kirjaudu tai rekisteröidy casino cli
-  --setup SETUP  Valmistele Casino cli tietokanta
+-h, --help            Show this help message and exit
+--version             Show the program's version number and exit
+--auth AUTH           Log-In or Register to the casino's userbase
+--setup [SETUP ...]   Setup the casino's database. You can pass .sql filenames as parameter to source the database with data.
 ```
 
-signup to casino
-
+### Registration
 ```sh
 python main.py --auth "signup"
 ```
 
-signin to casino
-
+### Signing in
 ```sh
 python main.py --auth "signin"
 // or
 python main.py --auth "signin foo foobar"
 ```
 
-# TODO
+After signin you the game should be Up & Running! Have fun!
 
 ## Features
 
@@ -95,3 +93,9 @@ python main.py --auth "signin foo foobar"
 - Profile editing
   - Allows the user to edit their own credidentials (username & password)
   - Allows the user to delete their profile and all records from the database
+
+## TODOS (in the future)
+- API with Flask
+- Web UI
+- More games
+- Code cleanup

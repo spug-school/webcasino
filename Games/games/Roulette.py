@@ -1,6 +1,6 @@
 import random
 from time import sleep
-from .Game import Game
+from ..Game import Game
 from cli.common.utils import header
 from typing import override
 
@@ -119,7 +119,7 @@ class Roulette(Game):
         return total_winnings
     
     @override
-    def game_specific_logic(self) -> dict:
+    def start_game(self) -> dict:
         '''
         Game-specific logic for: Roulette
         '''

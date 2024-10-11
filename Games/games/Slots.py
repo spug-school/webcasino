@@ -1,7 +1,7 @@
 import time, random, sys
 from wcwidth import wcswidth
 from typing import override
-from .Game import Game
+from ..Game import Game
 
 class Slots(Game):
     def __init__(self, player: object, db_handler: object):
@@ -99,7 +99,7 @@ class Slots(Game):
         return int(winnings)
 
     @override
-    def game_specific_logic(self) -> dict:
+    def start_game(self) -> dict:
         '''
         Game-specific logic for: Slots
         '''

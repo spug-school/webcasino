@@ -29,16 +29,16 @@ class Cmd:
         self.parser.add_argument(
             '--version',
             action='version',
-            version='CLI Casino 1.1'
+            version='CLI Casino V1.1'
         )
         self.parser.add_argument(
             '--auth',
-            help='Kirjaudu tai rekisteröidy casino cli'
+            help='Kirjaudu tai rekisteröidy. Käytä "--auth signup" rekisteröitymiseen ja "--auth signin" kirjautumiseen. Voit myös lisätä käyttäjänimen ja salasanan suoraan "--auth signin username password".'
         )
         self.parser.add_argument(
             '--setup',
             nargs='*',
-            help="Valmistele Casino cli tietokanta. Esim --setup, --setup test.sql"
+            help="Valmistele Casino cli tietokanta. Käytä '--setup' ilman argumentteja, jos haluat käyttää oletusasetuksia. Argumenttina voit lisätä .sql tiedoston nimen, joka ajetaan tietokantaan."
         )
         self._run(config = config)
 

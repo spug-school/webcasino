@@ -1,6 +1,6 @@
 import random
 from time import sleep
-from .Game import Game
+from ..Game import Game
 from typing import override
 
 class Coinflip(Game):
@@ -22,7 +22,7 @@ class Coinflip(Game):
         return bet * 2 if guess == flip[0] else 0
     
     @override
-    def game_specific_logic(self) -> dict:
+    def start_game(self) -> dict:
         '''
         Game-specific logic for: CoinFlip
         '''

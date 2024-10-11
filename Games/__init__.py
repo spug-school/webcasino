@@ -1,8 +1,8 @@
-from .Dice import Dice
-from .CoinFlip import Coinflip
-from .Twentyone import Twentyone
-from .Roulette import Roulette
-from .Slots import Slots
+from .games.Dice import Dice
+from .games.CoinFlip import Coinflip
+from .games.Twentyone import Twentyone
+from .games.Roulette import Roulette
+from .games.Slots import Slots
 # ...
 
 __all__ = [
