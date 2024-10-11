@@ -48,10 +48,10 @@ CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
 INSERT INTO `game_types` 
   (`name`, `name_en`, `rules`)
 VALUES
-  ('nopanheitto', 'dice', 'Pelaaja valitsee itse, kuinka suurta noppaa heittää. Pelaajan tulee sitten arvata nopan oikea silmäluku.\n\n- Voittokerroin on silmälukujen lukumäärä'),
+  ('nopanheitto', 'dice', 'Pelissä heitetään pelaajan valitsemaa määrää noppia. Pelaaja arvaa, mikä nopanheiton summa on.\n\n- Voittokerroin = noppien määrä'),
   ('ruletti', 'roulette', 'Pelaaja arvaa värin sekä halutessaan kahta numeroa. Pelaaja asettaa jokaiselle arvaukselle (väri sekä numerot) oman erillisen panoksensa.\n\n- Numeroarvauksen voittokerroin = 36x\n- Väriarvauksen = 2x'),
-  ('ventti', 'twentyone', 'Pelaaja saa kaksi korttia, joista toinen on piilotettu. Pelaaja voi joko jäädä tai ottaa lisää kortteja. Tavoitteena on saada korttien summa mahdollisimman lähelle 21:ä, mutta ei yli. Pelaaja voittaa, jos hänen korttiensa summa on suurempi kuin jakajan korttien summa, mutta ei yli 21:ä.\n\n- Voittokerroin = 2x'),
-  ('hedelmäpeli', 'slots', 'Pelaaja asettaa panoksen ja painaa pelinappia. Pelissä on 4 rullaa, joissa on erilaisia symboleja. Jos rullat pysähtyvät samoihin symboleihin, pelaaja voittaa.\n\nPyöräytyksen hinta: 10 pistettä\n\nVoittokertoimet:\n- 3 samaa symbolia = 5x\n- 4 samaa symbolia = 25x'),
+  ('ventti', 'twentyone', 'Pelaaja ja jakaja saavat alussa kaksi korttia. Pelaaja aloittaa. Pelaaja voi joko jäädä tai ottaa lisää kortteja. Tavoitteena on saada korttien summa mahdollisimman lähelle 21:ä, mutta ei yli. Pelaaja voittaa, jos hänen korttiensa summa on suurempi kuin jakajan korttien summa, mutta ei yli 21:ä. Jos pelaajan ja jakajan kädet ovat yhtä suuret, jakaja voittaa.\n\n- Voittokerroin = 2x'),
+  ('hedelmäpeli', 'slots', 'Pelaaja asettaa panoksen ja painaa pelinappia. Pelissä on 4 rullaa, joissa on erilaisia symboleja. Jos rullat pysähtyvät samoihin symboleihin, pelaaja voittaa.\n\nPyöräytyksen hinta: 100 pistettä\n\nVoittokertoimet:\n- 2 samaa symbolia = 1.25x\n- 3 samaa symbolia = 5x\n- 4 samaa symbolia = 25x'),
   ('kolikonheitto', 'coinflip', 'Pelaaja valitsee joko kruunan tai klaavan. Jos pelaaja arvaa oikein, hän voittaa.\n\n- Voittokerroin = 2x');
 
 -- Insert admin on setup
