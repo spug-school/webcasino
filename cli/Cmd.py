@@ -49,10 +49,7 @@ class Cmd:
         self.db = Database(
             config = config,
             connect = True,
-            setup = {
-                'sql': args.setup,
-                'source': args.setup if args.setup else []
-            }
+            setup = args.setup if args.setup else None
         )
         
         # create the game selection options

@@ -12,6 +12,9 @@
 
 A text & keyboard based 'casino' application that runs on the command line. Allows users to play the most simple casino games with play-money. The app also has some other nice features, such as, a dynamic Leaderboard, the possibility to view the player's own Game history and the chance to edit the players own profile information.
 
+### Note
+All of the games text are in ***FINNISH*** so do with that as you will.
+
 ### About
 
 This project is part of the first year engineering studies of 4 eager information technology students, more specifically, the Python basics course. The point of the project is to display the skills learned throughout the course in the form of a high quality and maintainable codebase.
@@ -99,3 +102,4 @@ After signin you the game should be Up & Running! Have fun!
 - Web UI
 - More games
 - Code cleanup
+- Logger location

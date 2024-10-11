@@ -114,7 +114,6 @@ class Slots(Game):
         self.player.update_balance(-bet)
         
         spin_result = self._spin_slot_machine()
-        
         outcome = self._determine_outcome(bet, spin_result)
         
         return {

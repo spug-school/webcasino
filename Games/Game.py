@@ -34,27 +34,25 @@ class Game(ABC):
         '''
         pass
     
+    
     # --------------------------------
-    # CLI Helper methods
+    # CLI Helper wrapper methods
     # --------------------------------
     def validate_input(self, prompt: str, input_type: str, min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False):
-        '''
-        Wrapper for the get_prompt cli helper function
-        '''
         return get_prompt(prompt, input_type, min_value, max_value, allowed_values, allow_empty)
                 
     def box_wrapper(self, text: str, min_width: int = 75, max_width: int = 75):
-        '''
-        Wrapper for the box_wrapper cli helper function
-        '''
         box_wrap(text, min_width, max_width)
     
     # --------------------------------
     # Game related methods
     # --------------------------------
-    def play_game(self):
+    def play_game(self) -> bool:
         '''
         Before starting the main loop, asks the player if they want to play the game
+        
+        Returns:
+            bool: Whether the player wants to play the game or not
         '''
         play_game = self.validate_input(f'Haluatko pelata peliä (k / e): ', 'str', allowed_values=('k', 'e'))
         
@@ -62,6 +60,15 @@ class Game(ABC):
             return True if play_game == 'k' else False
         
     def get_bet(self, balance: int, bet_to_text: str = None) -> int:
+        '''
+        Gets the bet from the player and deducts it from the player's balance
+        
+        Parameters:
+            balance (int): The player's balance
+            bet_to_text (str): The text to display for the bet prompt
+        Returns:
+            int: The bet amount
+        '''
         prompt_text = f'Panos (syötä tyhjä peruuttaaksesi): ' if bet_to_text is None else f'{bet_to_text} (syötä tyhjä peruuttaaksesi): '
 
         # ask the bet from the player
@@ -80,6 +87,14 @@ class Game(ABC):
         return bet
         
     def play_again(self, balance: str) -> bool:
+        '''
+        Handle the game ending and ask the player if they want to play again
+        
+        Parameters:
+            balance (str): The player's balance
+        Returns:
+            bool: Whether the player wants to play again or not
+        '''
         if balance <= 0:
             print(f'Saldo ei riitä. Peli päättyi.\n')
             return False
@@ -92,12 +107,16 @@ class Game(ABC):
         print(f'Pelin säännöt:')
         box_wrap(self.game_info.get('rules'))
     
+    
     # --------------------------------
     # Main game loop
     # --------------------------------
     def run_game(self) -> object:
         '''
         Play the game and return the modified player object
+        
+        Returns:
+            object: The modified player object
         '''
         while True:
             self.game_intro(self.player.get_username())
@@ -148,9 +167,16 @@ class Game(ABC):
     # --------------------------------
     # Database related methods
     # --------------------------------
-    def __get_game_type_record(self, value: str, key: str = 'name_en'):
+    def __get_game_type_record(self, value: str, key: str = 'name_en') -> dict | bool:
         '''
         Creates a new game type in the database. References the class name as the game type name
+        
+        Parameters:
+            value (str): The value to search for in the database
+            key (str): The key to search for in the database
+            
+        Returns:
+            (dict{} | bool(False)): The game type record, if found. False if not found
         '''
         try:
             query = '''
@@ -172,33 +198,50 @@ class Game(ABC):
         '''
         Updates all the player values in bulk after a game has ended
         
-        @param won: bool: Whether the player won the game or not
-        @param win_amount: int: The net outcome of the game (amount won minus the bet)
-        @param save: bool: Whether to save the updated values to the database or not
+        Parameters:
+            won (bool): Whether the player won the game or not
+            win_amount (int): The amount won
+            save (bool): Whether to save the updated values to the database
+            
+        Returns:
+            bool: Success state
         '''
-        if won: # win
-            self.player.update_total_winning(win_amount)
-            self.player.update_games_won()
-            self.player.update_balance(win_amount) # update balance with net outcome
-        else: # loss
-            self.player.update_games_lost()
+        try:
+            if won: # win
+                self.player.update_total_winning(win_amount)
+                self.player.update_games_won()
+                self.player.update_balance(win_amount) # update balance with net outcome
+            else: # loss
+                self.player.update_games_lost()
+                
+                if self.player.get_balance() <= 0:
+                    self.player.set_banned()
+            
+            # win & loss
+            self.player.update_games_played()
             
             if self.player.get_balance() <= 0:
-                self.player.set_banned()
-        
-        # win & loss
-        self.player.update_games_played()
-        
-        if self.player.get_balance() <= 0:
-            self.player.update_balance(0) # don't allow negative balances
+                self.player.update_balance(0) # don't allow negative balances
 
-        
-        if save: # save the updated values to the database
-            self.player.save()
+            
+            if save: # save the updated values to the database
+                self.player.save()
+                
+            return True
+        except Exception as error:
+            logging.error(f'Error updating the player values: {error}')
+            return False
     
     def save_game_to_history(self, win_amount: int, bet: int) -> bool:
         '''
         Saves the game to the database. Returns success state boolean
+        
+        Parameters:
+            win_amount (int): The amount won
+            bet (int): The amount bet
+        
+        Returns:
+            bool: Success state
         '''
         try:
             query = '''

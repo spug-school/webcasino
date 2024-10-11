@@ -3,6 +3,12 @@ import os
 def get_file_path(filename: str) -> str:
     '''
     Returns the full path of *filename* searched through the whole project directory
+    
+    Parameters:
+        filename (str): The name of the file to search for.
+        
+    Returns:
+        (str): The full path of the file `filename`.
     '''
     
     if filename == "" or not isinstance(filename, str):

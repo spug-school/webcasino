@@ -1,3 +1,11 @@
+# -----------------------------------
+# Handles the creation of the Game-
+# Options and Classes enums.
+# Called from Cmd.py to create the
+# game selection options dynamically
+# from the game_types table.
+# -----------------------------------
+
 from enum import Enum
 
 class GameOption(Enum):
@@ -8,7 +16,7 @@ class GameOption(Enum):
         obj.display_name = display_name
         return obj
 
-def create_game_options(game_types):
+def create_game_options(game_types: list) -> tuple:
     # create the game options
     game_types.append((len(game_types) + 1, 'Takaisin', 'BACK'))
     game_options_dict = {name.upper(): id_ for id_, name, name_en in game_types}

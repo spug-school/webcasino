@@ -1,3 +1,7 @@
+# ---------------------------------------------------------------
+# This file contains the common utility functions used in the CLI
+# ---------------------------------------------------------------
+
 import shutil, os
 
 name = r"""
@@ -7,7 +11,6 @@ name = r"""
 | |___ | |___  | |  | |___  / ___ \  ___) || | | |\  || |_| |
  \____||_____||___|  \____|/_/   \_\|____/|___||_| \_| \___/
 """
-
 
 # helpers
 def clear_terminal():
@@ -21,7 +24,7 @@ def heading(text: str) -> str:
 
 def header(text: str, balance: int = 0, clear: bool = True, hide_balance: bool = False) -> None:
     '''
-    Prints the header. Call this on the start of each loop
+    Clears the terminal and prints the logo and the header text
     '''
     if clear:
         clear_terminal()
@@ -29,7 +32,10 @@ def header(text: str, balance: int = 0, clear: bool = True, hide_balance: bool =
 
 def fetch_game_types(db: object) -> list:
     '''
-    Gets the game type records from the db as a list
+    Gets the game_type records from the db as a list
+    
+    Parameters:
+        db (object): The database handler instance object.
     '''
     try:
         result = db.query('SELECT * FROM game_types', cursor_settings={'dictionary': True})
@@ -42,21 +48,21 @@ def fetch_game_types(db: object) -> list:
     except Exception as error:
         return []
     
-def get_prompt(prompt: str, input_type: str = 'str', min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False, sanitize: bool = False) -> str | int | None:
+def get_prompt(prompt: str, input_type: str = 'str', min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False, sanitize: bool = False) -> str | int:
     '''
-    Validates / sanitizes the input based on the type and constraints provided.
+    Validates / sanitizes an input based on the type and constraints provided.
     
     Parameters:
-    - prompt (str): The prompt to display to the user.
-    - input_type (str): The type of input expected ('str' or 'int').
-    - min_value (int): The minimum value for integer inputs.
-    - max_value (int): The maximum value for integer inputs.
-    - allowed_values (tuple): A tuple of allowed values for string inputs.
-    - allow_empty (bool): Whether to allow empty inputs.
-    - sanitize (bool): Whether to sanitize the input by removing blacklisted characters.
+        prompt (str): The prompt to display to the user.
+        input_type (str): The type of input expected ('str' or 'int').
+        min_value (int): The minimum value for integer inputs.
+        max_value (int): The maximum value for integer inputs.
+        allowed_values (tuple): A tuple of allowed values for string inputs.
+        allow_empty (bool): Whether to allow empty inputs.
+        sanitize (bool): Whether to sanitize the input by removing blacklisted characters.
     
     Returns:
-    - str | int | None: The validated and/or sanitized input.
+        (str | int): The validated and/or sanitized input result.
     '''
     blacklisted_chars = [
         ';', 
@@ -98,7 +104,10 @@ def box_wrapper(text: str, min_width: int = 75, max_width: int = 75):
     Creates a nice box-like wrapper for a wanted text.
     Used in displaying the game rules, for example
     
-    Could be located elsewhere tho - TODO
+    Parameters:
+        text (str): The text to wrap in a box.
+        min_width (int): The minimum width of the box.
+        max_width (int): The maximum width of the box.
     '''
     terminal_width = shutil.get_terminal_size().columns
     padding = 4 # padding on both sides

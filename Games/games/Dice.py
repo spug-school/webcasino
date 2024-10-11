@@ -29,7 +29,7 @@ class Dice(Game):
             
         # one more opportunity to exit the game before rolling the dice
         if bet == 0:
-            return 0
+            return None
         
         dice_amount = self.validate_input(f'\nKuinka montaa noppaa haluat heittää (2 - {self.max_dice}): ', 'int', 2, self.max_dice)
         dice_total = self.sides * dice_amount
