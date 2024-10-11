@@ -105,6 +105,12 @@ class Slots(Game):
         '''
         
         bet = self.game_cost
+        
+        if self.player.get_balance() < bet:
+            print('Sinulla ei ole tarpeeksi rahaa pelataksesi tätä peliä. Palataan takaisin...')
+            time.sleep(3)
+            return None
+        
         self.player.update_balance(-bet)
         
         spin_result = self._spin_slot_machine()
