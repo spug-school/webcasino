@@ -9,39 +9,43 @@ class Database:
     
     Attributes:
         config (dict): A dictionary containing the database connection parameters
-        
-    Examples:
-        db = Database(config, connect=True, setup=True)\n
-        db.query('SELECT * FROM users')
+        connect (bool): Whether to connect to the db
+        setup (list): A list of setup/source files
     '''
-    def __init__(self, config: dict, connect: bool = True, setup: dict = {}):
+    def __init__(self, config: dict, connect: bool = True, setup: list = None):
         self.config = config
-        self.setup_file = config.get('setup_file', 'setup.sql')
+        self.setup_file = config.get('setup_file')
         self.connection = self.create_connection(setup = True if setup else False) if connect else None
         
-        if setup and setup.get('sql', None):
+        if setup:
             self.setup_database(
-                file_name=self.setup_file,
-                source_files=setup.get('source', [])
+                file_name = self.setup_file,
+                source_files = setup
             )
         
     def create_connection(self, setup: bool = False) -> mysql.connector.connection.MySQLConnection:
         '''
         Creates a connection to the db, and returns the connection object
+        
+        Parameters:
+            setup (bool): Whether to setup the db
+        
+        Returns:
+            mysql.connector.connection.MySQLConnection: The connection object
         '''
         try: 
             connection = mysql.connector.connect(
-                host=self.config['db_host'],
-                port=self.config['db_port'],
-                user=self.config['db_user'],
-                password=self.config['db_pass'],
-                autocommit=self.config['autocommit'],
-                collation=self.config['collation'],
-                charset='utf8mb4'
+                host = self.config['db_host'],
+                port = self.config['db_port'],
+                user = self.config['db_user'],
+                password = self.config['db_pass'],
+                autocommit = self.config['autocommit'],
+                collation = self.config['collation'],
+                charset = 'utf8mb4'
             )
 
             if setup:
-                # Create the database if it doesn't exist
+                # create the database if it doesn't exist
                 cursor = connection.cursor()
                 cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{self.config['db_name']}`")
                 cursor.close()
@@ -55,9 +59,12 @@ class Database:
             logging.error(f'Error connecting to the database: {connection_error}')
             return None
     
-    def close_connection(self):
+    def close_connection(self) -> bool:
         '''
         Closes the connection to the db
+        
+        Returns:
+            bool: Success state
         '''
         try:
             self.connection.commit()  # Commit any pending transactions
@@ -71,6 +78,13 @@ class Database:
     def setup_database(self, file_name: str, source_files: list = []) -> bool:
         '''
         Runs the initial setup script for the db
+        
+        Parameters:
+            file_name (str): The name of the setup file
+            source_files (list): A list of source data files to insert
+            
+        Returns:
+            bool: Success state
         '''
         if file_name is None or file_name == '':
             logging.warning('No setup file provided')
@@ -103,9 +117,15 @@ class Database:
             logging.error(f'Error setting up the database:\n{error}')
             return False
            
-    def execute_script(self, script: str):
+    def execute_script(self, script: str) -> bool:
         '''
         Executes a multi-statement SQL script
+        
+        Parameters:
+            script (str): The script to execute
+            
+        Returns:
+            bool: Success state
         '''
         try:
             with self.connection.cursor() as cursor:
@@ -114,6 +134,8 @@ class Database:
                     if statement.strip():
                         cursor.execute(statement)
                         self.connection.commit()
+                        
+            return True
         except Exception as error:
             logging.error(f'Error executing script:\n{error}')
             return False
@@ -121,6 +143,15 @@ class Database:
     def query(self, query: str, values: tuple = (), fetch: bool = True, cursor_settings: dict = {}) -> dict:
         '''
         Executes singular `query` on the database
+        
+        Parameters:
+            query (str): The query to execute
+            values (tuple): The values to pass to the query
+            fetch (bool): Whether to fetch the results
+            cursor_settings (dict): Optional settings for the cursor
+            
+        Returns:
+            dict: A dictionary containing the query results
         '''
         try:
             cursor = self.connection.cursor(**cursor_settings)
@@ -135,4 +166,8 @@ class Database:
             }
         except Exception as error:
             logging.error(f'Error executing query `{query}`:\n{error}')
-            return False
+            return {
+                'affected_rows': 0,
+                'result_group': False,
+                'result': [],
+            }

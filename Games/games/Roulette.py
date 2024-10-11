@@ -7,7 +7,7 @@ from typing import override
 class Roulette(Game):
     '''
     Game: Roulette
-    Description: The simplest form of single guess roulette, where the player chooses a number to bet on and then spins the wheel. self.colors are not included in this version, but the number multiplier is faithful, with 0 in the pool too.
+    Description: The simplest form of Straight Up roulette bet, where the player guesses the color and/or number of the next roll.
     '''
     def __init__(self, player: object, db_handler: object):
         super().__init__(player, db_handler, self.__class__.__name__.lower())

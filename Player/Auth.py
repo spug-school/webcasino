@@ -8,6 +8,13 @@ class Auth:
     def create_user(self, username: str, password: str) -> bool:
         '''
         Handles new user creation in the db "users" table
+        
+        Parameters:
+            username (str): The username to create.
+            password (str): The password to create.
+            
+        Returns:
+            bool: True if the user was created successfully, False otherwise.
         '''
         try:
             hashed_password = self.__hash_password(password)
@@ -36,6 +43,13 @@ class Auth:
     def authenticate_user(self, username: str, password: str) -> bool:
         '''
         Authenticates the user against the db "users" table
+        
+        Parameters:
+            username (str): The username to authenticate.
+            password (str): The password to authenticate.
+            
+        Returns:
+            bool: True if the user was authenticated successfully, False otherwise.
         '''
         try:
             hashed_password = self.__hash_password(password)
@@ -69,6 +83,12 @@ class Auth:
     def check_user_exists(self, username: str) -> bool:
         '''
         Checks if the user exists in the db "users" table
+        
+        Parameters:
+            username (str): The username to check.
+            
+        Returns:
+            bool: True if the user exists, False otherwise.
         '''
         try:
             query = '''
@@ -90,11 +110,24 @@ class Auth:
     def __hash_password(self, password: str) -> str:
         '''
         Hashes of the password given (sha256)
+        
+        Parameters:
+            password (str): The password to hash.
+        
+        Returns:
+            str: The hashed password.
         '''
         return hashlib.sha256(password.encode()).hexdigest()
 
     def __verify_password(self, password: str, hashed_password: str) -> bool:
         '''
         Verifies the password against the hashed password
+        
+        Parameters:
+            password (str): The password to verify.
+            hashed_password (str): The hashed password to verify against.
+            
+        Returns:
+            bool: True if the password is verified, False otherwise
         '''
         return self.__hash_password(password) == hashed_password

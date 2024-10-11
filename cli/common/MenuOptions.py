@@ -1,7 +1,12 @@
+# -----------------------------------
+# Handles the creation of the main
+# menu options and the cli view 
+# component classes as a part of it.
+# -----------------------------------
+
 from enum import Enum
 from cli.views.CLIView import CLIView
 from cli.views import *
-from time import sleep
 
 def create_menu_options():
     cli_view_classes = {}

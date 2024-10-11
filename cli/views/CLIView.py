@@ -15,22 +15,27 @@ class CLIView(ABC):
         '''
         pass
     
+    
+    # --------------------------------
+    # CLI Helper wrapper methods
+    # --------------------------------
     def show_header(self, hide_balance: bool = True, text: str = ''):
-        '''
-        Wrapper for the header cli helper function
-        Has hide_balance as a default True.
-        '''
         header(f'{self.view_name}{f'  |  {text}' if not text == '' else ''}', hide_balance = hide_balance)
     
     def validate_input(self, prompt: str, input_type: str, min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False, sanitize: bool = False):
-        '''
-        Wrapper for the get_prompt cli helper function
-        '''
         return get_prompt(prompt, input_type, min_value, max_value, allowed_values, allow_empty, sanitize)
     
+    
+    # --------------------------------
+    # View related methods
+    # --------------------------------
     def sub_menu(self, options: list = [], isolate_last: bool = True) -> int:
         '''
         Creates & displays a sub-menu and returns the selected option
+        
+        Parameters:
+            options (list): A list of options to display.
+            isolate_last (bool): Whether to isolate the last option with empty lines before & after.
         '''
         while True:
             for index, option in enumerate(options, start = 1):
@@ -43,8 +48,15 @@ class CLIView(ABC):
 
     def display_table(self, data: list, headers: list, alignment: list, table_description: str = None):
         '''
-        Displays a table with the given data, headers, and alignment
+        Creates & displays a table using the tabulate module
+        
+        Parameters:
+            data (list): The data to display in the table.
+            headers (list): The headers for the table.
+            alignment (list): The alignment for the columns.
+            table_description (str): The description for the table.
         '''
+        
         if len(data) == 0:
             print('Ei näytettäviä tietoja.\n')
             return
@@ -66,6 +78,10 @@ class CLIView(ABC):
         if table_description:
             print(f'{table_description}\n')
     
+    
+    # --------------------------------
+    # Main view loop
+    # --------------------------------
     def run(self):
         while True:
             self.show_header(self.view_name)

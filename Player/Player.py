@@ -16,22 +16,11 @@ class Player:
         self.__password = password
 
         self.__data = self.__authenticate_or_create_user()
+        
 
-    # Authentication
-    def __authenticate_or_create_user(self):
-        user = self.__auth.authenticate_user(self.__username, self.__password)
-
-        if user:
-            return self.__load_profile(self.__username, self.__password)
-        else:
-            existing_user = self.__auth.check_user_exists(self.__username)
-
-            if existing_user:
-                raise ValueError("Incorrect password for existing user.")
-            else:
-                return self.__create_profile(self.__username, self.__password)
-
+    # ------------------------------
     # Getters
+    # ------------------------------
     def get_data(self) -> dict:
         return self.__data
 
@@ -53,7 +42,10 @@ class Player:
         '''
         return self.__data.get('is_banned')
 
+
+    # ------------------------------
     # Setters
+    # ------------------------------
     def update_total_winning(self, amount: int):
         self.__data['total_winnings'] += amount
 
@@ -72,10 +64,33 @@ class Player:
     def set_banned(self):
         self.__data['is_banned'] = True
 
-    # Db methods
-    def __load_profile(self, username: str, password: str):
+
+    # ------------------------------
+    # Protected methods
+    # ------------------------------
+    def __authenticate_or_create_user(self):
+        user = self.__auth.authenticate_user(self.__username, self.__password)
+
+        if user:
+            return self.__load_profile(self.__username, self.__password)
+        else:
+            existing_user = self.__auth.check_user_exists(self.__username)
+
+            if existing_user:
+                raise ValueError("Incorrect password for existing user.")
+            else:
+                return self.__create_profile(self.__username, self.__password)
+    
+    def __load_profile(self, username: str, password: str) -> dict | bool:
         '''
         Handles loading the player's data from the database, if username matches
+        
+        Parameters:
+            username (str): The username to authenticate.
+            password (str): The password to authenticate.
+        
+        Returns:
+            (dict{} | bool(False)): The player's data if the user was authenticated successfully, False otherwise.
         '''
         try:
             authenticated = self.__auth.authenticate_user(username, password)
@@ -107,9 +122,16 @@ class Player:
             logging.error(f'Error loading player {username} data: {error}')
             return False
 
-    def __create_profile(self, username: str, password: str):
+    def __create_profile(self, username: str, password: str) -> dict | bool:
         '''
         Handles creating a new player in the database
+
+        Parameters:
+            username (str): The username to create.
+            password (str): The password to create.
+        
+        Returns:
+            (dict{} | bool(False)): The player's data if the user was created successfully, False otherwise.
         '''
         new_user = self.__auth.create_user(username, password)
 
@@ -135,9 +157,15 @@ class Player:
             self.__db.connection.rollback()
             return False
     
-    def update_username(self, new_name: str):
+    def update_username(self, new_name: str) -> bool:
         '''
         Updates the player's username in the database
+        
+        Parameters:
+            new_name (str): The new username to set.
+        
+        Returns:
+            bool: Success state
         '''
         try:
             query = '''
@@ -159,6 +187,12 @@ class Player:
     def update_password(self, new_password: str):
         '''
         Updates the player's password in the database
+        
+        Parameters:
+            new_password (str): The new password to set.
+            
+        Returns:
+            bool: Success state
         '''
         hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
     
@@ -179,9 +213,12 @@ class Player:
             logging.error(f'Error updating the password of user {self.get_data().get('id', None)}: {error}')
             return False
     
-    def delete_account(self):
+    def delete_account(self) -> bool:
         '''
         Deletes the player's profile from the database
+        
+        Returns:
+            bool: Success state
         '''
         try:
             query_values = (self.get_data().get('id'),)
@@ -217,9 +254,15 @@ class Player:
             logging.error(f'Error deleting the user {self.get_data().get("id", None)}: {error}')
             return False
         
-    def unban_account(self, balance_to_set: int):
+    def unban_account(self, balance_to_set: int) -> bool:
         '''
         Unbans the player's account
+        
+        Parameters:
+            balance_to_set (int): The balance to set for the player
+        
+        Returns:
+            bool: Success state
         '''
         try:
             query = '''
@@ -243,9 +286,12 @@ class Player:
             logging.error(f'Error unbanning the user {self.get_data().get("id", None)}: {error}')
             return False
         
-    def save(self):
+    def save(self) -> bool:
         '''
         Used for saving the player's data from the temp object to the database
+        
+        Returns:
+            bool: Success state
         '''
         try:
             user_query = '''
@@ -281,6 +327,7 @@ class Player:
             self.__db.connection.commit()
 
             logging.info(f'Player {self.__data["id"]} data saved successfully')
+            return True
         except mysql.connector.Error as error:
             logging.error(f'Error saving player {self.__data["id"]} data: {error}')
             self.__db.connection.rollback()
