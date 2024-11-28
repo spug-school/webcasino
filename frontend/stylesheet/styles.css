@@ -1,0 +1,78 @@
+body {
+    background-color: antiquewhite;
+}
+
+#title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20%;
+    background-color: antiquewhite;
+    align-content: center;
+    text-align: center;
+}
+
+#render {
+    position: absolute;
+    top: 20%;
+    left: 5%;
+    bottom: 25%;
+    width: 65%;
+    background-color: aqua;
+    border: 5px black;
+    border-style: solid double double solid;
+    container-type: inherit;
+
+    canvas {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+#messages {
+    position: absolute;
+    top: 20%;
+    right: 5%;
+    bottom: 25%;
+    width: 20%;
+    background-color: aquamarine;
+    border: 5px black;
+    border-style: solid double double solid;
+    padding: 1%;
+}
+
+#control {
+    position: absolute;
+    bottom: 1%;
+    left: 5%;
+    right: 5%;
+    height: 20%;
+    background-color: bisque;
+    border: 5px black;
+    border-style: solid double double solid;
+    iframe {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.inner-control {
+    width: inherit;
+    height: inherit;
+    bottom: inherit;
+    left: inherit;
+    right: inherit;
+    padding: 1%;
+}
+
+form {
+    display: inline-grid;
+    grid-template-columns: 90% 90%;
+    gap: 5%;
+}
+
+.grid-item {
+    padding: 3%;
+    text-align: left;
+}
