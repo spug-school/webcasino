@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WEB-CASINO</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet/styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts/index.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='scripts/controller.js') }}" defer></script>
+</head>
+<body>
+<div id="title">
+    <h1>WEB-CASINO</h1>
+    <h2 id="secondary">The house always wins!</h2>
+</div>
+<div id="render">
+
+</div>
+<div id="messages">
+    <ul id="communication">
+
+    </ul>
+</div>
+
+<div id="control">
+    <form action="/data/" id="login-form" onfocus="this">
+        <label for="login">Login name</label>
+        <input type="text" id="login" name="Login">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password">
+        <input type="submit">
+        <input type="button" value="Register" onclick="registerForm()">
+    </form>
+</div>
+</body>
+</html>
