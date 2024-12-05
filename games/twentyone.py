@@ -125,6 +125,7 @@ class TwentyOne:
             else:
                 self.dealer_pass = True
 
+
     def ai_logic(self):
         if not self.dealer_pass:
             if self.dealer_turn < self.max_turns:
