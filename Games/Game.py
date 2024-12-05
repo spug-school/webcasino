@@ -12,7 +12,7 @@ class Game(ABC):
         db_handler (object): The database handler object
         game_type_name (str): The name of the game type
     '''
-    def __init__(self, player: object, db_handler: object, game_type_name: str):
+    def __init__(self, player: object, db_handler: object, game_type_name: str, ui: str = 'cli'):
         self.player = player
         self.db = db_handler
         self.game_type_record = self.__get_game_type_record(value = game_type_name, key = 'name_en')
@@ -20,6 +20,7 @@ class Game(ABC):
             'name': self.game_type_record.get('name'),
             'rules': self.game_type_record.get('rules')
         }
+        self.ui = ui
         
     @abstractmethod
     def start_game(self) -> dict:
@@ -39,7 +40,10 @@ class Game(ABC):
     # CLI Helper wrapper methods
     # --------------------------------
     def validate_input(self, prompt: str, input_type: str, min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False):
-        return get_prompt(prompt, input_type, min_value, max_value, allowed_values, allow_empty)
+        if self.ui == 'web':
+            return f'{prompt} {input_type} {min_value} {max_value} {allowed_values} {allow_empty}'
+        else:
+            return get_prompt(prompt, input_type, min_value, max_value, allowed_values, allow_empty)
                 
     def box_wrapper(self, text: str, min_width: int = 75, max_width: int = 75):
         box_wrap(text, min_width, max_width)
@@ -54,6 +58,12 @@ class Game(ABC):
         Returns:
             bool: Whether the player wants to play the game or not
         '''
+        if self.ui == 'web':
+            return {
+                'text':f'Haluatko pelata peliä (k / e): ',
+                'type': 'str',
+            }
+        
         play_game = self.validate_input(f'Haluatko pelata peliä (k / e): ', 'str', allowed_values=('k', 'e'))
         
         if play_game is not None:
@@ -106,6 +116,12 @@ class Game(ABC):
         print(f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n\n')
         print(f'Pelin säännöt:')
         box_wrap(self.game_info.get('rules'))
+        return {
+            'name': self.game_info.get('name'),
+            'welcome': f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n\n',
+            'rules-heading': 'Pelin säännöt:',
+            'rules': self.game_info.get('rules')
+        }
     
     
     # --------------------------------
