@@ -1,0 +1,265 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import flask\r\nimport queue\r\nimport threading\r\nfrom time import sleep\r\n\r\nfrom flask import jsonify\r\n\r\nfrom games.twentyone import TwentyOne\r\nimport json\r\n\r\napp = flask.Flask(__name__, template_folder='frontend', static_folder='frontend')\r\nflask_queue = queue.Queue()\r\ngame = TwentyOne()\r\ngame_thread = threading.Thread(target=game.run, daemon=True)\r\nurl_list = []\r\nif not game_thread.is_alive():\r\n    try:\r\n        game_thread.start()\r\n        if not game.queue.empty():\r\n            print(game.queue.get())\r\n    except KeyboardInterrupt:\r\n        game_thread.join()\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef index():\r\n    if flask.request.method == 'GET':\r\n        return flask.render_template('index.html', image_urls=url_list)\r\n\r\n@app.route('/games/', methods=['POST'])\r\ndef games():\r\n    pass\r\n@app.route('/data/', methods=['GET','POST'])\r\ndef data():\r\n    try:\r\n        data_to_json = json.loads(flask.request.data)\r\n        if data_to_json['input'] == \"Yes\":\r\n            print(f\"received message: {data_to_json['input']}\")\r\n            game.queue.put(1)\r\n        elif data_to_json['input'] == \"No\":\r\n            print(f\"received message: {data_to_json['input']}\")\r\n            game.queue.put(0)\r\n        while game.to_send.empty():\r\n            sleep(0.1)\r\n\r\n\r\n    except Exception as e:\r\n        print(e)\r\n    try:\r\n        while game.to_send.empty():\r\n            sleep(0.1)\r\n        game_data = game.to_send.get()\r\n\r\n        for card in game_data[\"data\"][\"dealer_hand\"]:\r\n            img_file = f'img/{card[\"suit\"]}_{card[\"rank\"]}.png'\r\n            image_url = flask.url_for('static', filename=f'{img_file}')\r\n            url_list.append(image_url)\r\n\r\n        for card in game_data[\"data\"][\"player_hand\"]:\r\n            img_file = f'img/{card[\"suit\"]}_{card[\"rank\"]}.png'\r\n            image_url = flask.url_for('static', filename=f'{img_file}')\r\n            url_list.append(image_url)\r\n\r\n        json_report = json.dumps(game_data)\r\n        response = flask.make_response(json_report)\r\n        response.mimetype = 'application/json'\r\n    except Exception as e:\r\n        print(e)\r\n        response = flask.make_response(str(e))\r\n        response.mimetype = 'text/plain'\r\n        response.headers = {'status': 'error', 'message': str(e)}\r\n        return response\r\n    return response\r\n\r\n\r\n\r\nif __name__ == '__main__':\r\n    app.run(debug=True, threaded=True, use_reloader=True, host='127.0.0.1', port=5000)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision b7853f27c63e1d4b17b2197fafe28b76f3146fbe)
++++ b/main.py	(date 1733383753886)
+@@ -13,6 +13,7 @@
+ game = TwentyOne()
+ game_thread = threading.Thread(target=game.run, daemon=True)
+ url_list = []
++game_list =[]
+ if not game_thread.is_alive():
+     try:
+         game_thread.start()
+@@ -28,7 +29,7 @@
+ 
+ @app.route('/games/', methods=['POST'])
+ def games():
+-    pass
++    game_list = [TwentyOne()]
+ @app.route('/data/', methods=['GET','POST'])
+ def data():
+     try:
+Index: games/twentyone.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from random import shuffle\r\nimport queue\r\nfrom time import sleep\r\n\r\n\r\nclass TwentyOne:\r\n    def __init__(self):\r\n\r\n        # game options\r\n        self.queue = queue.Queue()\r\n        self.to_send = queue.Queue()\r\n        self.twentyone = 21\r\n        self.max_turns = 3\r\n        self.ranks = (\"A\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"J\", \"Q\", \"K\")\r\n        self.suits = (\"hearts\", \"diamonds\", \"cross\", \"spades\")\r\n        self.messages = []\r\n        self.deck = []\r\n        self.player_hand = []\r\n        self.dealer_hand = []\r\n        self.player_turn = 0\r\n        self.dealer_turn = 0\r\n        self.player_total = 0\r\n        self.dealer_total = 0\r\n        self.player_has_ace = False\r\n        self.dealer_has_ace = False\r\n        self.player_pass = False\r\n        self.dealer_pass = False\r\n        self.player_over = False\r\n        self.dealer_over = False\r\n        self.player_win = False\r\n        self.data_dict = {\"data\":\r\n                              {\"dealer_hand\": self.dealer_hand,\r\n                              \"player_hand\": self.player_hand,\r\n                               \"player_pass\": str(self.player_pass).lower(),\r\n                               \"message\": self.messages}\r\n                          }\r\n        self.state_check = {\"player_p\": self.player_pass,\r\n                            \"dealer_p\": self.dealer_pass,\r\n                            \"player_win\": self.player_win,\r\n                            \"player_over\": self.player_over,\r\n                            \"dealer_over\": self.dealer_over}\r\n\r\n    def shuffle_deck(self):\r\n        for i in range(len(self.suits)):\r\n            for j in range(len(self.ranks)):\r\n                value = j + 1\r\n                if self.ranks[j] in [\"J\", \"Q\", \"K\"]:\r\n                    value = 10\r\n                self.deck.append({\"suit\": self.suits[i], \"rank\": self.ranks[j], \"value\": value})\r\n        shuffle(self.deck)\r\n\r\n    def game_reset(self):\r\n        self.messages = []\r\n        self.deck = []\r\n        self.player_hand = []\r\n        self.dealer_hand = []\r\n        self.player_turn = 0\r\n        self.dealer_turn = 0\r\n        self.player_total = 0\r\n        self.dealer_total = 0\r\n        self.player_has_ace = False\r\n        self.dealer_has_ace = False\r\n        self.player_pass = False\r\n        self.dealer_pass = False\r\n        self.player_over = False\r\n        self.dealer_over = False\r\n        self.player_win = False\r\n\r\n\r\n    def score_calculation(self):\r\n        self.player_total = 0\r\n        self.dealer_total = 0\r\n        if self.player_has_ace:\r\n            self.player_total += 11\r\n        if self.dealer_has_ace:\r\n            self.dealer_total += 11\r\n        for p_card in self.player_hand:\r\n            self.player_total += p_card[\"value\"]\r\n        for d_card in self.dealer_hand:\r\n            self.dealer_total += d_card[\"value\"]\r\n\r\n    def first_deal(self):\r\n        self.shuffle_deck()\r\n        for i in range(2):\r\n            self.player_hand.append(self.deck[0])\r\n            self.deck.remove(self.deck[0])\r\n        for i in range(2):\r\n            self.dealer_hand.append(self.deck[0])\r\n            self.deck.remove(self.deck[0])\r\n        self.score_calculation()\r\n        for card in self.player_hand:\r\n            if card[\"value\"] == 1 and self.player_total + 11 <= self.twentyone and not self.player_has_ace:\r\n                self.message_manager(\"You have an ace. Do you want it to be 21?\")\r\n                while self.queue.empty():\r\n                    sleep(1)\r\n                answer = self.queue.get()\r\n                if answer == 1:\r\n                    self.player_has_ace = True\r\n        for card in self.dealer_hand:\r\n            if card[\"value\"] == 1 and self.dealer_total + 11 <= self.twentyone and not self.dealer_has_ace:\r\n                self.dealer_has_ace = True\r\n\r\n    def over_check(self):\r\n        if self.player_over:\r\n            self.dealer_pass = True\r\n        if not self.player_pass:\r\n            if self.player_total > self.twentyone:\r\n                self.message_manager(\"Player went over 21.\")\r\n                self.player_pass = True\r\n                self.player_over = True\r\n        else:\r\n            if self.dealer_total > self.twentyone:\r\n                self.message_manager(\"Dealer went over 21.\")\r\n                self.dealer_pass = True\r\n                self.dealer_over = True\r\n    \r\n    def hit_me(self):\r\n        self.player_hand.append(self.deck[0])\r\n        self.deck.remove(self.deck[0])\r\n        if self.player_hand[0][\"value\"] == 1 and not self.player_has_ace:\r\n            if self.player_total + 11 <= self.twentyone:\r\n                self.message_manager(\"You have an ace in your hand. Do you want it to have a value of 11?\")\r\n                self.to_send.put(self.get_data())\r\n                while self.queue.empty():\r\n                    sleep(1)\r\n                answer = self.queue.get()\r\n                if answer == 1:\r\n                    self.player_has_ace = True\r\n        self.player_turn += 1\r\n\r\n    def dealer_hit(self):\r\n        if self.dealer_turn < self.max_turns and not self.player_over:\r\n            if self.dealer_total < self.player_total:\r\n                self.dealer_hand.append(self.deck[0])\r\n                self.deck.remove(self.deck[0])\r\n                print(self.dealer_hand)\r\n                if self.dealer_hand[0][\"value\"] == 1 and not self.dealer_has_ace:\r\n                    if self.dealer_total + 11 <= self.twentyone:\r\n                        self.dealer_has_ace = True\r\n                self.dealer_turn += 1\r\n            else:\r\n                self.dealer_pass = True\r\n        else:\r\n            self.dealer_pass = True\r\n\r\n    def message_manager(self, message):\r\n        while len(self.messages) > 10:\r\n            self.messages.pop(-1)\r\n        self.messages.append(message)\r\n\r\n    def ai_logic(self):\r\n        print(f\"Dealer is equal or more than max: {self.dealer_turn >= self.max_turns}\")\r\n        print(self.dealer_turn)\r\n        sleep(1)\r\n        if not self.dealer_pass:\r\n            print(\"dealer pass false\")\r\n            if self.dealer_turn < self.max_turns:\r\n                print(\"dealer turn less than max turns\")\r\n                if self.player_over:\r\n                    print(\"Player went over 21.\")\r\n                    self.dealer_pass = True\r\n                else:\r\n                    if self.player_total <= self.dealer_total:\r\n                        print(\"Dealer has more than player\")\r\n                        self.dealer_pass = True\r\n                    else:\r\n\r\n                        self.dealer_hit()\r\n            else:\r\n                print(\"dealer_pass true\")\r\n                self.dealer_pass = True\r\n\r\n    def get_data(self):\r\n        return self.data_dict\r\n\r\n\r\n    def run(self):\r\n        while self.queue.empty():\r\n            sleep(1)\r\n        ignore_command = self.queue.get()\r\n        print(\"Command received\")\r\n        self.first_deal()\r\n        self.message_manager(\"dealing cards\")\r\n        print(\"answer send\")\r\n        self.score_calculation()\r\n        while not self.dealer_pass:\r\n            while not self.player_pass:\r\n\r\n                self.message_manager(f\"Player has {self.player_total}. Do you want another card?\")\r\n                self.to_send.put(self.get_data())\r\n                while self.queue.empty():\r\n                    sleep(1)\r\n                command = self.queue.get()\r\n                if command == 1:\r\n                    self.hit_me()\r\n                    self.score_calculation()\r\n                    self.over_check()\r\n                else:\r\n                    self.player_pass = True\r\n            print(\"Dealer turn reached.\")\r\n            self.ai_logic()\r\n            self.score_calculation()\r\n            self.over_check()\r\n            print(self.dealer_total)\r\n        self.message_manager(f\"dealer has {self.dealer_total}.\")\r\n\r\n        if self.player_pass and self.dealer_pass:\r\n            if self.player_over:\r\n                self.message_manager(\"Player went over 21. Player lost.\")\r\n                self.to_send.put(self.get_data())\r\n                print(\"1\")\r\n            elif self.player_total < self.dealer_total <= self.twentyone:\r\n                self.message_manager(\"Dealer got greater hand. Player lost.\")\r\n                self.to_send.put(self.get_data())\r\n                print(\"2\")\r\n            elif self.dealer_over:\r\n                self.message_manager(\"Dealer went over 21. Dealer lost.\")\r\n                self.to_send.put(self.get_data())\r\n                print(\"3\")
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/games/twentyone.py b/games/twentyone.py
+--- a/games/twentyone.py	(revision b7853f27c63e1d4b17b2197fafe28b76f3146fbe)
++++ b/games/twentyone.py	(date 1733386101833)
+@@ -50,22 +50,31 @@
+         shuffle(self.deck)
+ 
+     def game_reset(self):
+-        self.messages = []
+-        self.deck = []
+-        self.player_hand = []
+-        self.dealer_hand = []
+-        self.player_turn = 0
+-        self.dealer_turn = 0
+-        self.player_total = 0
+-        self.dealer_total = 0
+-        self.player_has_ace = False
+-        self.dealer_has_ace = False
+-        self.player_pass = False
+-        self.dealer_pass = False
+-        self.player_over = False
+-        self.dealer_over = False
+-        self.player_win = False
++        self.message_manager("Do you want to play again?")
++        self.to_send.put(self.get_data())
++        while self.queue.empty():
++            sleep(1)
++        if self.queue.get() == 1:
++            self.messages = []
++            self.deck = []
++            self.player_hand = []
++            self.dealer_hand = []
++            self.player_turn = 0
++            self.dealer_turn = 0
++            self.player_total = 0
++            self.dealer_total = 0
++            self.player_has_ace = False
++            self.dealer_has_ace = False
++            self.player_pass = False
++            self.dealer_pass = False
++            self.player_over = False
++            self.dealer_over = False
++            self.player_win = False
+ 
++            return True
++        else:
++            return False
++
+ 
+     def score_calculation(self):
+         self.player_total = 0
+@@ -100,6 +109,14 @@
+             if card["value"] == 1 and self.dealer_total + 11 <= self.twentyone and not self.dealer_has_ace:
+                 self.dealer_has_ace = True
+ 
++    def ace_in_hand(self):
++        for card in self.player_hand:
++            if card["value"] == self.player_total + 11 <= self.twentyone and not self.player_has_ace:
++                while self.queue.empty():
++                    sleep(1)
++                if self.queue.get() == 1:
++                    self.player_has_ace = True
++
+     def over_check(self):
+         if self.player_over:
+             self.dealer_pass = True
+@@ -144,14 +161,13 @@
+             self.dealer_pass = True
+ 
+     def message_manager(self, message):
+-        while len(self.messages) > 10:
++        while len(self.messages) > 4:
+             self.messages.pop(-1)
+         self.messages.append(message)
+ 
+     def ai_logic(self):
+         print(f"Dealer is equal or more than max: {self.dealer_turn >= self.max_turns}")
+         print(self.dealer_turn)
+-        sleep(1)
+         if not self.dealer_pass:
+             print("dealer pass false")
+             if self.dealer_turn < self.max_turns:
+@@ -177,43 +193,42 @@
+     def run(self):
+         while self.queue.empty():
+             sleep(1)
+-        ignore_command = self.queue.get()
+-        print("Command received")
+-        self.first_deal()
+-        self.message_manager("dealing cards")
+-        print("answer send")
+-        self.score_calculation()
+-        while not self.dealer_pass:
+-            while not self.player_pass:
++        start_command = self.queue.get()
++        if start_command == 1:
++            print("Command received")
++            self.first_deal()
++            self.message_manager("dealing cards")
++            print("answer send")
++            self.score_calculation()
++            while not self.dealer_pass:
++                while not self.player_pass:
+ 
+-                self.message_manager(f"Player has {self.player_total}. Do you want another card?")
+-                self.to_send.put(self.get_data())
+-                while self.queue.empty():
+-                    sleep(1)
+-                command = self.queue.get()
+-                if command == 1:
+-                    self.hit_me()
+-                    self.score_calculation()
+-                    self.over_check()
+-                else:
+-                    self.player_pass = True
+-            print("Dealer turn reached.")
+-            self.ai_logic()
+-            self.score_calculation()
+-            self.over_check()
+-            print(self.dealer_total)
+-        self.message_manager(f"dealer has {self.dealer_total}.")
++                    self.message_manager(f"Player has {self.player_total}. Do you want another card?")
++                    self.to_send.put(self.get_data())
++                    while self.queue.empty():
++                        sleep(1)
++                    command = self.queue.get()
++                    if command == 1:
++                        self.hit_me()
++                        self.ace_in_hand()
++                        self.score_calculation()
++                        self.over_check()
++                    else:
++                        self.player_pass = True
++                print("Dealer turn reached.")
++                self.ai_logic()
++                self.score_calculation()
++                self.over_check()
++                print(self.dealer_total)
++            self.message_manager(f"dealer has {self.dealer_total}.")
+ 
+-        if self.player_pass and self.dealer_pass:
+-            if self.player_over:
+-                self.message_manager("Player went over 21. Player lost.")
+-                self.to_send.put(self.get_data())
+-                print("1")
+-            elif self.player_total < self.dealer_total <= self.twentyone:
+-                self.message_manager("Dealer got greater hand. Player lost.")
+-                self.to_send.put(self.get_data())
+-                print("2")
+-            elif self.dealer_over:
+-                self.message_manager("Dealer went over 21. Dealer lost.")
+-                self.to_send.put(self.get_data())
+-                print("3")
+\ No newline at end of file
++            if self.player_pass and self.dealer_pass:
++                if self.player_over:
++                    self.message_manager("Player went over 21. Player lost.")
++                    self.to_send.put(self.get_data())
++                elif self.player_total < self.dealer_total <= self.twentyone:
++                    self.message_manager("Dealer got greater hand. Player lost.")
++                    self.to_send.put(self.get_data())
++                elif self.dealer_over:
++                    self.message_manager("Dealer went over 21. Dealer lost.")
++                    self.to_send.put(self.get_data())
+Index: frontend/scripts/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\"use strict\";\r\n\r\nlet control = document.querySelector(\"#control\");\r\nlet renderWindow = document.querySelector(\"#render\");\r\nlet secondaryTitle = document.querySelector(\"#secondary\");\r\nlet messageDisplay = document.querySelector(\"#communication\");\r\n\r\nfunction twentyOneForm() {\r\n    control.textContent = \"\"\r\n    const formTwentyOne = document.createElement(\"form\");\r\n    formTwentyOne.id = \"twentyOneForm\";\r\n    formTwentyOne.method = \"post\";\r\n    formTwentyOne.action = \"/data/\";\r\n    formTwentyOne.classList.add(\"activeForm\");\r\n    const yesButton = document.createElement(\"button\");\r\n    yesButton.name = \"yesButton\";\r\n    yesButton.value = \"Yes\";\r\n    yesButton.innerHTML = \"Yes\";\r\n    yesButton.id = \"yes\"\r\n    formTwentyOne.appendChild(yesButton);\r\n    const noButton = document.createElement(\"button\");\r\n    noButton.name = \"noButton\";\r\n    noButton.value = \"No\";\r\n    noButton.innerHTML = \"No\";\r\n    noButton.id = \"no\"\r\n    formTwentyOne.appendChild(noButton);\r\n    control.appendChild(formTwentyOne);\r\n\r\n    formTwentyOne.addEventListener(\"click\", (event) => {\r\n        event.preventDefault();\r\n        const clickedButton = event.target;\r\n        const answerYes = formTwentyOne.querySelector(\"#yes\");\r\n        const answerNo = formTwentyOne.querySelector(\"#no\");\r\n        if (clickedButton.id === \"yes\") {\r\n            console.log(answerYes.id)\r\n            fetch('/data/', {\r\n                method: 'POST',\r\n                headers: {'Content-Type': 'application/json'},\r\n                body: JSON.stringify({'input':answerYes.value}),\r\n            })\r\n            .then(response => response.json())\r\n            .then(data => {\r\n                renderWindow.innerHTML = \"\";\r\n                messageDisplay.innerHTML = \"\";\r\n                const dealerHand = data.data.dealer_hand;\r\n                const playerHand = data.data.player_hand;\r\n                const playerPass = data.data.player_pass;\r\n                const lineBreak = document.createElement(\"br\");\r\n                const messageList = data.data.message;\r\n\r\n                messageList.forEach(message => {\r\n                    const messageObject = document.createElement(\"li\");\r\n                    messageObject.textContent = message;\r\n                    messageDisplay.appendChild(messageObject);\r\n                })\r\n                dealerHand.forEach((dealerCard) => {\r\n                    if (!playerPass) {\r\n                        const image = document.createElement(\"img\");\r\n                        image.src = `/frontend/img/card_0.png`;\r\n                        image.alt = \"Back of playing card\";\r\n                        renderWindow.appendChild(image);\r\n                    } else {\r\n                        const image = document.createElement(\"img\");\r\n                        image.src = `/frontend/img/` + dealerCard.suit + `_` + dealerCard.rank + `.png`;\r\n                        image.alt = dealerCard.rank + \" of \" + dealerCard.suit;\r\n                        renderWindow.appendChild(image);\r\n                    }\r\n                })\r\n                renderWindow.appendChild(lineBreak);\r\n\r\n                playerHand.forEach(playerCard => {\r\n                    const image = document.createElement(\"img\");\r\n                    image.src = image.src = `/frontend/img/` + playerCard.suit + `_` + playerCard.rank + `.png`;\r\n                    image.alt = playerCard.rank + \" of \" + playerCard.suit;\r\n                    renderWindow.appendChild(image);\r\n                })\r\n            })\r\n            .catch(error => console.log(error));\r\n        } else if (clickedButton.id === \"no\") {\r\n            console.log(answerNo.id)\r\n            fetch('/data/', {\r\n                method: 'POST',\r\n                headers: {'Content-Type': 'application/json'},\r\n                body: JSON.stringify({'input':answerNo.value}),\r\n            })\r\n                .then(response => response.json())\r\n                .then(data => {\r\n                    renderWindow.innerHTML = \"\";\r\n                    messageDisplay.innerHTML = \"\";\r\n                    const dealerHand = data.data.dealer_hand;\r\n                    const playerHand = data.data.player_hand;\r\n                    const playerPass = data.data.player_pass;\r\n                    const messageList = data.data.message;\r\n\r\n                    messageList.forEach(message => {\r\n                        const messageObject = document.createElement(\"li\");\r\n                        messageObject.textContent = message;\r\n                        messageDisplay.appendChild(messageObject);\r\n                    })\r\n                    const lineBreak = document.createElement(\"br\");\r\n                    dealerHand.forEach((dealerCard) => {\r\n                        if (playerPass) {\r\n                            const image = document.createElement(\"img\");\r\n                            image.src = \"/frontend/img/\" + dealerCard.suit + \"_\" + dealerCard.rank + \".png\";\r\n                            image.alt = dealerCard.rank + \" of \" + dealerCard.suit;\r\n                            renderWindow.appendChild(image);\r\n                        } else {\r\n                            const image = document.createElement(\"img\");\r\n                            image.src = \"/frontend/img/card_0.png\";\r\n                            image.alt = \"Back of playing card\";\r\n                            renderWindow.appendChild(image);\r\n                        }\r\n                    })\r\n                    renderWindow.appendChild(lineBreak);\r\n\r\n                    playerHand.forEach(playerCard => {\r\n                        const image = document.createElement(\"img\");\r\n                        image.src = \"/frontend/img/\" + playerCard.suit + \"_\" + playerCard.rank + \".png\";\r\n                        image.alt = playerCard.rank + \" of \" + playerCard.suit;\r\n                        renderWindow.appendChild(image);\r\n                    })\r\n                })\r\n                .catch(error => console.log(error));\r\n        }\r\n    })\r\n}\r\n\r\ntwentyOneForm()
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/scripts/index.js b/frontend/scripts/index.js
+--- a/frontend/scripts/index.js	(revision b7853f27c63e1d4b17b2197fafe28b76f3146fbe)
++++ b/frontend/scripts/index.js	(date 1733239708270)
+@@ -28,6 +28,7 @@
+ 
+     formTwentyOne.addEventListener("click", (event) => {
+         event.preventDefault();
++        document.querySelector("button").disabled = true;
+         const clickedButton = event.target;
+         const answerYes = formTwentyOne.querySelector("#yes");
+         const answerNo = formTwentyOne.querySelector("#no");
+@@ -55,11 +56,13 @@
+                 })
+                 dealerHand.forEach((dealerCard) => {
+                     if (!playerPass) {
++                        console.log(playerPass.type)
+                         const image = document.createElement("img");
+                         image.src = `/frontend/img/card_0.png`;
+                         image.alt = "Back of playing card";
+                         renderWindow.appendChild(image);
+-                    } else {
++                    } else if (playerPass) {
++                        console.log(playerPass)
+                         const image = document.createElement("img");
+                         image.src = `/frontend/img/` + dealerCard.suit + `_` + dealerCard.rank + `.png`;
+                         image.alt = dealerCard.rank + " of " + dealerCard.suit;
+@@ -74,6 +77,8 @@
+                     image.alt = playerCard.rank + " of " + playerCard.suit;
+                     renderWindow.appendChild(image);
+                 })
++
++                document.querySelector("button").disabled = false;
+             })
+             .catch(error => console.log(error));
+         } else if (clickedButton.id === "no") {
+@@ -91,6 +96,7 @@
+                     const playerHand = data.data.player_hand;
+                     const playerPass = data.data.player_pass;
+                     const messageList = data.data.message;
++                    console.log(playerPass)
+ 
+                     messageList.forEach(message => {
+                         const messageObject = document.createElement("li");
+@@ -99,7 +105,7 @@
+                     })
+                     const lineBreak = document.createElement("br");
+                     dealerHand.forEach((dealerCard) => {
+-                        if (playerPass) {
++                        if (playerPass !== yes) {
+                             const image = document.createElement("img");
+                             image.src = "/frontend/img/" + dealerCard.suit + "_" + dealerCard.rank + ".png";
+                             image.alt = dealerCard.rank + " of " + dealerCard.suit;
+@@ -119,6 +125,8 @@
+                         image.alt = playerCard.rank + " of " + playerCard.suit;
+                         renderWindow.appendChild(image);
+                     })
++
++                    document.querySelector("button").disabled = false;
+                 })
+                 .catch(error => console.log(error));
+         }

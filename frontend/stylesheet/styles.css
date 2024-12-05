@@ -28,6 +28,12 @@ body {
         height: 100%;
         width: 100%;
     }
+
+    img {
+        padding: 1%;
+        height: 40%;
+        object-fit: contain;
+    }
 }
 
 #messages {
@@ -40,6 +46,7 @@ body {
     border: 5px black;
     border-style: solid double double solid;
     padding: 1%;
+    object-fit: contain;
 }
 
 #control {
@@ -75,4 +82,26 @@ form {
 .grid-item {
     padding: 3%;
     text-align: left;
+}
+
+#yes {
+    background-color: #04AA6D;
+    font-size: 24px;
+    padding: 16px 32px;
+    border-radius: 15px;
+    color: aliceblue;
+    position: absolute;
+    top: 5%;
+    left: 5%;
+}
+
+#no {
+    background-color: #f44336;
+    font-size: 24px;
+    padding: 16px 32px;
+    border-radius: 15px;
+    color: aliceblue;
+    position: absolute;
+    top: 5%;
+    right: 5%;
 }
