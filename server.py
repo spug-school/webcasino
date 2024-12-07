@@ -4,6 +4,7 @@ import jwt
 from datetime import datetime, timedelta
 from config import config
 from Player.Player import Player
+from Games import *
 
 from Database.Database import Database
 
@@ -34,21 +35,19 @@ def token_required(f):
             # Use app.config['SECRET_KEY'] for decoding
             decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             user_id = decoded.get('user_id')
+            username = decoded.get('username')
+            password = decoded.get('password')
             
-            if not user_id:
+            if not user_id or not username or not password:
                 return jsonify({'error': 'Invalid token payload'}), 401
+        
+            user = Player(username, password, db)
             
-            # Query to fetch user details
-            query = '''
-                SELECT id, username FROM users WHERE id = %s
-            '''
-            result = db.query(query, (user_id,))
-            
-            if not result or not result.get('result_group'):
-                return jsonify({'error': 'User not found'}), 404
+            if not user or not user.get_username():
+                return jsonify({'error': 'User not found'}), 40
 
             # Create a simple user object with id and username
-            current_user =  result['result'][0]
+            current_user = Player(username, password, db)
 
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token has expired'}), 401
@@ -90,6 +89,8 @@ def login():
 
         token = jwt.encode({
             'user_id': user.get_data().get('id'),
+            'username': user.get_data().get('username'),
+            'password': password,
             'exp': datetime.now() + timedelta(hours=1)  
             }, 
             app.config['SECRET_KEY'], 
@@ -100,24 +101,62 @@ def login():
             'token': token  
             }), 200)
             
+@app.route('/bet', methods=['POST'])
+@token_required
+def place_bet(current_user):
+        """Place a bet in the current game session."""
+        data = request.get_json()
+        bet = data.get('bet')
+        player_data = data.get('player_data')
+        db_handler = db()
+        player = Player.from_data(player_data)
+        game = Dice(player, db_handler)
 
+        if bet <= 0 or bet > player.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+
+        player.update_balance(-bet)
+        return jsonify({'bet': bet, 'balance': player.get_balance()})
 
 @app.route('/api/profile', methods=['GET'])
 @token_required
 def profile(current_user):
+    user = current_user.get_data()
+
     return make_response(jsonify({
-        'id': current_user[0],
-        'username': current_user[1]
+        'user': user
     }), 200)
     
+
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
-    if request.method == 'GET':
-        return "Leaderboard"
+    sort = "DESC"
+    filter_column = "user_statistics.total_winnings"
+    query = f'''
+                SELECT 
+                    users.username,
+                    user_statistics.total_winnings,
+                    user_statistics.games_played,
+                    user_statistics.games_won,
+                    user_statistics.games_lost
+                FROM users
+                JOIN user_statistics
+                ON users.id = user_statistics.user_id
+                ORDER BY {filter_column} {sort}
+                LIMIT 10
+            '''
+    
+    data = db.query(query, cursor_settings={'dictionary': True})
+
+    return make_response(jsonify({
+        'data': data
+    }),200)
     
 @app.route('/api/games', methods=['GET', 'POST'])
-def games():
+def games(current_user: Player):
+    user = current_user
     if request.method == 'GET': 
+
         return "Games"
 
 @app.route('/api/logout', methods=['POST'])

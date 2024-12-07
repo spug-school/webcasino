@@ -22,11 +22,10 @@ export async function Profile(req) {
     <h1>My profile</h1>
     </div>
     <div>
-    <p>ID: ${data.id}</p>
-    <p>Username: ${data.username}</p>
     </div>
     </div>
     `;
-  root.appendChild(p);
+  // <p>ID: ${data.id}</p>
+  // <p>Username: ${data.username}</p>
   console.log(data);
 }
