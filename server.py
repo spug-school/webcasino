@@ -4,15 +4,17 @@ import jwt
 from datetime import datetime, timedelta
 from config import config
 from Player.Player import Player
+from Player.Auth import Auth
 
 from Database.Database import Database
 
 app = Flask(__name__)
-app.secret_key = 'your_unique_secret_key'
-CORS(app)
+app.secret_key = config().get('secret_key')
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 blacklisted_tokens = set()
-db = Database(config = config(), connect = True, setup = "--setup")
+db = Database(config = config())
+auth_handler = Auth(db)
 
 def token_required(f):
     def wrapper(*args, **kwargs):
@@ -34,22 +36,13 @@ def token_required(f):
             # Use app.config['SECRET_KEY'] for decoding
             decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             user_id = decoded.get('user_id')
-            
+           
             if not user_id:
                 return jsonify({'error': 'Invalid token payload'}), 401
             
-            # Query to fetch user details
-            query = '''
-                SELECT id, username FROM users WHERE id = %s
-            '''
-            result = db.query(query, (user_id,))
+            # Get the current user's data
+            current_user = Player(user_id, db).get_data()
             
-            if not result or not result.get('result_group'):
-                return jsonify({'error': 'User not found'}), 404
-
-            # Create a simple user object with id and username
-            current_user =  result['result'][0]
-
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token has expired'}), 401
         except jwt.InvalidTokenError:
@@ -66,54 +59,100 @@ def token_required(f):
 
     return wrapper
 
-@app.route('/api/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'GET':
-        return jsonify({
-            "path": "home",
-            "number": 23
-        })
-
 
 @app.route('/api/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        username = request.get_json().get('username')
-        password = request.get_json().get('password')
-        user = Player(username, password, db)
-
-        if not user or user.get_username() is None:
-            return make_response(jsonify({
-                'error': 'Incorrect username or password.'
-                }), 401)
+        data = request.json
         
-
+        username = data.get('username')
+        password = data.get('password')
+        
+        username_in_use = auth_handler.user_exists(username)
+        
+        # username is in use
+        if username_in_use:
+            login_result = auth_handler.login(username, password)
+            
+            if not login_result:
+                return make_response(jsonify({'message': 'Väärä salasana!'}), 401)
+            else:
+                user_id = login_result
+                
+        # username is not in use -> create a new user
+        else:
+            user_id = auth_handler.create_user(username, password)
+            
         token = jwt.encode({
-            'user_id': user.get_data().get('id'),
+            'user_id': user_id,
             'exp': datetime.now() + timedelta(hours=1)  
             }, 
             app.config['SECRET_KEY'], 
             algorithm='HS256')
         
         return make_response(jsonify({
-            'message': 'Logged in successfully', 
-            'token': token  
+            'message': f'Tervetuloa, {username}!', 
+            'token': token,
+            'user_id': user_id,
             }), 200)
             
-
-
 @app.route('/api/profile', methods=['GET'])
 @token_required
 def profile(current_user):
-    return make_response(jsonify({
-        'id': current_user[0],
-        'username': current_user[1]
-    }), 200)
+    return make_response(jsonify(current_user), 200)
     
+@app.route('/api/gamehistory', methods=['GET'])
+@token_required
+def gamehistory(current_user):
+    query = f'''
+        SELECT
+            game_history.bet,
+            game_history.win_amount,
+            game_history.played_at,
+            game_types.name
+        FROM game_history
+        JOIN game_types
+        ON game_history.game_type_id = game_types.id
+        WHERE game_history.user_id = {current_user.get('id')}
+        ORDER BY game_history.played_at DESC
+        LIMIT 10
+    '''
+
+    result = db.query(query, cursor_settings={'dictionary': True})
+    
+    return result['result']
+
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
-    if request.method == 'GET':
-        return "Leaderboard"
+    args = request.args
+    filter = args.get('filter', 'total_winnings')
+    sort = args.get('sort', 'DESC')
+    
+    # sanitation
+    valid_columns = ('total_winnings', 'games_played', 'games_won', 'games_lost')
+    if filter not in valid_columns:
+        filter = 'total_winnings'
+    if sort.lower() not in ('asc', 'desc'):
+        sort = 'DESC'
+    
+    query = f'''
+        SELECT 
+            u.username as 'käyttäjänimi',
+            s.total_winnings as 'kokonaisvoitot',
+            s.games_played as 'pelejä pelattu',
+            s.games_won as 'pelejä voitettu',
+            s.games_lost as 'pelejä hävitty'
+        FROM users u
+        JOIN user_statistics s
+        ON u.id = s.user_id
+        WHERE u.hidden = 0
+        ORDER BY {filter} {sort}
+        LIMIT 10
+    '''
+    
+    result = db.query(query, cursor_settings={'dictionary': True})
+    
+    return result['result']
     
 @app.route('/api/games', methods=['GET', 'POST'])
 def games():
@@ -129,8 +168,27 @@ def logout(current_user):
         token = token.split(' ')[1]
     
     blacklisted_tokens.add(token)
-    
+    print(blacklisted_tokens)
     return make_response(jsonify({
         'message': 'Logged out successfully'
     }), 200)
 
+@app.route('/api/player/<int:id>', methods=['GET'])
+def player(id):
+    query = '''
+        SELECT 
+            u.username,
+            s.balance,
+            s.total_winnings,
+            s.games_played,
+            s.games_won,
+            s.games_lost
+        FROM users u
+        JOIN user_statistics s
+        ON u.id = s.user_id
+        WHERE u.id = %s
+    '''
+    
+    result = db.query(query, (id,), cursor_settings={'dictionary': True})
+    
+    return result['result'][0]
