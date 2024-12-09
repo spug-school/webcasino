@@ -12,5 +12,6 @@ def config() -> dict:
         'db_name': os.getenv('DB_NAME', None),
         'autocommit': bool(os.getenv('DB_AUTOCOMMIT', False)),
         'collation': 'utf8mb4_unicode_ci',
-        'setup_file': os.getenv('DB_SETUP_FILE', 'setup.sql')
+        'setup_file': os.getenv('DB_SETUP_FILE', 'setup.sql'),
+        'secret_key': os.getenv('API_SECRET_KEY')
     }

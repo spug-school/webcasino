@@ -7,9 +7,10 @@ CREATE TABLE `users` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `username` VARCHAR(25) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
+  `hidden` BOOLEAN DEFAULT 0, -- we want some users to be hidden (like admin)
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
+);
 
 CREATE TABLE `user_statistics` (
   `user_id` INTEGER PRIMARY KEY,
@@ -20,14 +21,14 @@ CREATE TABLE `user_statistics` (
   `games_lost` INTEGER DEFAULT 0,
   `is_banned` BOOLEAN DEFAULT 0,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
+);
 
 CREATE TABLE `game_types` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL UNIQUE,
   `name_en` VARCHAR(50) NOT NULL UNIQUE,
   `rules` TEXT
-) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
+);
 
 CREATE TABLE `game_history` (
   `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -38,11 +39,11 @@ CREATE TABLE `game_history` (
   `game_type_id` INTEGER NOT NULL,
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   FOREIGN KEY (`game_type_id`) REFERENCES `game_types` (`id`)
-) ENGINE=InnoDB DEFAULT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
+);
 
 -- Indexes
-CREATE INDEX idx_user_id_history ON `game_history` (`user_id`);
-CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
+-- CREATE INDEX idx_user_id_history ON `game_history` (`user_id`);
+-- CREATE INDEX idx_game_id_history ON `game_history` (`game_type_id`);
 
 -- Game types
 INSERT INTO `game_types` 
@@ -55,11 +56,10 @@ VALUES
   ('kolikonheitto', 'coinflip', 'Pelaaja valitsee joko kruunan tai klaavan. Jos pelaaja arvaa oikein, hän voittaa.\n\n- Voittokerroin = 2x');
 
 -- Insert admin on setup
-INSERT INTO `users` (`id`, `username`, `password`)
+INSERT INTO `users` (`username`, `password`, `hidden`)
 VALUES
 -- password is 'password' in sha256
-(1, 'admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8');
-
+('admin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 1);
 INSERT INTO `user_statistics` (`user_id`, `balance`)
 VALUES
 (1, 99999999);
