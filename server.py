@@ -100,23 +100,6 @@ def login():
             'message': 'Logged in successfully', 
             'token': token  
             }), 200)
-            
-@app.route('/bet', methods=['POST'])
-@token_required
-def place_bet(current_user):
-        """Place a bet in the current game session."""
-        data = request.get_json()
-        bet = data.get('bet')
-        player_data = data.get('player_data')
-        db_handler = db()
-        player = Player.from_data(player_data)
-        game = Dice(player, db_handler)
-
-        if bet <= 0 or bet > player.get_balance():
-            return jsonify({'error': 'Invalid bet amount'}), 400
-
-        player.update_balance(-bet)
-        return jsonify({'bet': bet, 'balance': player.get_balance()})
 
 @app.route('/api/profile', methods=['GET'])
 @token_required
@@ -158,6 +141,41 @@ def games(current_user: Player):
     if request.method == 'GET': 
 
         return "Games"
+    
+@app.route('/api/games/dice', methods=['POST'])
+@token_required
+def dice_play(current_user: Player):
+    data = request.get_json()
+    user = current_user
+
+    try:
+        bet = data.get('bet')
+        dice_amount = data.get('dice_amount')
+        guess = data.get('guess')
+
+        if bet<= 0 or bet > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+
+        playgame = Dice(user,db)
+
+        outcome = playgame.start_game(bet,dice_amount, guess)
+
+        if outcome['won']:
+            current_user.update_balance(outcome['win_amount'])
+        else:
+            current_user.update_balance(-outcome['bet'])
+
+        return make_response(jsonify({
+            'message': 'Game played successfully!',
+            'outcome': outcome,
+            'balance': current_user.get_balance()
+        }), 200)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+
+
 
 @app.route('/api/logout', methods=['POST'])
 @token_required

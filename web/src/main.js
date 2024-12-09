@@ -5,6 +5,7 @@ import { Home } from "./pages/home.js";
 import { Login } from "./pages/login.js";
 import { Profile } from "./pages/profile.js";
 import { Leaderboard } from "./pages/leaderboard.js";
+import { Dice } from "./pages/games/dice.js";
 
 export const router = new Router();
 
@@ -38,5 +39,6 @@ router.get("/logout", (req) => {
 router.get("/profile", (req) => Profile(req));
 router.get("/leaderboard", (req) => Leaderboard(req));
 router.get("/games", (req) => Games(req));
+router.get("/games/dice", (req) => Dice(req));
 
 router.init();
