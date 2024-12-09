@@ -13,7 +13,7 @@ class Auth:
             self._db.query(user_query, (username, hashed_password))
 
             # grab the created user's id
-            created_user_id = self._db.query('SELECT LAST_INSERT_ID() AS id')['data'][0][0]
+            created_user_id = self._db.query('SELECT LAST_INSERT_ID() AS id')['result'][0][0]
             
             # create the "profile" after the user is created
             profile_query = 'INSERT INTO user_statistics (user_id) VALUES (%s)'
