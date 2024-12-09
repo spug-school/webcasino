@@ -42,7 +42,7 @@ def token_required(f):
                 return jsonify({'error': 'Invalid token payload'}), 401
             
             # Get the current user's data
-            current_user = Player(user_id, db).get_data()
+            current_user = Player(user_id, db)
             
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token has expired'}), 401
@@ -105,6 +105,7 @@ def profile(current_user):
 @app.route('/api/gamehistory', methods=['GET'])
 @token_required
 def gamehistory(current_user):
+    user_id = current_user.get_data().get('id')
     query = f'''
         SELECT
             game_history.bet,
@@ -114,7 +115,7 @@ def gamehistory(current_user):
         FROM game_history
         JOIN game_types
         ON game_history.game_type_id = game_types.id
-        WHERE game_history.user_id = {current_user.get('id')}
+        WHERE game_history.user_id = {user_id}
         ORDER BY game_history.played_at DESC
         LIMIT 10
     '''
