@@ -1,4 +1,5 @@
 @import "./reset.css";
+@import "./styles/dice.css";
 
 body {
   background-color: antiquewhite;
@@ -201,6 +202,7 @@ label {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="password"] {
   display: flex;
   height: 2.5rem;

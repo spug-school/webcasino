@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from config import config
 from Player.Player import Player
 from Player.Auth import Auth
+from Games import *
 
 from Database.Database import Database
 
@@ -155,9 +156,46 @@ def leaderboard():
     return result['result']
     
 @app.route('/api/games', methods=['GET', 'POST'])
-def games():
+def games(current_user: Player):
+    user = current_user
     if request.method == 'GET': 
+
         return "Games"
+    
+@app.route('/api/games/dice', methods=['POST'])
+@token_required
+def dice_play(current_user: Player):
+    data = request.get_json()
+    user = current_user
+
+    try:
+        bet = data.get('bet')
+        dice_amount = data.get('dice_amount')
+        guess = data.get('guess')
+
+        if bet<= 0 or bet > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+
+        playgame = Dice(user,db)
+
+        outcome = playgame.start_game(bet,dice_amount, guess)
+
+        if outcome['won']:
+            current_user.update_balance(outcome['win_amount'])
+        else:
+            current_user.update_balance(-outcome['bet'])
+
+        return make_response(jsonify({
+            'message': 'Game played successfully!',
+            'outcome': outcome,
+            'balance': current_user.get_balance()
+        }), 200)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+
+
 
 @app.route('/api/logout', methods=['POST'])
 @token_required
