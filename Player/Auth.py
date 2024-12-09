@@ -1,133 +1,58 @@
-import logging
 import hashlib
+from Database.Database import Database
 
 class Auth:
-    def __init__(self, db_handler: object):
-        self.__db = db_handler
+    def __init__(self, db_handler: Database):
+        self._db = db_handler
 
-    def create_user(self, username: str, password: str) -> bool:
-        '''
-        Handles new user creation in the db "users" table
-        
-        Parameters:
-            username (str): The username to create.
-            password (str): The password to create.
-            
-        Returns:
-            bool: True if the user was created successfully, False otherwise.
-        '''
+    def create_user(self, username: str, password: str):
         try:
-            hashed_password = self.__hash_password(password)
+            # create the user first
+            user_query = 'INSERT INTO users (username, password) VALUES (%s, %s)'
+            hashed_password = self._hash_password(password)
+            self._db.query(user_query, (username, hashed_password))
 
-            insert_query = '''
-                INSERT INTO users (username, password)
-                VALUES (%s, %s)
-            '''
+            # grab the created user's id
+            created_user_id = self._db.query('SELECT LAST_INSERT_ID() AS id')['data'][0][0]
+            
+            # create the "profile" after the user is created
+            profile_query = 'INSERT INTO user_statistics (user_id) VALUES (%s)'
+            self._db.query(profile_query, (created_user_id,))
 
-            self.__db.query(insert_query, (username, hashed_password))
-            self.__db.connection.commit()
-
-            created_user_id = self.__db.query('SELECT LAST_INSERT_ID() AS id')['result'][0][0]
-
-            logging.info(f'User `{username}` created with id {created_user_id}')
-
-            return {
-                'id': created_user_id,
-                'username': username,
-                'password': hashed_password
-            }
+            return created_user_id
         except Exception as error:
-            logging.error(f'Error creating user: {error}')
+            print(error)
+        
+    def login(self, username: str, password: str):
+        user_exists_query = 'SELECT id FROM users WHERE username = %s'
+        user_exists_result = self._db.query(user_exists_query, (username,))
+        
+        if not user_exists_result['result_group']:
             return False
 
-    def authenticate_user(self, username: str, password: str) -> bool:
+        # authenticate user
+        auth_query = '''
+            SELECT id
+            FROM users
+            WHERE username = %s AND password = %s
         '''
-        Authenticates the user against the db "users" table
+        hashed_password = self._hash_password(password)
+        auth_result = self._db.query(auth_query, (username, hashed_password), cursor_settings={'dictionary': True})
+
+        # user found
+        if auth_result['result_group']:
+            user_id = auth_result['result'][0]['id']
+            return user_id
+
+        return False
         
-        Parameters:
-            username (str): The username to authenticate.
-            password (str): The password to authenticate.
-            
-        Returns:
-            bool: True if the user was authenticated successfully, False otherwise.
+    def user_exists(self, username: str) -> bool:
+        query = 'SELECT id FROM users WHERE username = %s'
+        result = self._db.query(query, (username,))
+        return result['result_group']
+
+    def _hash_password(self, password: str) -> str:
         '''
-        try:
-            hashed_password = self.__hash_password(password)
-
-            query = '''
-                SELECT id, username, password
-                FROM users
-                WHERE username = %s AND password = %s
-            '''
-
-            result = self.__db.query(query, (username, hashed_password), cursor_settings={'dictionary': True})
-
-            if result['result_group']:
-                user = result['result'][0]
-                if self.__verify_password(password, user['password']):
-                    logging.info(f'User `{username}` authenticated successfully')
-                    return {
-                        'id': user['id'],
-                        'username': user['username'],
-                        'password': user['password']
-                    }
-                else:
-                    logging.warning(f'Password verification failed for user `{username}`')
-                    return False
-            else:
-                return False
-        except Exception as error:
-            logging.error(f'User `{username}` authentication failed.\nError: {error}')
-            return False
-
-    def check_user_exists(self, username: str) -> bool:
-        '''
-        Checks if the user exists in the db "users" table
-        
-        Parameters:
-            username (str): The username to check.
-            
-        Returns:
-            bool: True if the user exists, False otherwise.
-        '''
-        try:
-            query = '''
-                SELECT id, username
-                FROM users
-                WHERE username = %s
-            '''
-
-            result = self.__db.query(query, (username,))
-
-            if result['result_group']:
-                return True
-            else:
-                return False
-        except Exception as error:
-            logging.error(f'Error checking if user exists: {error}')
-            return False
-
-    def __hash_password(self, password: str) -> str:
-        '''
-        Hashes of the password given (sha256)
-        
-        Parameters:
-            password (str): The password to hash.
-        
-        Returns:
-            str: The hashed password.
+        Hashes the password using SHA256 (just mock, this is NOT safe)
         '''
         return hashlib.sha256(password.encode()).hexdigest()
-
-    def __verify_password(self, password: str, hashed_password: str) -> bool:
-        '''
-        Verifies the password against the hashed password
-        
-        Parameters:
-            password (str): The password to verify.
-            hashed_password (str): The hashed password to verify against.
-            
-        Returns:
-            bool: True if the password is verified, False otherwise
-        '''
-        return self.__hash_password(password) == hashed_password

@@ -1,259 +1,92 @@
-import mysql.connector
-import logging
 import hashlib
-from Player.Auth import Auth
+from Database.Database import Database
 
 class Player:
     '''
-    Holds the player's data in a temporary Class, and handles the player's data manipulation.
+    Represents a player from the db, and handles the player's data manipulation.
     The current class is used to update the player's data in the database after/during each singular game.
     '''
-    def __init__(self, username: str, password: str, db_handler: object):
-        self.__db = db_handler
-        self.__auth = Auth(db_handler)
+    def __init__(self, user_id: int, db_handler: Database):
+        self._db = db_handler
+        self.id = user_id
 
-        self.__username = username
-        self.__password = password
-
-        self.__data = self.__authenticate_or_create_user()
-        
+        # holds both the user and user_statistics data
+        self.data = self._load_data(user_id)
 
     # ------------------------------
     # Getters
     # ------------------------------
-    def get_data(self) -> dict:
-        return self.__data
+    def get_data(self, with_password: bool = True) -> dict:
+        if not with_password:
+            data_without_password = self.data.copy()
+            del data_without_password['password']
+            return data_without_password
+        return self.data
 
     def get_balance(self) -> int:
-        '''
-        Needed so frequently that it's worth having a separate method for it
-        '''
-        return int(self.__data.get('balance'))
+        return int(self.data.get('balance'))
     
     def get_username(self) -> str:
-        '''
-        As is this
-        '''
-        return self.__data.get('username')
+        return self.data.get('username')
 
     def get_ban_status(self) -> bool:
-        '''
-        1: banned, 0: not banned
-        '''
-        return self.__data.get('is_banned')
-
+        return self.data.get('is_banned')
 
     # ------------------------------
     # Setters
     # ------------------------------
     def update_total_winning(self, amount: int):
-        self.__data['total_winnings'] += amount
+        self.data['total_winnings'] += amount
 
     def update_games_played(self):
-        self.__data['games_played'] += 1
+        self.data['games_played'] += 1
 
     def update_games_won(self):
-        self.__data['games_won'] += 1
+        self.data['games_won'] += 1
 
     def update_games_lost(self):
-        self.__data['games_lost'] += 1
+        self.data['games_lost'] += 1
 
     def update_balance(self, amount: int):
-        self.__data['balance'] += amount
+        self.data['balance'] += amount
 
-    def set_banned(self):
-        self.__data['is_banned'] = True
-
-
-    # ------------------------------
-    # Protected methods
-    # ------------------------------
-    def __authenticate_or_create_user(self):
-        user = self.__auth.authenticate_user(self.__username, self.__password)
-
-        if user:
-            return self.__load_profile(self.__username, self.__password)
-        else:
-            existing_user = self.__auth.check_user_exists(self.__username)
-
-            if existing_user:
-                raise ValueError("Incorrect password for existing user.")
-            else:
-                return self.__create_profile(self.__username, self.__password)
+    def set_banned(self, status: bool):
+        self.data['is_banned'] = status
     
-    def __load_profile(self, username: str, password: str) -> dict | bool:
+    def _load_data(self, user_id: int) -> dict | bool:
+        user_query = '''
+            SELECT * FROM users
+            WHERE id = %s
         '''
-        Handles loading the player's data from the database, if username matches
+        profile_query = '''
+            SELECT
+                balance,
+                total_winnings,
+                games_played,
+                games_won,
+                games_lost,
+                is_banned
+            FROM user_statistics
+            WHERE user_id = %s
+        '''
+
+        user_result = self._db.query(user_query, (user_id,), cursor_settings={'dictionary': True})
+        user_data = user_result['result'][0]
+
+        profile_result = self._db.query(profile_query, (user_id,), cursor_settings={'dictionary': True})
+        profile_data = profile_result['result'][0]
         
-        Parameters:
-            username (str): The username to authenticate.
-            password (str): The password to authenticate.
-        
-        Returns:
-            (dict{} | bool(False)): The player's data if the user was authenticated successfully, False otherwise.
-        '''
-        try:
-            authenticated = self.__auth.authenticate_user(username, password)
-
-            if not authenticated:
-                return False
-
-            user_query = '''
-                SELECT * FROM users
-                WHERE username = %s
-            '''
-            profile_query = '''
-                SELECT * FROM user_statistics
-                WHERE user_id = %s
-            '''
-
-            user_result = self.__db.query(user_query, (username,), cursor_settings={'dictionary': True})
-            
-            if user_result['result_group']:
-                user_data = user_result['result'][0]
-
-                profile_result = self.__db.query(profile_query, (user_data['id'],), cursor_settings={'dictionary': True})
-                profile_data = profile_result['result'][0] # there is always atleast the default data
-                
-                return {**user_data, **profile_data} # Merge user and profile data
-            else:
-                return False
-        except mysql.connector.Error as error:
-            logging.error(f'Error loading player {username} data: {error}')
-            return False
-
-    def __create_profile(self, username: str, password: str) -> dict | bool:
-        '''
-        Handles creating a new player in the database
-
-        Parameters:
-            username (str): The username to create.
-            password (str): The password to create.
-        
-        Returns:
-            (dict{} | bool(False)): The player's data if the user was created successfully, False otherwise.
-        '''
-        new_user = self.__auth.create_user(username, password)
-
-        if not new_user:
-            return False
-
-        try:
-            query = '''
-                INSERT INTO user_statistics
-                    (user_id)
-                VALUES (%s)
-            '''
-
-            self.__db.query(query, (new_user['id'],))
-            self.__db.connection.commit()
-
-            logging.info(f'Player `{username}:{new_user['id']}` created successfully')
-
-            return self.__load_profile(username, password)
-
-        except mysql.connector.Error as error:
-            logging.error(f'Error creating player {username} data: {error}')
-            self.__db.connection.rollback()
-            return False
+        return {**user_data, **profile_data} # Merge user and profile data
     
     def update_username(self, new_name: str) -> bool:
-        '''
-        Updates the player's username in the database
-        
-        Parameters:
-            new_name (str): The new username to set.
-        
-        Returns:
-            bool: Success state
-        '''
-        try:
-            query = '''
-                UPDATE users SET username = %s WHERE id = %s
-            '''
-            values = (new_name, self.get_data().get('id'))
-            
-            result = self.__db.query(query, values)
-            
-            if result['affected_rows'] > 0:
-                self.__data['username'] = new_name
-                return True
-            else:
-                return False
-        except Exception as error:
-            logging.error(f'Error updating the username of user {self.get_data().get('id', None)}: {error}')
-            return False
+        self.data['username'] = new_name
+        return self.save()
         
     def update_password(self, new_password: str):
-        '''
-        Updates the player's password in the database
-        
-        Parameters:
-            new_password (str): The new password to set.
-            
-        Returns:
-            bool: Success state
-        '''
         hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
+        self.data['password'] = hashed_password
+        return self.save()
     
-        try:
-            query = '''
-                UPDATE users SET password = %s WHERE id = %s
-            '''
-            values = (hashed_password, self.get_data().get('id'))
-            
-            result = self.__db.query(query, values)
-            
-            if result['affected_rows'] > 0:
-                self.__data['password'] = hashed_password
-                return True
-            else:
-                return False
-        except Exception as error:
-            logging.error(f'Error updating the password of user {self.get_data().get('id', None)}: {error}')
-            return False
-    
-    def delete_account(self) -> bool:
-        '''
-        Deletes the player's profile from the database
-        
-        Returns:
-            bool: Success state
-        '''
-        try:
-            query_values = (self.get_data().get('id'),)
-            self.__db.connection.start_transaction()
-            
-            # first, delete the user's statistics
-            query_stats = '''
-                DELETE FROM user_statistics WHERE user_id = %s
-            '''
-            
-            self.__db.query(query_stats, query_values)
-            
-            # then delete the user's game_history
-            query_history = '''
-                DELETE FROM game_history WHERE user_id = %s
-            '''
-            self.__db.query(query_history, query_values)
-            
-            # theeen at last delete the user itself
-            query_user = '''
-                DELETE FROM users WHERE id = %s
-            '''
-            result = self.__db.query(query_user, query_values)
-            
-            self.__db.connection.commit()
-            
-            if result['affected_rows'] > 0:
-                return True
-            else:
-                return False
-        except Exception as error:
-            self.__db.connection.rollback() # go back if we encounter an issue
-            logging.error(f'Error deleting the user {self.get_data().get("id", None)}: {error}')
-            return False
-        
     def unban_account(self, balance_to_set: int) -> bool:
         '''
         Unbans the player's account
@@ -264,71 +97,102 @@ class Player:
         Returns:
             bool: Success state
         '''
-        try:
-            query = '''
-                UPDATE user_statistics 
-                SET 
-                    is_banned = 0,
-                    balance = %s
-                WHERE user_id = %s
-            '''
-            values = (balance_to_set, self.get_data().get('id'))
-            result = self.__db.query(query, values)
-            
-            if result['affected_rows'] > 0:
-                self.__data['is_banned'] = False
-                self.__data['balance'] = balance_to_set
-                self.save()
-                return True
-            else:
-                return False
-        except Exception as error:
-            logging.error(f'Error unbanning the user {self.get_data().get("id", None)}: {error}')
-            return False
-        
-    def save(self) -> bool:
+        self.set_banned(False)
+        self.update_balance(balance_to_set)
+        return self.save()
+    
+    def delete_account(self) -> bool:
         '''
-        Used for saving the player's data from the temp object to the database
+        Deletes the player's user & profile from the database
         
         Returns:
             bool: Success state
         '''
         try:
-            user_query = '''
-                UPDATE users
-                SET username = %s, password = %s
-                WHERE id = %s
+            user_id = (self.get_data().get('id'),)
+            self._db.connection.start_transaction()
+            
+            # first, delete the user's statistics
+            query_stats = '''
+                DELETE FROM user_statistics WHERE user_id = %s
             '''
-
-            profile_query = '''
-                UPDATE user_statistics
-                SET balance = %s, total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, is_banned = %s
-                WHERE user_id = %s
+            
+            self._db.query(query_stats, user_id)
+            
+            # then delete the user's game_history
+            query_history = '''
+                DELETE FROM game_history WHERE user_id = %s
             '''
-
-            user_values = (
-                self.__data['username'],
-                self.__data['password'],
-                self.__data['id']
-            )
-
-            profile_values = (
-                self.__data['balance'],
-                self.__data['total_winnings'],
-                self.__data['games_played'],
-                self.__data['games_won'],
-                self.__data['games_lost'],
-                self.__data['is_banned'],
-                self.__data['id']
-            )
-
-            self.__db.query(user_query, user_values)
-            self.__db.query(profile_query, profile_values)
-            self.__db.connection.commit()
-
-            logging.info(f'Player {self.__data["id"]} data saved successfully')
-            return True
-        except mysql.connector.Error as error:
-            logging.error(f'Error saving player {self.__data["id"]} data: {error}')
-            self.__db.connection.rollback()
+            self._db.query(query_history, user_id)
+            
+            # theeen at last delete the user itself
+            query_user = '''
+                DELETE FROM users WHERE id = %s
+            '''
+            result = self._db.query(query_user, user_id)
+            
+            self._db.commit_changes()
+            
+            if result['affected_rows'] > 0:
+                return True
+            else:
+                return False
+        except:
+            self._db.connection.rollback() # go back if we encounter an issue
             return False
+        
+    def save(self) -> bool:
+        '''
+        Updates the players data in the database tables
+        
+        TODO - could be optimized to only update the changed values
+        '''
+        try:
+            self._save_credentials()
+            self._save_profile()
+            self._db.commit_changes()
+            return True
+        except:
+            self._db.connection.rollback()
+            return False
+        
+    def _save_credentials(self):
+        '''
+        Updates the player's credentials in the database
+        '''
+        query = '''
+            UPDATE users
+            SET username = %s, password = %s
+            WHERE id = %s
+        '''
+        
+        values = (
+            self.data['username'],
+            self.data['password'],
+            self.data['id']
+        )
+        
+        self._db.query(query, values)
+        self._db.connection.commit()
+        
+    def _save_profile(self):
+        '''
+        Updates the player's profile in the database
+        '''
+        query = '''
+            UPDATE user_statistics
+            SET balance = %s, total_winnings = %s, games_played = %s, games_won = %s, games_lost = %s, is_banned = %s
+            WHERE user_id = %s
+        '''
+        
+        values = (
+            self.data['balance'],
+            self.data['total_winnings'],
+            self.data['games_played'],
+            self.data['games_won'],
+            self.data['games_lost'],
+            self.data['is_banned'],
+            self.data['id']
+        )
+        
+        self._db.query(query, values)
