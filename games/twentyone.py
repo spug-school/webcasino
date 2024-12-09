@@ -28,6 +28,7 @@ class TwentyOne:
         self.player_over = False
         self.dealer_over = False
         self.player_win = False
+        self.running = False
         self.data_dict = {"data":
                               {"dealer_hand": self.dealer_hand,
                               "player_hand": self.player_hand,
@@ -175,45 +176,50 @@ class TwentyOne:
 
 
     def run(self):
-        while self.queue.empty():
-            sleep(1)
-        ignore_command = self.queue.get()
-        print("Command received")
-        self.first_deal()
-        self.message_manager("dealing cards")
-        print("answer send")
-        self.score_calculation()
-        while not self.dealer_pass:
-            while not self.player_pass:
+        while True:
+            while self.queue.empty():
+                sleep(1)
+            if self.queue.get() == 1:
+                print("Command received")
+                self.first_deal()
+                self.message_manager("dealing cards")
+                print("answer send")
+                self.score_calculation()
+                while not self.dealer_pass:
+                    while not self.player_pass:
 
-                self.message_manager(f"Player has {self.player_total}. Do you want another card?")
-                self.to_send.put(self.get_data())
-                while self.queue.empty():
-                    sleep(1)
-                command = self.queue.get()
-                if command == 1:
-                    self.hit_me()
+                        self.message_manager(f"Player has {self.player_total}. Do you want another card?")
+                        self.to_send.put(self.get_data())
+                        while self.queue.empty():
+                            sleep(1)
+                        command = self.queue.get()
+                        if command == 1:
+                            self.hit_me()
+                            self.score_calculation()
+                            self.over_check()
+                        else:
+                            self.player_pass = True
+                    print("Dealer turn reached.")
+                    self.ai_logic()
                     self.score_calculation()
                     self.over_check()
-                else:
-                    self.player_pass = True
-            print("Dealer turn reached.")
-            self.ai_logic()
-            self.score_calculation()
-            self.over_check()
-            print(self.dealer_total)
-        self.message_manager(f"dealer has {self.dealer_total}.")
+                    print(self.dealer_total)
+                self.message_manager(f"dealer has {self.dealer_total}.")
 
-        if self.player_pass and self.dealer_pass:
-            if self.player_over:
-                self.message_manager("Player went over 21. Player lost.")
+                if self.player_pass and self.dealer_pass:
+                    if self.player_over:
+                        self.message_manager("Player went over 21. Player lost. Play again?")
+                        self.to_send.put(self.get_data())
+                        print("1")
+                    elif self.player_total < self.dealer_total <= self.twentyone:
+                        self.message_manager("Dealer got greater hand. Player lost. Play again?")
+                        self.to_send.put(self.get_data())
+                        print("2")
+                    elif self.dealer_over:
+                        self.message_manager("Dealer went over 21. Dealer lost. Play again?")
+                        self.to_send.put(self.get_data())
+                        print("3")
+            else:
+                self.message_manager("Thank you for playing")
                 self.to_send.put(self.get_data())
-                print("1")
-            elif self.player_total < self.dealer_total <= self.twentyone:
-                self.message_manager("Dealer got greater hand. Player lost.")
-                self.to_send.put(self.get_data())
-                print("2")
-            elif self.dealer_over:
-                self.message_manager("Dealer went over 21. Dealer lost.")
-                self.to_send.put(self.get_data())
-                print("3")
+                break
