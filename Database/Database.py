@@ -120,14 +120,14 @@ class Database:
             return {
                 'affected_rows': cursor.rowcount,
                 'result_group': True if len(data_found) > 0 else False,
-                'data': data_found if len(data_found) > 0 else [],
+                'result': data_found if len(data_found) > 0 else [],
             }
         except Exception as error:
             print(error)
             return {
                 'affected_rows': 0,
                 'result_group': False,
-                'data': [],
+                'result': [],
                 'error': str(error)
             }
             
