@@ -1,3 +1,5 @@
+from asyncio import timeout
+
 import flask
 import queue
 import threading
@@ -29,6 +31,8 @@ def index():
 @app.route('/games/', methods=['POST'])
 def games():
     pass
+
+
 @app.route('/data/', methods=['GET','POST'])
 def data():
     try:
@@ -40,8 +44,7 @@ def data():
             print(f"received message: {data_to_json['input']}")
             game.queue.put(0)
         while game.to_send.empty():
-            sleep(0.1)
-
+            sleep(0.5)
 
     except Exception as e:
         print(e)

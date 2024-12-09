@@ -4,6 +4,7 @@ let control = document.querySelector("#control");
 let renderWindow = document.querySelector("#render");
 let secondaryTitle = document.querySelector("#secondary");
 let messageDisplay = document.querySelector("#communication");
+let running = false;
 
 function twentyOneForm() {
     control.textContent = ""

@@ -51,7 +51,6 @@ class TwentyOne:
         shuffle(self.deck)
 
     def game_reset(self):
-        self.messages = []
         self.deck = []
         self.player_hand = []
         self.dealer_hand = []
@@ -177,6 +176,9 @@ class TwentyOne:
 
     def run(self):
         while True:
+            if not self.deck == []:
+                self.game_reset()
+
             while self.queue.empty():
                 sleep(1)
             if self.queue.get() == 1:
@@ -210,14 +212,17 @@ class TwentyOne:
                     if self.player_over:
                         self.message_manager("Player went over 21. Player lost. Play again?")
                         self.to_send.put(self.get_data())
+                        self.game_reset()
                         print("1")
-                    elif self.player_total < self.dealer_total <= self.twentyone:
+                    elif self.player_total <= self.dealer_total <= self.twentyone:
                         self.message_manager("Dealer got greater hand. Player lost. Play again?")
                         self.to_send.put(self.get_data())
+                        self.game_reset()
                         print("2")
                     elif self.dealer_over:
                         self.message_manager("Dealer went over 21. Dealer lost. Play again?")
                         self.to_send.put(self.get_data())
+                        self.game_reset()
                         print("3")
             else:
                 self.message_manager("Thank you for playing")
