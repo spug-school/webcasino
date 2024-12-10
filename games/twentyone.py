@@ -171,7 +171,7 @@ class TwentyOne:
                 print("dealer_pass true")
                 self.dealer_pass = True
 
-    def get_data(self):
+    def get_data(self, *argv):
         if not self.data_dict['data']['dealer_hand'] == self.dealer_hand:
             self.data_dict['data']['dealer_hand'] = self.dealer_hand
             self.data_dict['data']['player_hand'] = self.player_hand
@@ -180,7 +180,15 @@ class TwentyOne:
             for item in self.dealer_hand:
                 dealer_hidden_cards.append(self.backside)
             self.data_dict['data']['dealer_hand'] = dealer_hidden_cards
-        return self.data_dict
+
+        sending = self.data_dict
+        if argv:
+            if self.player_win:
+                sending['data']['player_win'] = True
+            else:
+                sending['data']['player_win'] = False
+
+        return sending
 
 
     def run(self):
@@ -217,17 +225,17 @@ class TwentyOne:
                 if self.player_pass and self.dealer_pass:
                     if self.player_over:
                         self.message_manager("Player went over 21. Player lost. Play again?")
-                        self.to_send.put(self.get_data())
+                        self.to_send.put(self.get_data(True))
                         self.game_reset()
                         print("1")
                     elif self.player_total <= self.dealer_total <= self.twentyone:
                         self.message_manager("Dealer got greater hand. Player lost. Play again?")
-                        self.to_send.put(self.get_data())
+                        self.to_send.put(self.get_data(True))
                         self.game_reset()
                         print("2")
                     elif self.dealer_over:
                         self.message_manager("Dealer went over 21. Dealer lost. Play again?")
-                        self.to_send.put(self.get_data())
+                        self.to_send.put(self.get_data(True))
                         self.game_reset()
                         print("3")
             else:
