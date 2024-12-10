@@ -1,5 +1,5 @@
 /* fetch utility functions */
-import { apiUrl } from "../core/config";
+import { apiUrl } from "../core/config.js";
 
 const fetchData = async (url, options = {}) => {
     try {

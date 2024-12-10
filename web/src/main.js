@@ -23,17 +23,18 @@ if (!token && window.location.pathname !== "/login") {
 
 if (token && user_id) {
   const user = document.querySelector("#user");
-  const user_id = localStorage.getItem("user_id");
   user.href = `/logout`;
   user.innerHTML = `Poistu pelistä`;
 
-  const userData = await getPlayerData(user_id);
+  if (!localStorage.getItem("userData")) {
+    getPlayerData(user_id).then((data) => {
+      localStorage.setItem("userData", JSON.stringify(data));
+    });
+  }
+  
+  const userData = JSON.parse(localStorage.getItem("userData"));
   const welcomeText = document.querySelector("#user-welcome");
   welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>. Saldosi on ${userData.balance}`;
-
-  // userdata is accessible in all pages from
-  // localstorage
-  localStorage.setItem("userData", userData);
 }
 
 router.get("/", (req) => Home(req));
@@ -48,6 +49,7 @@ router.get("/logout", (req) => {
   });
   localStorage.removeItem("token");
   localStorage.removeItem("user_id");
+  localStorage.removeItem("userData");
   window.location.href = "/login";
 });
 router.get("/profile", (req) => Profile(req));

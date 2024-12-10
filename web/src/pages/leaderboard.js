@@ -1,4 +1,4 @@
-import { getLeaderBoardData } from "../utils/fetchUtils";
+import { getLeaderBoardData } from "../utils/fetchUtils.js";
 
 
 export async function Leaderboard(req) {

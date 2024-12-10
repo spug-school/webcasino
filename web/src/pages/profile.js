@@ -1,10 +1,9 @@
-import { getGameHistory, getPlayerData } from "../utils/fetchUtils";
+import { getGameHistory, getPlayerData } from "../utils/fetchUtils.js";
 
 export async function Profile(req) {
   const root = document.querySelector("#root");
 
   const playerData = await getPlayerData(localStorage.getItem("user_id"));
-  console.log(playerData)
   const gameHistory = await getGameHistory();
 
   root.innerHTML = `

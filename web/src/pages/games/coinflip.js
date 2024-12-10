@@ -1,4 +1,4 @@
-import { apiUrl } from "../../core/config";
+import { apiUrl } from "../../core/config.js";
 
 async function getData(url, bet, guess) {
     const response = await fetch(url, {
@@ -102,6 +102,6 @@ function displayOutcome(outcome) {
     const outcomeText = document.querySelector("#outcome");
     const balance = document.querySelector("#balance");
   
-    outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}, ${outcome.win ? "Voitit!" : "Hävisit..."}`;
+    outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}, ${outcome.won ? "Voitit!" : "Hävisit..."}`;
     balance.textContent = `Uusi saldosi on: ${outcome.balance}`;
 }
