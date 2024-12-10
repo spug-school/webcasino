@@ -34,6 +34,7 @@
 
 .controls {
   margin: 10px 0;
+  width: 100%;
 
   input {
     min-width: 200px;
@@ -58,16 +59,14 @@
 }
 
 .dice {
-  width: 50px;
-  height: 50px;
-  background: #fff;
-  border: 2px solid #333;
+  width: 60px;
+  height: 60px;
+  background: transparent;
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
   align-content: space-around;
   position: relative;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .dot {

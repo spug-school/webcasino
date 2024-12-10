@@ -99,8 +99,8 @@ def login():
             
 @app.route('/api/profile', methods=['GET'])
 @token_required
-def profile(current_user):
-    return make_response(jsonify(current_user), 200)
+def profile(current_user: Player):
+    return make_response(jsonify(current_user.get_data()), 200)
     
 @app.route('/api/gamehistory', methods=['GET'])
 @token_required
@@ -166,13 +166,13 @@ def games(current_user: Player):
 @app.route('/api/games/dice', methods=['POST'])
 @token_required
 def dice_play(current_user: Player):
-    data = request.get_json()
+    data = request.json
     user = current_user
 
     try:
-        bet = data.get('bet')
-        dice_amount = data.get('dice_amount')
-        guess = data.get('guess')
+        bet = int(data.get('bet'))
+        dice_amount = int(data.get('dice_amount'))
+        guess = int(data.get('guess'))
 
         if bet<= 0 or bet > current_user.get_balance():
             return jsonify({'error': 'Invalid bet amount'}), 400
@@ -181,19 +181,16 @@ def dice_play(current_user: Player):
 
         outcome = playgame.start_game(bet,dice_amount, guess)
 
-        if outcome['won']:
-            current_user.update_balance(outcome['win_amount'])
-        else:
-            current_user.update_balance(-outcome['bet'])
-
         return make_response(jsonify({
             'message': 'Game played successfully!',
-            'outcome': outcome,
-            'balance': current_user.get_balance()
+            'balance': current_user.get_balance(),
+            **outcome
         }), 200)
     except ValueError as e:
+        print(e)
         return jsonify({'error': str(e)}), 400
     except Exception as e:
+        print(e)
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
 
 

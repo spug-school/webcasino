@@ -35,94 +35,18 @@ class Game(ABC):
         '''
         pass
     
-    
-    # --------------------------------
-    # CLI Helper wrapper methods
-    # --------------------------------
-    def validate_input(self, prompt: str, input_type: str, min_value: int = None, max_value: int = None, allowed_values: tuple = None, allow_empty: bool = False):
-        if self.ui == 'web':
-            return f'{prompt} {input_type} {min_value} {max_value} {allowed_values} {allow_empty}'
-        else:
-            return get_prompt(prompt, input_type, min_value, max_value, allowed_values, allow_empty)
-                
-    def box_wrapper(self, text: str, min_width: int = 75, max_width: int = 75):
-        box_wrap(text, min_width, max_width)
-    
-    # --------------------------------
-    # Game related methods
-    # --------------------------------
-    def play_game(self) -> bool:
-        '''
-        Before starting the main loop, asks the player if they want to play the game
-        
-        Returns:
-            bool: Whether the player wants to play the game or not
-        '''
-        if self.ui == 'web':
-            return {
-                'text':f'Haluatko pelata peliä (k / e): ',
-                'type': 'str',
-            }
-        
-        play_game = self.validate_input(f'Haluatko pelata peliä (k / e): ', 'str', allowed_values=('k', 'e'))
-        
-        if play_game is not None:
-            return True if play_game == 'k' else False
-        
-    def get_bet(self, balance: int, bet_to_text: str = None) -> int:
+    def deduct_bet(self, bet: int) -> int:
         '''
         Gets the bet from the player and deducts it from the player's balance
         
         Parameters:
-            balance (int): The player's balance
-            bet_to_text (str): The text to display for the bet prompt
+            bet (int): The bet amount
         Returns:
             int: The bet amount
         '''
-        prompt_text = f'Panos (syötä tyhjä peruuttaaksesi): ' if bet_to_text is None else f'{bet_to_text} (syötä tyhjä peruuttaaksesi): '
-
-        # ask the bet from the player
-        bet = self.validate_input(prompt_text, 'int', min_value=0, max_value=balance, allow_empty=True)
-        
-        # cancel the game if the bet is empty
-        if bet is None:
-            return 0
-        
-        bet = int(bet)
-
-        # deduct the bet from the player's balance
         self.player.update_balance(-bet)
         self.player.save()
-        
         return bet
-        
-    def play_again(self, balance: str) -> bool:
-        '''
-        Handle the game ending and ask the player if they want to play again
-        
-        Parameters:
-            balance (str): The player's balance
-        Returns:
-            bool: Whether the player wants to play again or not
-        '''
-        if balance <= 0:
-            print(f'Saldo ei riitä. Peli päättyi.\n')
-            return False
-    
-        return self.validate_input(f'Haluatko pelata uudestaan (k / e): ', 'str', allowed_values=('k', 'e'))
-    
-    def game_intro(self, username: str):
-        header(f'{self.game_info.get("name").capitalize()}', self.player.get_balance())
-        print(f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n\n')
-        print(f'Pelin säännöt:')
-        box_wrap(self.game_info.get('rules'))
-        return {
-            'name': self.game_info.get('name'),
-            'welcome': f'Tervetuloa {self.game_info.get("name")}-peliin, {username}!\n\n',
-            'rules-heading': 'Pelin säännöt:',
-            'rules': self.game_info.get('rules')
-        }
-    
     
     # --------------------------------
     # Main game loop

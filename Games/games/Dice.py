@@ -14,8 +14,8 @@ class Dice(Game):
         self.sides = 6
         self.max_dice = 4
 
-    def _roll_dice(self, dice_amount: int) -> int:
-        return sum([random.randint(1, self.sides) for _ in range(dice_amount)])
+    def _roll_dice(self) -> int:
+        return random.randint(1, self.sides)
     
     def _determine_outcome(self, guess: int, bet: int, roll: int, dice_amount: int) -> int:
         return bet * dice_amount if guess == roll else 0
@@ -25,30 +25,37 @@ class Dice(Game):
         '''
         Game-specific logic for: Dice
         '''
-        self.player.update_balance(-bet)
-        self.player.save()
-            
-        # one more opportunity to exit the game before rolling the dice
-        if bet == 0:
-            return None
-        
+        self.deduct_bet(bet)
+           
         if dice_amount < 2 or dice_amount > self.max_dice:
             raise ValueError(f'Dice amount must be between 2 and {self.max_dice}.')
         
         if guess < dice_amount or guess > self.sides * dice_amount:
             raise ValueError(f'Guess must be between {dice_amount} and {self.sides * dice_amount}.')
         
+        dice_rolls = [self._roll_dice() for _ in range(dice_amount)]
+        roll_sum = sum(dice_rolls)
+        win_amount = self._determine_outcome(guess, bet, roll_sum, dice_amount)
+        game_won = guess == roll_sum
         
-        # dice_amount = self.validate_input(f'\nKuinka montaa noppaa haluat heittää (2 - {self.max_dice}): ', 'int', 2, self.max_dice)
-        # dice_total = self.sides * dice_amount
-        # guess = self.validate_input(f'\nArvaa noppien summa ({dice_amount} - {dice_total}): ', 'int', dice_amount, dice_total)
+        # Bulk-update the player values
+        self.update_player_values(
+            won = game_won, 
+            win_amount = win_amount, 
+            save = True
+        )
         
-        roll = self._roll_dice(dice_amount)
-        win_amount = self._determine_outcome(guess, bet, roll, dice_amount)
+        # Save the game to the database
+        self.save_game_to_history(
+            bet = bet, 
+            win_amount = win_amount - bet
+        )
         
         return {
-            'won': guess == roll,
+            'won': game_won,
             'win_amount': win_amount,
             'bet': bet,
-            'roll': roll
+            'dice_rolls': dice_rolls,
+            'sum': roll_sum,
+            'balance': self.player.get_balance()
         }
