@@ -1,6 +1,7 @@
 @import "./reset.css";
 @import "./styles/dice.css";
 @import "./styles/coinflip.css";
+@import "./styles/slots.css";
 
 body {
   background-color: antiquewhite;

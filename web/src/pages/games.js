@@ -15,6 +15,7 @@ export function Games(req) {
       </figure>
       </a>
       <div>
+      <a href="/games/slots">
         <h3>Slots</h3>
         <p>Description</p>
       </div>

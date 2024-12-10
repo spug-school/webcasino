@@ -7,6 +7,7 @@ import { Profile } from "./pages/profile.js";
 import { Leaderboard } from "./pages/leaderboard.js";
 import { Dice } from "./pages/games/dice.js";
 import { Coinflip } from "./pages/games/coinflip.js";
+import { Slots } from "./pages/games/slots.js";
 
 import { getPlayerData } from "./utils/fetchUtils.js";
 
@@ -55,5 +56,6 @@ router.get("/leaderboard", (req) => Leaderboard(req));
 router.get("/games", (req) => Games(req));
 router.get("/games/dice", (req) => Dice(req));
 router.get("/games/coinflip", (req) => Coinflip(req));
+router.get("/games/slots", (req) => Slots(req));
 
 router.init();
