@@ -20,15 +20,14 @@ const fetchData = async (url, options = {}) => {
 }
 
 // player data
-export const getPlayerData = async (id) => {
-    const url = `${apiUrl}/player/${id}`;
+export const getPlayerData = async () => {
+    const url = `${apiUrl}/player`;
     return fetchData(url);
 }
 
 // leaderboard
 export const getLeaderBoardData = async (queryParams) => {
     const params = new URLSearchParams(queryParams).toString();
-    
     const url = `${apiUrl}/leaderboard?${params}`;
     return fetchData(url);
 }

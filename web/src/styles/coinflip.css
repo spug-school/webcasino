@@ -18,8 +18,8 @@
   }
 
 .coin {
-    width: 80px;
-    height: 80px;
+    width: 200px;
+    height: 200px;
     background-color: gold;
     border-radius: 50%;
     position: relative;
@@ -27,6 +27,7 @@
 
     &::before {
         content: "👑";
+        top: -1rem;
         transform: rotateY(0deg);
     }
 
@@ -43,8 +44,7 @@
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
-        font-size: 30px;
-        font-weight: bold;
+        font-size: 5rem;
     }
 
 }

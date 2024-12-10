@@ -24,50 +24,46 @@ export async function Coinflip(req) {
     const playerBalance = localStorage.getItem("userData").balance;
 
     root.innerHTML = `
-      <div class="game-container">
-          <h1>Kolikonheitto</h1>
-          <p>Tervetuloa heittämään kolikkoa! Syötä panos ja arvaus!</p>
-          <div id="game-area">
-              <div class="wrap">
-                  <div class="left">
-                      <div id="coinflip-area">
-                          <h2>Kolikko</h2>
-                          <div id="coinflip-container">
-                            <div class="coin"></div>
-                          </div>
-                        </div>
-                        <div id="result-area">
-                            <h2>Tulos</h2>
-                            <p id="outcome"></p>
-                            <p id="balance"></p>
-                        </div>
+    <div class="game-container">
+        <h1>Kolikonheitto</h1>
+        <p>Tervetuloa heittämään kolikkoa! Syötä panos ja arvaus!</p>
+        <div id="game-area">
+            <div class="wrap">
+                <div class="left">
+                    <div id="coinflip-area">
+                        <h2>Kolikko</h2>
+                        <div id="coinflip-container">
+                        <div class="coin"></div>
                     </div>
-                    <div>
-                        <form class="wrap-me" id="coinflip-form">
-                            <div class="controls">
-                                <label for="bet">Panos:</label>
-                                <input 
-                                type="number" 
-                                id="bet" 
-                                placeholder="Syötä panos" 
-                                min="1"
-                                max="${playerBalance}"
-                                required
-                                >
-                            </div>
-                            <div class="controls">
-                                <label for="guess">Arvauksesi:</label>
-                                <select id="guess">
-                                    <option value="k">Kruuna 👑</option>
-                                    <option value="c">Klaava 🍀</option>
-                                </select>
-                        </div>
-                        <button>Heitä kolikkoa!</button>
-                    </form>
+                </div>
+                <div id="result-area">
+                    <h2>Tulos</h2>
+                    <p id="outcome"></p>
+                    <p id="balance"></p>
                 </div>
             </div>
-        </div>
-    </div>    
+        <div>
+        <form class="wrap-me" id="coinflip-form">
+            <div class="controls">
+                <label for="bet">Panos:</label>
+                <input 
+                type="number" 
+                id="bet" 
+                placeholder="Syötä panos" 
+                min="1"
+                max="${playerBalance}"
+                required>
+            </div>
+            <div class="controls">
+                <label for="guess">Arvauksesi:</label>
+                <select id="guess">
+                    <option value="k">Kruuna 👑</option>
+                    <option value="c">Klaava 🍀</option>
+                </select>
+            </div>
+            <button>Heitä kolikkoa!</button>
+        </form>
+    </div>
     `;
 
     const coinflipForm = document.querySelector("#coinflip-form");
@@ -77,9 +73,8 @@ export async function Coinflip(req) {
         event.preventDefault();
 
         // reset the coin animation
-        coin.style.removeProperty('--result-angle');
         coin.style.animation = "none";
-        coin.offsetHeight; // trigger reflow
+
         const bet = coinflipForm.querySelector("#bet").value;
         const guess = coinflipForm.querySelector("#guess").value;
 
@@ -92,9 +87,10 @@ export async function Coinflip(req) {
         coin.style.setProperty('--result-angle', resultAngle);
         coin.style.animation = "flip 2s ease-in-out forwards";
         
-        setTimeout(() => {
+        // display outcome when animation ends
+        coin.addEventListener("animationend", () => {
             displayOutcome(data);
-        }, 2000);
+        }, {once: true});
     })
 }
 
@@ -102,6 +98,6 @@ function displayOutcome(outcome) {
     const outcomeText = document.querySelector("#outcome");
     const balance = document.querySelector("#balance");
   
-    outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}, ${outcome.won ? "Voitit!" : "Hävisit..."}`;
+    outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}. ${outcome.won ? "Voitit!" : "Hävisit..."}`;
     balance.textContent = `Uusi saldosi on: ${outcome.balance}`;
 }
