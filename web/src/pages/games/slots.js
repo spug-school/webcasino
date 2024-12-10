@@ -1,9 +1,14 @@
-import { getPlayerData } from "../../utils/fetchUtils.js";
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export async function Slots(req) {
     const root = document.querySelector("#root");
 
     const playerBalance = localStorage.getItem("userData").balance;
+
+    // Array of slot icons
+    const symbols = ['🍑', '🍌', '🍒', '🍏', '🍇'];
 
     root.innerHTML = `
     <div class="game-container">
@@ -13,9 +18,9 @@ export async function Slots(req) {
         <div id="slots-area">
           <div id="slot-machine">
             <div class="reel">🍑</div>
-            <div class="reel">🍑</div>
-            <div class="reel">🍑</div>
-            <div class="reel">🍑</div>
+            <div class="reel">🍌</div>
+            <div class="reel">🍒</div>
+            <div class="reel">🍏</div>
           </div>
         </div>
         <form id="slots-form">
@@ -43,6 +48,7 @@ export async function Slots(req) {
         event.preventDefault();
 
         const bet = parseInt(document.querySelector("#bet").value);
+
         const response = await fetch("http://127.0.0.1:5000/api/games/slots", {
             method: "POST",
             headers: {
@@ -61,11 +67,8 @@ export async function Slots(req) {
         console.log("Response data:", data);
 
         const reels = document.querySelectorAll(".reel");
-        data.spin_result.forEach((symbol, index) => {
-            reels[index].textContent = symbol;
-        });
 
-        console.log("Reel elements:", reels);
+        await spinReels(reels, symbols, data.spin_result);
 
         document.querySelector("#outcome").textContent = data.won
             ? `Voitit! Saldosi kasvoi ${data.win_amount} yksikköä.`
@@ -75,4 +78,23 @@ export async function Slots(req) {
         const userData = await getPlayerData(localStorage.getItem("user_id"));
         localStorage.setItem("userData", JSON.stringify(userData));
     });
+
+    async function spinReels(reels, symbols, finalResult) {
+        const spinTime = [1000, 1200, 1400, 1600];
+        const intervalTime = 100;
+
+        for (let i = 0; i < reels.length; i++) {
+            const reel = reels[i];
+
+            const start = performance.now();
+
+            while (performance.now() - start < spinTime[i]) {
+                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                reel.textContent = randomSymbol;
+                await sleep(intervalTime);
+            }
+
+            reel.textContent = finalResult[i];
+        }
+    }
 }

@@ -1,4 +1,4 @@
-/* === Slots Game Styles === */
+/* Updated Slots Game Styles */
 #slot-machine {
     display: flex;
     justify-content: center;
@@ -7,11 +7,21 @@
 }
 
 .reel {
-    font-size: 2rem;
+    font-size: 2rem; /* Controls the size of the icons */
+    display: flex;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
     border: 2px solid #ddd;
-    padding: 10px;
-    width: 50px;
-    height: 50px;
+    padding: 0; /* Remove padding that might shift content */
+    width: 60px; /* Ensure consistent width */
+    height: 60px; /* Ensure consistent height */
     text-align: center;
     background: #fff;
+    box-sizing: border-box; /* Include border/padding in box size */
+}
+
+/* Optional: Hover Effect for Better UX */
+.reel:hover {
+    border-color: #bbb;
+    background-color: #f9f9f9;
 }
