@@ -26,15 +26,9 @@ if (token && user_id) {
   user.href = `/logout`;
   user.innerHTML = `Poistu pelistä`;
 
-  if (!localStorage.getItem("userData")) {
-    getPlayerData(user_id).then((data) => {
-      localStorage.setItem("userData", JSON.stringify(data));
-    });
-  }
-  
-  const userData = JSON.parse(localStorage.getItem("userData"));
+  const userData = await getPlayerData(user_id, token);
   const welcomeText = document.querySelector("#user-welcome");
-  welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>. Saldosi on ${userData.balance}`;
+  welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>! Saldo: ${userData.balance}`;
 }
 
 router.get("/", (req) => Home(req));

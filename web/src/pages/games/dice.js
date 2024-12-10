@@ -74,56 +74,58 @@ export async function Dice(req) {
                         <button>Heitä nopat!</button>
                     </form>
                 </div>
-            </div>
-        </div>
-    </div>    
     `;
-  const diceForm = document.querySelector("#dice-form");
-  diceForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const bet = event.currentTarget[0].value;
-    const diceAmount = event.currentTarget[1].value;
-    const guess = event.currentTarget[2].value;
-    const data = await getData(
-      "http://127.0.0.1:5000/api/games/dice",
-      bet,
-      diceAmount,
-      guess
-    );
 
-    // clear the dice container
-    const diceContainer = document.querySelector("#dice-container");
-    diceContainer.innerHTML = "";
+    const outcomeText = document.querySelector("#outcome");
+    const balance = document.querySelector("#balance");
+    const rollResult = document.querySelector("#roll-result");
     
-    // create images of the dice rolls
-    const diceRolls = data.dice_rolls;
-    diceRolls.forEach((diceValue, index) => {
-      setTimeout(() => {
-        createDiceImg(diceValue, diceContainer);
-        if (index === diceRolls.length - 1) {
-          displayOutcome(data);
-        }
-      }, index * 1000);
+    const diceForm = document.querySelector("#dice-form");
+    
+    diceForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+    
+      outcomeText.innerHTML = '';
+      balance.innerHTML = '';
+      rollResult.innerHTML = '';
+    
+      const bet = event.currentTarget[0].value;
+      const diceAmount = event.currentTarget[1].value;
+      const guess = event.currentTarget[2].value;
+      const data = await getData(
+        "http://127.0.0.1:5000/api/games/dice",
+        bet,
+        diceAmount,
+        guess
+      );
+    
+      // clear the dice container
+      const diceContainer = document.querySelector("#dice-container");
+      diceContainer.innerHTML = "";
+      
+      // create images of the dice rolls
+      const diceRolls = data.dice_rolls;
+      diceRolls.forEach((diceValue, index) => {
+        setTimeout(() => {
+          createDiceElement(diceValue, diceContainer);
+          if (index === diceRolls.length - 1) {
+            rollResult.innerHTML = `Noppien arvot ovat ${diceRolls.join(", ")}`
+            outcomeText.innerHTML = `Heiton summa: ${data.sum}, ${data.win ? "Voitit!" : "Hävisit..."}`
+            balance.innerHTML = `Uusi saldo: ${data.balance}`
+          }
+        }, index * 750);
+      });
     });
-  });
 }
 
-function createDiceImg(diceValue, target) {
-  const diceImg = document.createElement("img");
-  diceImg.src = `../images/dice/side_${diceValue}_pips.png`;
-  diceImg.alt = `dice ${diceValue}`;
-
+function createDiceElement(diceValue, target) {
   const diceWrapper = document.createElement("div");
   diceWrapper.classList.add("dice");
 
+  const diceImg = document.createElement("img");
+  diceImg.src = `/images/dice/side_${diceValue}_pips.png`;
+  diceImg.alt = `dice ${diceValue}`;
   diceWrapper.appendChild(diceImg);
+
   target.appendChild(diceWrapper);
-}
-
-function displayOutcome(outcome) {
-  const outcomeText = document.querySelector("#outcome");
-  const balance = document.querySelector("#balance");
-
-  outcomeText.textContent = `Heiton summa: ${outcome.sum}, ${outcome.win ? "Voitit!" : "Hävisit..."}`;
-  balance.textContent = `Uusi saldo: ${outcome.balance}`;
 }
