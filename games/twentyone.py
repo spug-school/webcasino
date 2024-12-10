@@ -13,6 +13,7 @@ class TwentyOne:
         self.max_turns = 3
         self.ranks = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
         self.suits = ("hearts", "diamonds", "cross", "spades")
+        self.backside = {"suit": "card", "rank": 0, "value": 0}
         self.messages = []
         self.deck = []
         self.player_hand = []
@@ -171,14 +172,20 @@ class TwentyOne:
                 self.dealer_pass = True
 
     def get_data(self):
+        if not self.data_dict['data']['dealer_hand'] == self.dealer_hand:
+            self.data_dict['data']['dealer_hand'] = self.dealer_hand
+            self.data_dict['data']['player_hand'] = self.player_hand
+        if self.player_pass == False:
+            dealer_hidden_cards = []
+            for item in self.dealer_hand:
+                dealer_hidden_cards.append(self.backside)
+            self.data_dict['data']['dealer_hand'] = dealer_hidden_cards
         return self.data_dict
 
 
     def run(self):
         while True:
-            if not self.deck == []:
-                self.game_reset()
-
+            print("Game started")
             while self.queue.empty():
                 sleep(1)
             if self.queue.get() == 1:
@@ -189,7 +196,6 @@ class TwentyOne:
                 self.score_calculation()
                 while not self.dealer_pass:
                     while not self.player_pass:
-
                         self.message_manager(f"Player has {self.player_total}. Do you want another card?")
                         self.to_send.put(self.get_data())
                         while self.queue.empty():
