@@ -6,6 +6,7 @@ import { Login } from "./pages/login.js";
 import { Profile } from "./pages/profile.js";
 import { Leaderboard } from "./pages/leaderboard.js";
 import { Dice } from "./pages/games/dice.js";
+import { Coinflip } from "./pages/games/coinflip.js";
 
 import { getPlayerData } from "./utils/fetchUtils.js";
 
@@ -29,6 +30,10 @@ if (token && user_id) {
   const userData = await getPlayerData(user_id);
   const welcomeText = document.querySelector("#user-welcome");
   welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>. Saldosi on ${userData.balance}`;
+
+  // userdata is accessible in all pages from
+  // localstorage
+  localStorage.setItem("userData", userData);
 }
 
 router.get("/", (req) => Home(req));
@@ -49,5 +54,6 @@ router.get("/profile", (req) => Profile(req));
 router.get("/leaderboard", (req) => Leaderboard(req));
 router.get("/games", (req) => Games(req));
 router.get("/games/dice", (req) => Dice(req));
+router.get("/games/coinflip", (req) => Coinflip(req));
 
 router.init();

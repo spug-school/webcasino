@@ -183,17 +183,39 @@ def dice_play(current_user: Player):
 
         return make_response(jsonify({
             'message': 'Game played successfully!',
-            'balance': current_user.get_balance(),
             **outcome
         }), 200)
     except ValueError as e:
-        print(e)
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        print(e)
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
 
-
+@app.route('/api/games/coinflip', methods=['POST'])
+@token_required
+def coinflip_play(current_user: Player):
+    data = request.json
+    user = current_user
+    
+    try:
+        bet = int(data.get('bet'))
+        guess = data.get('guess') # 'k' or 'c'
+        
+        if bet <= 0 or bet > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+        
+        playgame = Coinflip(user, db)
+        
+        outcome = playgame.start_game(bet, guess)
+        
+        return make_response(jsonify({
+            'message': 'Game played successfully!',
+            **outcome
+        }), 200)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+    
 
 @app.route('/api/logout', methods=['POST'])
 @token_required
@@ -204,7 +226,7 @@ def logout(current_user):
         token = token.split(' ')[1]
     
     blacklisted_tokens.add(token)
-    print(blacklisted_tokens)
+    
     return make_response(jsonify({
         'message': 'Logged out successfully'
     }), 200)

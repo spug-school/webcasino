@@ -14,29 +14,39 @@ class Coinflip(Game):
         ]
         
     def _flip_coin(self) -> str:
-        print('\nKolikkoa heitetään...\n')
-        sleep(random.randint(1 * 10, 3 * 10) / 10) # sleep for a random time between 0.5 and 1 seconds
         return random.choice(self.coin_sides)
     
     def _determine_outcome(self, guess: str, flip: str, bet: int) -> int:
         return bet * 2 if guess == flip[0] else 0
     
     @override
-    def start_game(self) -> dict:
+    def start_game(self, bet: int, guess: str) -> dict:
         '''
         Game-specific logic for: CoinFlip
         '''
-        bet = self.get_bet(self.player.get_balance())
+        self.deduct_bet(bet)
         
-        # one more opportunity to exit the game before flipping the coin
-        if bet == 0:
-            return False
-        
-        guess = self.validate_input('\nArvaa kruuna (k) vai klaava (c): ', 'str', allowed_values = ('k', 'c'))
         flip = self._flip_coin()
+        win_amount = self._determine_outcome(guess, flip, bet)
+        game_won = guess == flip[0]
+        
+        # Bulk-update the player values
+        self.update_player_values(
+            won = game_won, 
+            win_amount = win_amount, 
+            save = True
+        )
+        
+        # Save the game to the database
+        self.save_game_to_history(
+            bet = bet, 
+            win_amount = win_amount - bet
+        )
         
         return {
-            'won': guess == flip[0],
-            'win_amount': self._determine_outcome(guess, flip, bet),
-            'bet': bet
+            'won': game_won,
+            'win_amount': win_amount,
+            'bet': bet,
+            'flip': flip,
+            'balance': self.player.get_balance()
         }

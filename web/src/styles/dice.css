@@ -9,7 +9,6 @@
     font-weight: 700;
   }
   p {
-    opacity: 0.7;
     margin-bottom: 1rem;
   }
 }
@@ -36,14 +35,15 @@
   margin: 10px 0;
   width: 100%;
 
-  input {
+  input, select {
     min-width: 200px;
     width: 100%;
   }
 }
 
 #result-area,
-#dice-area {
+#dice-area,
+#coinflip-area {
   margin-top: 20px;
   padding: 10px;
   background: #f9f9f9;
@@ -51,7 +51,8 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-#dice-container {
+#dice-container,
+#coinflip-container {
   display: flex;
   justify-content: center;
   gap: 10px;
