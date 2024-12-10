@@ -20,8 +20,26 @@
     box-sizing: border-box; /* Include border/padding in box size */
 }
 
-/* Optional: Hover Effect for Better UX */
 .reel:hover {
     border-color: #bbb;
     background-color: #f9f9f9;
+}
+
+/* General container to center everything */
+.center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Push everything near the top */
+    padding-top: 2rem; /* Add custom padding to control space above */
+    height: 100vh;
+    text-align: center;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem; /* Adds spacing between elements */
+    text-align: center;
 }

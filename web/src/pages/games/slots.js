@@ -11,37 +11,39 @@ export async function Slots(req) {
     const symbols = ['🍑', '🍌', '🍒', '🍏', '🍇'];
 
     root.innerHTML = `
-    <div class="game-container">
-      <h1>Hedelmäpeli</h1>
-      <p>Tervetuloa hedelmäpeliin! Syötä panos ja aloita peli!</p>
-      <div id="game-area">
-        <div id="slots-area">
-          <div id="slot-machine">
-            <div class="reel">🍑</div>
-            <div class="reel">🍌</div>
-            <div class="reel">🍒</div>
-            <div class="reel">🍏</div>
-          </div>
-        </div>
-        <form id="slots-form">
-          <label for="bet">Panos:</label>
-          <input 
-            type="number" 
-            id="bet" 
-            placeholder="Syötä panos" 
-            min="1"
-            max="${playerBalance}"
-            required
-          >
-          <button type="submit">Aloita peli!</button>
-        </form>
-        <div id="result-area">
-          <p id="outcome"></p>
-          <p id="balance"></p>
+<div class="center-container">
+  <div class="game-container">
+    <h1>Hedelmäpeli</h1>
+    <p>Tervetuloa hedelmäpeliin! Syötä panos ja aloita peli!</p>
+    <div id="game-area">
+      <div id="slots-area">
+        <div id="slot-machine">
+          <div class="reel">🍑</div>
+          <div class="reel">🍌</div>
+          <div class="reel">🍒</div>
+          <div class="reel">🍏</div>
         </div>
       </div>
+      <form id="slots-form">
+        <label for="bet">Panos:</label>
+        <input 
+          type="number" 
+          id="bet" 
+          placeholder="Syötä panos" 
+          min="1"
+          max="${playerBalance}"
+          required
+        >
+        <button type="submit">Aloita peli!</button>
+      </form>
+      <div id="result-area">
+        <p id="outcome"></p>
+        <p id="balance"></p>
+      </div>
     </div>
-  `;
+  </div>
+</div>
+`;
 
     const slotsForm = document.querySelector("#slots-form");
     slotsForm.addEventListener("submit", async (event) => {
