@@ -144,8 +144,8 @@ class TwentyOne:
             self.dealer_pass = True
 
     def message_manager(self, message):
-        while len(self.messages) > 10:
-            self.messages.pop(-1)
+        while len(self.messages) > 5:
+            self.messages.pop(0)
         self.messages.append(message)
 
     def ai_logic(self):
