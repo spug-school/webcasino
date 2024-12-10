@@ -31,14 +31,14 @@ export function Games(req) {
         </div>
 
         <div class="game-card">
-          <a href="/games/roulette">
+          <a href="/games/coinflip">
             <img 
-              src="/images/games_page/roulettegame.png" 
-              alt="Roulette"
+              src="/images/games_page/coinflipgame.png" 
+              alt="Coin Flip"
               style="width: 100%; border-radius: 0.5rem;"
             >
-            <h3>Roulette</h3>
-            <p>Place your bets and spin the wheel!</p>
+            <h3>Coin Flip</h3>
+            <p>Flip the coin and decide your fate!</p>
           </a>
         </div>
       </div>
