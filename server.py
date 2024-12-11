@@ -97,6 +97,40 @@ def login():
             'user_id': user_id,
             }), 200)
             
+@app.route('/api/logout', methods=['POST'])
+@token_required
+def logout(current_user):
+    token = request.headers.get('Authorization')
+    
+    if token.startswith('Bearer '):
+        token = token.split(' ')[1]
+    
+    blacklisted_tokens.add(token)
+    
+    return make_response(jsonify({
+        'message': 'Logged out successfully'
+    }), 200)
+
+@app.route('/api/player/<int:id>', methods=['GET'])
+def player(id):
+    query = '''
+        SELECT 
+            u.username,
+            s.balance,
+            s.total_winnings,
+            s.games_played,
+            s.games_won,
+            s.games_lost
+        FROM users u
+        JOIN user_statistics s
+        ON u.id = s.user_id
+        WHERE u.id = %s
+    '''
+    
+    result = db.query(query, (id,), cursor_settings={'dictionary': True})
+    
+    return result['result'][0]
+
 @app.route('/api/profile', methods=['GET'])
 @token_required
 def profile(current_user: Player):
@@ -166,18 +200,15 @@ def games(current_user: Player):
 @app.route('/api/games/dice', methods=['POST'])
 @token_required
 def dice_play(current_user: Player):
-    data = request.json
-    user = current_user
-
     try:
-        bet = int(data.get('bet'))
-        dice_amount = int(data.get('dice_amount'))
-        guess = int(data.get('guess'))
+        bet = int(request.get_json().get('bet'))
+        dice_amount = int(request.get_json().get('dice_amount'))
+        guess = int(request.get_json().get('guess'))
 
         if bet<= 0 or bet > current_user.get_balance():
             return jsonify({'error': 'Invalid bet amount'}), 400
 
-        playgame = Dice(user,db)
+        playgame = Dice(current_user,db)
 
         outcome = playgame.start_game(bet,dice_amount, guess)
 
@@ -193,17 +224,14 @@ def dice_play(current_user: Player):
 @app.route('/api/games/coinflip', methods=['POST'])
 @token_required
 def coinflip_play(current_user: Player):
-    data = request.json
-    user = current_user
-    
     try:
-        bet = int(data.get('bet'))
-        guess = data.get('guess') # 'k' or 'c'
+        bet = int(request.get_json().get('bet'))
+        guess = request.get_json().get('guess') # 'k' or 'c'
         
         if bet <= 0 or bet > current_user.get_balance():
             return jsonify({'error': 'Invalid bet amount'}), 400
         
-        playgame = Coinflip(user, db)
+        playgame = Coinflip(current_user, db)
         
         outcome = playgame.start_game(bet, guess)
         
@@ -216,37 +244,27 @@ def coinflip_play(current_user: Player):
     except Exception as e:
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
     
-
-@app.route('/api/logout', methods=['POST'])
+@app.route('/api/games/roulette', methods=['POST'])
 @token_required
-def logout(current_user):
-    token = request.headers.get('Authorization')
-    
-    if token.startswith('Bearer '):
-        token = token.split(' ')[1]
-    
-    blacklisted_tokens.add(token)
-    
-    return make_response(jsonify({
-        'message': 'Logged out successfully'
-    }), 200)
+def roulette_play(current_user: Player):
+    try:
+        bets = int(request.get_json().get('bets'))
+        color_guesses = str(request.get_json().get('color_guesses'))
+        number_guesses = int(request.get_json().get('number_guesses'))
 
-@app.route('/api/player/<int:id>', methods=['GET'])
-def player(id):
-    query = '''
-        SELECT 
-            u.username,
-            s.balance,
-            s.total_winnings,
-            s.games_played,
-            s.games_won,
-            s.games_lost
-        FROM users u
-        JOIN user_statistics s
-        ON u.id = s.user_id
-        WHERE u.id = %s
-    '''
-    
-    result = db.query(query, (id,), cursor_settings={'dictionary': True})
-    
-    return result['result'][0]
+        if bets <= 0 or bets > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+
+        playgame = Roulette(current_user, db)
+        print('not here')
+        outcome = playgame.start_game(bets, color_guesses, number_guesses)
+        print('here')
+        
+        return make_response(jsonify({
+            'message': 'Game played successfully!',
+            **outcome
+        }), 200)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500

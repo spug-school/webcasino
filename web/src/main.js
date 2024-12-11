@@ -1,4 +1,4 @@
-//import "./styles.css";
+import "./styles.css";
 import { Router } from "./core/simpleRouter.js";
 import { Games } from "./pages/games.js";
 import { Home } from "./pages/home.js";
@@ -9,6 +9,7 @@ import { Dice } from "./pages/games/dice.js";
 import { Coinflip } from "./pages/games/coinflip.js";
 
 import { getPlayerData } from "./utils/fetchUtils.js";
+import { Roulette } from "./pages/games/roulette.js";
 
 export const router = new Router();
 
@@ -57,5 +58,6 @@ router.get("/leaderboard", (req) => Leaderboard(req));
 router.get("/games", (req) => Games(req));
 router.get("/games/dice", (req) => Dice(req));
 router.get("/games/coinflip", (req) => Coinflip(req));
+router.get("/games/roulette", (req) => Roulette(req));
 
 router.init();

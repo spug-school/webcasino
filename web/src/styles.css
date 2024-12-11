@@ -1,6 +1,7 @@
 @import "./reset.css";
 @import "./styles/dice.css";
 @import "./styles/coinflip.css";
+@import "./styles/roulette.css";
 
 body {
   background-color: antiquewhite;
@@ -63,7 +64,7 @@ h2 {
   width: 100%;
   overflow: auto;
 
-  >* {
+  > * {
     margin-bottom: 1rem;
   }
 
@@ -85,7 +86,6 @@ h2 {
       font-size: 1rem;
     }
   }
-
 }
 
 /* table style */

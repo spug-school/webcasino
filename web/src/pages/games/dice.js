@@ -94,7 +94,7 @@ export async function Dice(req) {
     // clear the dice container
     const diceContainer = document.querySelector("#dice-container");
     diceContainer.innerHTML = "";
-    
+
     // create images of the dice rolls
     const diceRolls = data.dice_rolls;
     diceRolls.forEach((diceValue, index) => {
@@ -124,6 +124,8 @@ function displayOutcome(outcome) {
   const outcomeText = document.querySelector("#outcome");
   const balance = document.querySelector("#balance");
 
-  outcomeText.textContent = `Heiton summa: ${outcome.sum}, ${outcome.win ? "Voitit!" : "Hävisit..."}`;
+  outcomeText.textContent = `Heiton summa: ${outcome.sum}, ${
+    outcome.won ? "Voitit!" : "Hävisit..."
+  }`;
   balance.textContent = `Uusi saldo: ${outcome.balance}`;
 }
