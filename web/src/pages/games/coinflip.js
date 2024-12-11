@@ -99,19 +99,11 @@ export async function Coinflip(req) {
 }
 
 function displayOutcome(outcome) {
-<<<<<<< HEAD
-    const outcomeText = document.querySelector("#outcome");
-    const balance = document.querySelector("#balance");
-  
-    outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}, ${outcome.won ? "Voitit!" : "Hävisit..."}`;
-    balance.textContent = `Uusi saldosi on: ${outcome.balance}`;
-=======
   const outcomeText = document.querySelector("#outcome");
   const balance = document.querySelector("#balance");
 
   outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${
     outcome.flip[2]
-  }, ${outcome.win ? "Voitit!" : "Hävisit..."}`;
+  }, ${outcome.won ? "Voitit!" : "Hävisit..."}`;
   balance.textContent = `Uusi saldosi on: ${outcome.balance}`;
->>>>>>> 284becd (roulette game done, TODO:fix wheel css)
 }

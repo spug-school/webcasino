@@ -1,4 +1,4 @@
-import "./styles.css";
+// import "./styles.css";
 import { Router } from "./core/simpleRouter.js";
 import { Games } from "./pages/games.js";
 import { Home } from "./pages/home.js";
@@ -32,7 +32,7 @@ if (token && user_id) {
       localStorage.setItem("userData", JSON.stringify(data));
     });
   }
-  
+
   const userData = JSON.parse(localStorage.getItem("userData"));
   const welcomeText = document.querySelector("#user-welcome");
   welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>. Saldosi on ${userData.balance}`;
