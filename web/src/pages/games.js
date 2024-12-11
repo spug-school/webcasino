@@ -3,18 +3,18 @@ export function Games(req) {
   console.log(req);
   root.innerHTML = `
     <div class="games-container">
-      <h2>Games</h2>
-      <p>Choose a game</p>
+      <h2>Pelit</h2>
+      <p>Valitse Peli</p>
       <div class="games">
         <div class="game-card">
           <a href="/games/dice">
             <img 
               src="/images/games_page/dicegame.png" 
-              alt="Dice"
+              alt="Nopanheitto"
               style="width: 100%; border-radius: 0.5rem;"
             >
-            <h3>Dice</h3>
-            <p>Roll the dice and test your luck!</p>
+            <h3>Nopanheitto</h3>
+            <p>Heitä noppaa ja testaa onneasi!</p>
           </a>
         </div>
 
@@ -22,11 +22,11 @@ export function Games(req) {
           <a href="/games/slots">
             <img 
               src="/images/games_page/slotsgame.png" 
-              alt="Slots"
+              alt="Hedelmäpeli"
               style="width: 100%; border-radius: 0.5rem;"
             >
-            <h3>Slots</h3>
-            <p>Spin the reels and win big!</p>
+            <h3>Hedelmäpeli</h3>
+            <p>Vedä vivusta ja voita isosti!</p>
           </a>
         </div>
 
@@ -34,11 +34,35 @@ export function Games(req) {
           <a href="/games/coinflip">
             <img 
               src="/images/games_page/coinflipgame.png" 
-              alt="Coin Flip"
+              alt="Kolikonheitto"
               style="width: 100%; border-radius: 0.5rem;"
             >
-            <h3>Coin Flip</h3>
-            <p>Flip the coin and decide your fate!</p>
+            <h3>Kolikonheitto</h3>
+            <p>Heitä kolikko ja anna kohtalon päättää!</p>
+          </a>
+        </div>
+        
+        <div class="game-card">
+          <a href="/games/roulette">
+            <img 
+              src="/images/games_page/roulettegame.png" 
+              alt="Ruletti"
+              style="width: 100%; border-radius: 0.5rem;"
+            >
+            <h3>Ruletti</h3>
+            <p>Pyörän ympäri kiertää, mihin onni laskeutuu, kuka tietää?</p>
+          </a>
+        </div>
+        
+        <div class="game-card">
+          <a href="/games/ventti">
+            <img 
+              src="/images/games_page/venttigame.png" 
+              alt="Ventti"
+              style="width: 100%; border-radius: 0.5rem;"
+            >
+            <h3>Ventti</h3>
+            <p>Pelaa korttisi oikein ja voita jakajan!</p>
           </a>
         </div>
       </div>
