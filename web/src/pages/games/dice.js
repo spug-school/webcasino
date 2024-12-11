@@ -19,7 +19,7 @@ async function getData(url, bet, diceAmount, guess) {
 export async function Dice(req) {
   const root = document.querySelector("#root");
 
-  const playerBalance = localStorage.getItem("userData").balance;
+  const playerBalance = JSON.parse(localStorage.getItem("userData")).balance;
 
   root.innerHTML = `
       <div class="game-container">
@@ -69,53 +69,57 @@ export async function Dice(req) {
                             type="number" 
                             id="guess" 
                             placeholder="Arvaa summa"
+                            min="2"
+                            max="24"
                             required>
                         </div>
-                        <button>Heitä nopat!</button>
+                        <input type="submit" value="Heitä nopat!">
                     </form>
                 </div>
     `;
 
-    const outcomeText = document.querySelector("#outcome");
-    const balance = document.querySelector("#balance");
-    const rollResult = document.querySelector("#roll-result");
-    
-    const diceForm = document.querySelector("#dice-form");
-    
-    diceForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-    
-      outcomeText.innerHTML = '';
-      balance.innerHTML = '';
-      rollResult.innerHTML = '';
-    
-      const bet = event.currentTarget[0].value;
-      const diceAmount = event.currentTarget[1].value;
-      const guess = event.currentTarget[2].value;
-      const data = await getData(
-        "http://127.0.0.1:5000/api/games/dice",
-        bet,
-        diceAmount,
-        guess
-      );
-    
-      // clear the dice container
-      const diceContainer = document.querySelector("#dice-container");
-      diceContainer.innerHTML = "";
-      
-      // create images of the dice rolls
-      const diceRolls = data.dice_rolls;
-      diceRolls.forEach((diceValue, index) => {
-        setTimeout(() => {
-          createDiceElement(diceValue, diceContainer);
-          if (index === diceRolls.length - 1) {
-            rollResult.innerHTML = `Noppien arvot ovat ${diceRolls.join(", ")}`
-            outcomeText.innerHTML = `Heiton summa: ${data.sum}, ${data.win ? "Voitit!" : "Hävisit..."}`
-            balance.innerHTML = `Uusi saldo: ${data.balance}`
-          }
-        }, index * 750);
-      });
+  const outcomeText = document.querySelector("#outcome");
+  const balance = document.querySelector("#balance");
+  const rollResult = document.querySelector("#roll-result");
+
+  const diceForm = document.querySelector("#dice-form");
+  const submitBtn = diceForm.querySelector("input[type=submit]");
+
+  diceForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    submitBtn.disabled = true;
+
+    outcomeText.innerHTML = '';
+    balance.innerHTML = '';
+    rollResult.innerHTML = '';
+
+    const bet = event.currentTarget[0].value;
+    const diceAmount = event.currentTarget[1].value;
+    const guess = event.currentTarget[2].value;
+    const data = await getData(
+      "http://127.0.0.1:5000/api/games/dice",
+      bet,
+      diceAmount,
+      guess
+    );
+    // clear the dice container
+    const diceContainer = document.querySelector("#dice-container");
+    diceContainer.innerHTML = "";
+
+    // create images of the dice rolls
+    const diceRolls = data.dice_rolls;
+    diceRolls.forEach((diceValue, index) => {
+      setTimeout(() => {
+        createDiceElement(diceValue, diceContainer);
+        if (index === diceRolls.length - 1) {
+          rollResult.innerHTML = `Noppien arvot ovat ${diceRolls.join(", ")}`
+          outcomeText.innerHTML = `Heiton summa: ${data.sum}, ${data.won ? "Voitit!" : "Hävisit..."}`
+          balance.innerHTML = `Uusi saldo: ${data.balance}`
+          submitBtn.disabled = false;
+        }
+      }, index * 750);
     });
+  });
 }
 
 function createDiceElement(diceValue, target) {

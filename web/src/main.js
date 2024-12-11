@@ -29,6 +29,8 @@ if (token && user_id) {
   const userData = await getPlayerData(user_id, token);
   const welcomeText = document.querySelector("#user-welcome");
   welcomeText.innerHTML = `Tervetuloa, <b>${userData.username}</b>! Saldo: ${userData.balance}`;
+
+  localStorage.setItem("userData", JSON.stringify(userData));
 }
 
 router.get("/", (req) => Home(req));

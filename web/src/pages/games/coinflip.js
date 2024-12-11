@@ -2,26 +2,26 @@ import { apiUrl } from "../../core/config.js";
 
 async function getData(url, bet, guess) {
     const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ bet: bet, guess: guess }),
+        method: "POST",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bet: bet, guess: guess }),
     });
-  
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-  
+
     return await response.json();
-  }
+}
 
 export async function Coinflip(req) {
     const root = document.querySelector("#root");
 
-    const playerBalance = localStorage.getItem("userData").balance;
+    const playerBalance = JSON.parse(localStorage.getItem("userData")).balance;
 
     root.innerHTML = `
     <div class="game-container">
@@ -61,16 +61,18 @@ export async function Coinflip(req) {
                     <option value="c">Klaava 🍀</option>
                 </select>
             </div>
-            <button>Heitä kolikkoa!</button>
+            <input type="submit" value="Heitä kolikkoa!">
         </form>
     </div>
     `;
 
     const coinflipForm = document.querySelector("#coinflip-form");
     const coin = document.querySelector(".coin");
-    
+    const submitBtn = coinflipForm.querySelector("input[type=submit]");
+
     coinflipForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        submitBtn.disabled = true;
 
         // reset the coin animation
         coin.style.animation = "none";
@@ -79,25 +81,26 @@ export async function Coinflip(req) {
         const guess = coinflipForm.querySelector("#guess").value;
 
         const data = await getData(`${apiUrl}/games/coinflip`, bet, guess);
-        
+
         // animate the coin
         const flipResult = data.flip[1];
         const resultAngle = flipResult === "kruuna" ? "0deg" : "180deg";
-        
+
         coin.style.setProperty('--result-angle', resultAngle);
         coin.style.animation = "flip 2s ease-in-out forwards";
-        
+
         // display outcome when animation ends
         coin.addEventListener("animationend", () => {
             displayOutcome(data);
-        }, {once: true});
+            submitBtn.disabled = false;
+        }, { once: true });
     })
 }
 
 function displayOutcome(outcome) {
     const outcomeText = document.querySelector("#outcome");
     const balance = document.querySelector("#balance");
-  
+
     outcomeText.textContent = `Heiton tulos: ${outcome.flip[1]} ${outcome.flip[2]}. ${outcome.won ? "Voitit!" : "Hävisit..."}`;
     balance.textContent = `Uusi saldosi on: ${outcome.balance}`;
 }
