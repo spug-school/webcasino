@@ -12,7 +12,9 @@ async function getData(url, bet, guess) {
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        alert("Kolikonheitossa kävi virhe!");
+        console.error(response);
+        return;
     }
 
     return await response.json();

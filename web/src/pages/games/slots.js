@@ -1,18 +1,18 @@
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function Slots(req) {
-    const root = document.querySelector("#root");
+  const root = document.querySelector("#root");
 
-    const playerBalance = localStorage.getItem("userData").balance;
+  const playerBalance = JSON.parse(localStorage.getItem("userData")).balance;
 
-    // Array of slot icons
-    const symbols = ['🍑', '🍌', '🍒', '🍏', '🍇'];
+  // Array of slot icons
+  const symbols = ['🍑', '🍌', '🍒', '🍏', '🍇'];
 
-    root.innerHTML = `
+  root.innerHTML = `
 <div class="center-container">
-  <div class="game-container">
+  <div class="game-container game-container-slots">
     <h1>Hedelmäpeli</h1>
     <p>Tervetuloa hedelmäpeliin! Syötä panos ja aloita peli!</p>
     <div id="game-area">
@@ -45,58 +45,56 @@ export async function Slots(req) {
 </div>
 `;
 
-    const slotsForm = document.querySelector("#slots-form");
-    slotsForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
+  const slotsForm = document.querySelector("#slots-form");
+  slotsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-        const bet = parseInt(document.querySelector("#bet").value);
+    const bet = parseInt(document.querySelector("#bet").value);
 
-        const response = await fetch("http://127.0.0.1:5000/api/games/slots", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ bet: bet }),
-        });
-
-        if (!response.ok) {
-            alert("Error spinning the slot machine!");
-            return;
-        }
-
-        const data = await response.json();
-        console.log("Response data:", data);
-
-        const reels = document.querySelectorAll(".reel");
-
-        await spinReels(reels, symbols, data.spin_result);
-
-        document.querySelector("#outcome").textContent = data.won
-            ? `Voitit! Saldosi kasvoi ${data.win_amount} yksikköä.`
-            : "Hävisit panoksesi.";
-        document.querySelector("#balance").textContent = `Uusi saldo: ${data.balance}`;
-
-        const userData = await getPlayerData(localStorage.getItem("user_id"));
-        localStorage.setItem("userData", JSON.stringify(userData));
+    const response = await fetch("http://127.0.0.1:5000/api/games/slots", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ bet: bet }),
     });
 
-    async function spinReels(reels, symbols, finalResult) {
-        const spinTime = [1000, 1200, 1400, 1600];
-        const intervalTime = 100;
-
-        for (let i = 0; i < reels.length; i++) {
-            const reel = reels[i];
-
-            const start = performance.now();
-
-            while (performance.now() - start < spinTime[i]) {
-                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                reel.textContent = randomSymbol;
-                await sleep(intervalTime);
-            }
-
-            reel.textContent = finalResult[i];
-        }
+    if (!response.ok) {
+      alert("Error spinning the slot machine!");
+      return;
     }
+
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    const reels = document.querySelectorAll(".reel");
+
+    await spinReels(reels, symbols, data.spin_result);
+
+    document.querySelector("#outcome").textContent = data.won
+      ? `Voitit! Saldosi kasvoi ${data.win_amount} pistettä.`
+      : "Hävisit panoksesi.";
+    document.querySelector("#balance").textContent = `Uusi saldo: ${data.balance}`;
+  });
+
+}
+
+async function spinReels(reels, symbols, finalResult) {
+  const spinTime = [1000, 1200, 1400, 1600];
+  const intervalTime = 100;
+
+  for (let i = 0; i < reels.length; i++) {
+    const reel = reels[i];
+
+    const start = performance.now();
+
+    while (performance.now() - start < spinTime[i]) {
+      const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+      reel.textContent = randomSymbol;
+      await sleep(intervalTime);
+    }
+
+    reel.textContent = finalResult[i];
+  }
 }

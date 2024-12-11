@@ -2,6 +2,7 @@
 @import "./styles/dice.css";
 @import "./styles/coinflip.css";
 @import "./styles/slots.css";
+@import "./styles/twentyone.css";
 
 body {
   background-color: antiquewhite;
@@ -13,6 +14,13 @@ h1 {
 }
 
 h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* general headings */
+h3 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -54,7 +62,7 @@ h2 {
 .container {
   padding: 1.5rem;
 
-  > * {
+  >* {
     margin-bottom: 1rem;
   }
 }
@@ -76,15 +84,6 @@ h2 {
     justify-content: start;
     flex-wrap: wrap;
     flex-direction: row;
-
-    select {
-      height: 2.5rem;
-      border-radius: 0.375rem;
-      border: 1px solid #ccc;
-      background-color: #f1f1f1;
-      padding: 0.5rem 0.75rem;
-      font-size: 1rem;
-    }
   }
 
 }
@@ -237,6 +236,77 @@ input[type="submit"],
   &:hover {
     background-color: #334155a7;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.wrap {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 2rem;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 75%;
+}
+
+.wrap-me {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  flex: 1 1 25%;
+}
+
+.controls {
+  margin: 10px 0;
+  width: 100%;
+
+  input,
+  select {
+    min-width: 200px;
+    width: 100%;
+  }
+}
+
+#result-area,
+#dice-area,
+#coinflip-area,
+#twentyone-area {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#dice-container,
+#coinflip-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.game-container {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  /* width: 500px; */
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
 }
 
 /* games page */
@@ -317,13 +387,6 @@ input[type="submit"],
       }
     }
   }
-}
-
-/* general headings */
-h3 {
-  font-size: 1.25rem; /* General font-size */
-  font-weight: 600; /* Default weight */
-  margin-bottom: 1rem;
 }
 
 /* utilities */

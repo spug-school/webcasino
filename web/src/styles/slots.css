@@ -7,17 +7,24 @@
 }
 
 .reel {
-    font-size: 2rem; /* Controls the size of the icons */
+    font-size: 2rem;
+    /* Controls the size of the icons */
     display: flex;
-    align-items: center; /* Center vertically */
-    justify-content: center; /* Center horizontally */
+    align-items: center;
+    /* Center vertically */
+    justify-content: center;
+    /* Center horizontally */
     border: 2px solid #ddd;
-    padding: 0; /* Remove padding that might shift content */
-    width: 60px; /* Ensure consistent width */
-    height: 60px; /* Ensure consistent height */
+    padding: 0;
+    /* Remove padding that might shift content */
+    width: 60px;
+    /* Ensure consistent width */
+    height: 60px;
+    /* Ensure consistent height */
     text-align: center;
     background: #fff;
-    box-sizing: border-box; /* Include border/padding in box size */
+    box-sizing: border-box;
+    /* Include border/padding in box size */
 }
 
 .reel:hover {
@@ -30,16 +37,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Push everything near the top */
-    padding-top: 2rem; /* Add custom padding to control space above */
+    justify-content: flex-start;
+    /* Push everything near the top */
+    padding-top: 2rem;
+    /* Add custom padding to control space above */
     height: 100vh;
     text-align: center;
 }
 
-.game-container {
+.game-container-slots {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem; /* Adds spacing between elements */
-    text-align: center;
+    gap: 1rem;
+    /* Adds spacing between elements */
+    /*text-align: center;*/
 }

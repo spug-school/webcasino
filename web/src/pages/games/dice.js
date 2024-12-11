@@ -10,7 +10,9 @@ async function getData(url, bet, diceAmount, guess) {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    alert("Nopanheitossa kävi virhe!");
+    console.error(response);
+    return;
   }
 
   return await response.json();
@@ -76,6 +78,8 @@ export async function Dice(req) {
                         <input type="submit" value="Heitä nopat!">
                     </form>
                 </div>
+            </div>
+        </div>
     `;
 
   const outcomeText = document.querySelector("#outcome");
