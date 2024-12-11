@@ -4,7 +4,7 @@ from datetime import datetime
 
 class Game(ABC):
     '''
-    Parent class for all the games. Contains the common methods and attributes for the games
+    Parent class for all the games. Contains common methods and attributes for the games
 
     Attributes:
         player (object): The current player object
@@ -14,7 +14,7 @@ class Game(ABC):
     def __init__(self, player: object, db_handler: object, game_type_name: str, ui: str = 'cli'):
         self.player = player
         self.db = db_handler
-        self.game_type_record = self.__get_game_type_record(value = game_type_name, key = 'name_en')
+        self.game_type_record = self._get_game_type_record(value = game_type_name, key = 'name_en')
         self.game_info = {
             'name': self.game_type_record.get('name'),
             'rules': self.game_type_record.get('rules')
@@ -22,44 +22,40 @@ class Game(ABC):
         self.ui = ui
         
     @abstractmethod
-    def start_game(self) -> dict:
-        '''
-        This method should be implemented in the game class to handle the game-specific logic
-        
-        Returns:
-            dict{}: A dictionary containing the following keys:
-                - bet (int): The amount bet.
-                - win_amount (int): The amount won.
-                - won (bool): Whether the bet was won.
-        '''
+    def start_game(self):
         pass
     
-    def deduct_bet(self, bet: int) -> int:
+    def deduct_bet(self, bet: int):
         '''
-        Gets the bet from the player and deducts it from the player's balance
-        
-        Parameters:
-            bet (int): The bet amount
-        Returns:
-            int: The bet amount
+        Deducts bet from the player's balance & saves the record
         '''
         self.player.update_balance(-bet)
         self.player.save()
-        return bet
+    
+    def after_game(self, bet: int, win_amount: int):
+        '''
+        Updates the player values and saves the game to the database
+        '''
+        try:
+            self.update_player_values(
+                won = win_amount > 0, 
+                win_amount = win_amount, 
+                save = True
+            )
+            
+            self.save_game_to_history(
+                bet = bet, 
+                win_amount = win_amount - bet
+            )
+        except Exception as error:
+            logging.error(f'Error after the game: {error}')
     
     # --------------------------------
     # Database related methods
     # --------------------------------
-    def __get_game_type_record(self, value: str, key: str = 'name_en') -> dict | bool:
+    def _get_game_type_record(self, value: str, key: str = 'name_en') -> dict | bool:
         '''
-        Creates a new game type in the database. References the class name as the game type name
-        
-        Parameters:
-            value (str): The value to search for in the database
-            key (str): The key to search for in the database
-            
-        Returns:
-            (dict{} | bool(False)): The game type record, if found. False if not found
+        Gets the game type record from the database
         '''
         try:
             query = '''
@@ -85,9 +81,6 @@ class Game(ABC):
             won (bool): Whether the player won the game or not
             win_amount (int): The amount won
             save (bool): Whether to save the updated values to the database
-            
-        Returns:
-            bool: Success state
         '''
         try:
             if won: # win
@@ -109,22 +102,12 @@ class Game(ABC):
             
             if save: # save the updated values to the database
                 self.player.save()
-                
-            return True
         except Exception as error:
             logging.error(f'Error updating the player values: {error}')
-            return False
     
     def save_game_to_history(self, win_amount: int, bet: int) -> bool:
         '''
-        Saves the game to the database. Returns success state boolean
-        
-        Parameters:
-            win_amount (int): The amount won
-            bet (int): The amount bet
-        
-        Returns:
-            bool: Success state
+        Saves the game to the database
         '''
         try:
             query = '''
@@ -137,14 +120,17 @@ class Game(ABC):
             game_type_id = self.db.query('SELECT id FROM game_types WHERE name = %s', (self.game_info.get('name'),), cursor_settings={'dictionary': True})['result'][0].get('id')
 
             adjusted_win_amount = win_amount if win_amount > 0 else 0
-            values = (bet, adjusted_win_amount, datetime.now(), int(user_id), int(game_type_id))
+            values = (
+                bet, 
+                adjusted_win_amount, 
+                datetime.now(), 
+                int(user_id), 
+                int(game_type_id)
+            )
             
             result = self.db.query(query, values)
             
-            if result['affected_rows'] > 0:
-                return True
-            else:
-                raise Exception('Unexpected error saving the game')
+            return True if result['affected_rows'] > 0 else False
         except Exception as error:
             logging.error(f'Error saving the game: {error}')
             return False

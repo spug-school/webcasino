@@ -33,23 +33,11 @@ class Dice(Game):
         dice_rolls = [self._roll_dice() for _ in range(dice_amount)]
         roll_sum = sum(dice_rolls)
         win_amount = self._determine_outcome(guess, bet, roll_sum, dice_amount)
-        game_won = guess == roll_sum
         
-        # Bulk-update the player values
-        self.update_player_values(
-            won = game_won, 
-            win_amount = win_amount, 
-            save = True
-        )
-        
-        # Save the game to the database
-        self.save_game_to_history(
-            bet = bet, 
-            win_amount = win_amount - bet
-        )
+        self.after_game(bet, win_amount)
         
         return {
-            'won': game_won,
+            'won': win_amount > 0,
             'win_amount': win_amount,
             'bet': bet,
             'dice_rolls': dice_rolls,

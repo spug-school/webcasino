@@ -1,7 +1,3 @@
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export async function Slots(req) {
   const root = document.querySelector("#root");
 
@@ -33,7 +29,7 @@ export async function Slots(req) {
           max="${playerBalance}"
           required
         >
-        <button type="submit">Aloita peli!</button>
+        <input type="submit" value="Aloita peli!">
       </form>
       <div id="result-area">
         <h2>Tulos</h2>
@@ -47,15 +43,15 @@ export async function Slots(req) {
 
   const outcome = document.querySelector("#outcome");
   const balance = document.querySelector("#balance");
-
-  console.log("hips")
-
   const slotsForm = document.querySelector("#slots-form");
+  const playButton = slotsForm.querySelector("[type=submit]");
+
   slotsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     outcome.innerHTML = "";
     balance.innerHTML = "";
+    playButton.disabled = true;
 
     const bet = parseInt(document.querySelector("#bet").value);
 
@@ -74,18 +70,23 @@ export async function Slots(req) {
     }
 
     const data = await response.json();
-    console.log("Response data:", data);
+    // console.log("Response data:", data);
 
     const reels = document.querySelectorAll(".reel");
 
     await spinReels(reels, symbols, data.spin_result);
 
-    document.querySelector("#outcome").textContent = data.won
-      ? `Voitit! Saldosi kasvoi ${data.win_amount} pistettä.`
+    outcome.innerText = data.won
+      ? `Voitit! ${data.consecutive_symbols} vierekkäistä symbolia!\nSaldosi kasvoi ${data.win_amount} pistettä.`
       : "Hävisit panoksesi.";
-    document.querySelector("#balance").textContent = `Uusi saldo: ${data.balance}`;
+    balance.innerText = `Uusi saldo: ${data.balance}`;
+    playButton.disabled = false;
   });
 
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function spinReels(reels, symbols, finalResult) {

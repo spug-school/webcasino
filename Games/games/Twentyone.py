@@ -1,6 +1,5 @@
 from random import shuffle
 from time import sleep
-from os import system, name
 from ..Game import Game
 from typing import override
 

@@ -38,7 +38,7 @@ export function Games(req) {
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Kolikonheitto</h3>
-            <p>Heitä kolikko ja anna kohtalon päättää!</p>
+            <p>Perinteinen kolikonheitto!</p>
           </a>
         </div>
         
@@ -54,7 +54,7 @@ export function Games(req) {
           </a>
         </div>
         
-        <div class="game-card">
+        <!--<div class="game-card">
           <a href="/games/ventti">
             <img 
               src="/images/games_page/venttigame.png" 
@@ -64,7 +64,7 @@ export function Games(req) {
             <h3>Ventti</h3>
             <p>Pelaa korttisi oikein ja voita jakajan!</p>
           </a>
-        </div>
+        </div>-->
       </div>
     </div>
   `;

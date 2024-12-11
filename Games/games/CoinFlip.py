@@ -31,23 +31,11 @@ class Coinflip(Game):
 
         flip = self._flip_coin()
         win_amount = self._determine_outcome(guess, flip, bet)
-        game_won = guess == flip[0]
         
-        # Bulk-update the player values
-        self.update_player_values(
-            won = game_won, 
-            win_amount = win_amount, 
-            save = True
-        )
-        
-        # Save the game to the database
-        self.save_game_to_history(
-            bet = bet, 
-            win_amount = win_amount - bet
-        )
+        self.after_game(bet, win_amount)
         
         return {
-            'won': game_won,
+            'won': win_amount > 0,
             'win_amount': win_amount,
             'bet': bet,
             'flip': flip,

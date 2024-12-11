@@ -1,28 +1,26 @@
 from flask import Flask, request, make_response,jsonify
 from flask_cors import CORS
 import jwt
-import json
 from datetime import datetime, timedelta
 
 from config import config
 from helpers.get_db_setup_args import get_db_setup_args
 from Database.Database import Database
 
-from Player.Player import Player
-from Player.Auth import Auth
+from Player import Player, Auth
 
 from Games import *
 from ViewClasses import *
 
-
 app = Flask(__name__)
-app.secret_key = config().get('secret_key')
+app.secret_key = config.get('secret_key')
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-blacklisted_tokens = set()
 db_setup, db_setup_files = get_db_setup_args()
-db = Database(config = config(), setup = db_setup, setup_files = db_setup_files)
+db = Database(config = config, setup = db_setup, setup_files = db_setup_files)
 auth_handler = Auth(db)
+
+blacklisted_tokens = set()
 
 def token_required(f):
     def wrapper(*args, **kwargs):
@@ -41,8 +39,7 @@ def token_required(f):
             return jsonify({'error': 'Token is invalid or expired'}), 401
 
         try:
-            # Use app.config['SECRET_KEY'] for decoding
-            decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            decoded = jwt.decode(token, app.secret_key, algorithms=['HS256'])
             user_id = decoded.get('user_id')
            
             if not user_id:
@@ -95,14 +92,13 @@ def login():
             'user_id': user_id,
             'exp': datetime.now() + timedelta(hours=1)  
             }, 
-            app.config['SECRET_KEY'], 
+            app.secret_key, 
             algorithm='HS256')
         
         return jsonify({
-            'message': f'Tervetuloa, {username}!', 
             'token': token,
             'user_id': user_id,
-            }), 200
+        }), 200
             
 @app.route('/api/logout', methods=['POST'])
 @token_required
@@ -196,7 +192,6 @@ def dice_play(current_user: Player):
 @token_required
 def coinflip_play(current_user: Player):
     data = request.json
-    user = current_user
     
     try:
         bet = int(data.get('bet'))
@@ -205,8 +200,7 @@ def coinflip_play(current_user: Player):
         if bet <= 0 or bet > current_user.get_balance():
             return jsonify({'error': 'Invalid bet amount'}), 400
         
-        playgame = Coinflip(user, db)
-        
+        playgame = Coinflip(current_user, db)
         outcome = playgame.start_game(bet, guess)
         
         return jsonify({
@@ -225,26 +219,46 @@ def slots_play(current_user: Player):
     Endpoint to play the Slots game.
     """
     data = request.json
-    user = current_user
 
     try:
-        # Retrieve bet amount from request
         bet = int(data.get('bet'))
 
-        # Validate bet amount
         if bet <= 0 or bet > current_user.get_balance():
             return jsonify({'error': 'Invalid bet amount or insufficient balance'}), 400
 
-        # Create a Slots game instance and play the game
-        playgame = Slots(user, db)
+        playgame = Slots(current_user, db)
         outcome = playgame.start_game(bet)
 
-        # Respond with the game outcome
         return jsonify({
             'message': 'Slots game played successfully!',
             **outcome
         }), 200
 
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
+    
+@app.route('/api/games/roulette', methods=['POST'])
+@token_required
+def roulette_play(current_user: Player):
+    data = request.json
+    
+    try:
+        bet = int(data.get('bet'))
+        color_guess = str(data.get('color_guess'))
+        number_guess = int(data.get('number_guess'))
+        
+        if bet <= 0 or bet > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount'}), 400
+        
+        playgame = Roulette(current_user, db)
+        outcome = playgame.start_game(bet, color_guess, number_guess)
+        
+        return jsonify({
+            'message': 'Game played successfully!',
+            **outcome
+        }), 200
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
