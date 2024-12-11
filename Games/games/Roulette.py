@@ -1,7 +1,6 @@
 import random
 from time import sleep
 from ..Game import Game
-from cli.common.utils import header
 from typing import override
 
 class Roulette(Game):
@@ -42,12 +41,6 @@ class Roulette(Game):
             })
             
         return history
-    
-    def _print_history(self) -> None:
-        history_str = "  |  ".join([f'{roll["number"]}-{self.color_names[roll["color"][0]][0].upper()}' for roll in self.roll_history])
-        print(f'Viimeiset {self.roll_history_rolls} pyöräytystä:')
-        
-        self.box_wrapper(history_str)
     
     def _get_color(self, number: int) -> str:
         return 'v' if number in self.colors['v'] else 'p' if number in self.colors['p'] else 'm'

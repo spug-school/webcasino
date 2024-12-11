@@ -2,7 +2,6 @@ from random import shuffle
 from time import sleep
 from os import system, name
 from ..Game import Game
-from cli.common.utils import header
 from typing import override
 
 class Twentyone(Game):
