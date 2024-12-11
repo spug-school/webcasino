@@ -2,7 +2,6 @@
 @import "./styles/dice.css";
 @import "./styles/coinflip.css";
 @import "./styles/slots.css";
-@import "./styles/twentyone.css";
 
 body {
   background-color: antiquewhite;
