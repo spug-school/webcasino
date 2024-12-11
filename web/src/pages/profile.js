@@ -1,4 +1,5 @@
 import { getGameHistory } from "../utils/fetchUtils.js";
+import { apiUrl } from "../core/config.js";
 
 export async function Profile(req) {
   const root = document.querySelector("#root");

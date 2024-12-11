@@ -3,6 +3,7 @@
 @import "./styles/coinflip.css";
 @import "./styles/slots.css";
 @import "./styles/roulette.css";
+@import "./styles/profile.css";
 
 body {
   background-color: antiquewhite;
@@ -11,6 +12,10 @@ body {
 h1 {
   font-size: 1.5rem;
   font-weight: 700;
+
+  &#app-title {
+    font-style: italic;
+  }
 }
 
 h2 {
@@ -30,7 +35,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
 
   .heading {
     text-align: center;
@@ -51,6 +56,7 @@ h3 {
     a {
       color: black;
       text-decoration: none;
+      font-weight: 600;
 
       &:hover {
         text-decoration: underline;
@@ -356,7 +362,7 @@ input[type="submit"],
 
       img {
         border-radius: 0.5rem;
-        object-fit: cover;
+        object-fit: contain;
         height: 150px;
       }
 

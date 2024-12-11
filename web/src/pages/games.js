@@ -14,7 +14,7 @@ export function Games(req) {
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Nopanheitto</h3>
-            <p>Pelissä heitetään pelaajan valitsemaa määrää noppia. Pelaaja arvaa näiden noppien heiton summan.</p>
+            <p>Heitä valitsemaasi määrää noppia ja arvaa summa!</p>
           </a>
         </div>
 
@@ -38,7 +38,7 @@ export function Games(req) {
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Kolikonheitto</h3>
-            <p>Perinteinen kolikonheitto!</p>
+            <p>Pelaa klassista kolikonheittoa!</p>
           </a>
         </div>
         

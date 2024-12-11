@@ -27,7 +27,6 @@ export async function Dice(req) {
       <div class="game-container">
           <h1>Nopanheitto</h1>
           <p>Tervetuloa nopanheittoon!</p>
-          <p>Voittokerroin: noppien määrä x 6</p>
           <div id="game-area">
               <div class="wrap">
                   <div class="left">
