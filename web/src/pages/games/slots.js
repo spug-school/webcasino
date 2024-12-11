@@ -25,7 +25,6 @@ export async function Slots(req) {
         </div>
       </div>
       <form id="slots-form">
-        <label for="bet">Panos:</label>
         <input 
           type="number" 
           id="bet" 
@@ -37,6 +36,7 @@ export async function Slots(req) {
         <button type="submit">Aloita peli!</button>
       </form>
       <div id="result-area">
+        <h2>Tulos</h2>
         <p id="outcome"></p>
         <p id="balance"></p>
       </div>
@@ -45,9 +45,17 @@ export async function Slots(req) {
 </div>
 `;
 
+  const outcome = document.querySelector("#outcome");
+  const balance = document.querySelector("#balance");
+
+  console.log("hips")
+
   const slotsForm = document.querySelector("#slots-form");
   slotsForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    outcome.innerHTML = "";
+    balance.innerHTML = "";
 
     const bet = parseInt(document.querySelector("#bet").value);
 

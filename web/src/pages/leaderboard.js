@@ -71,6 +71,7 @@ function createTable(data, destination) {
     destination.appendChild(tbody);
 }
 
+// sort the object by the order of the keys in the order array
 function sortObjectByOrder(obj, order) {
     return order.reduce((sorted, key) => {
         if (obj.hasOwnProperty(key)) {

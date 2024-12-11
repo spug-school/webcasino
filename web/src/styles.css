@@ -83,6 +83,10 @@ h3 {
     justify-content: start;
     flex-wrap: wrap;
     flex-direction: row;
+
+    & > * {
+      max-width: 175px;
+    }
   }
 
 }

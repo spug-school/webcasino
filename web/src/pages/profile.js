@@ -1,9 +1,9 @@
-import { getGameHistory, getPlayerData } from "../utils/fetchUtils.js";
+import { getGameHistory } from "../utils/fetchUtils.js";
 
 export async function Profile(req) {
   const root = document.querySelector("#root");
 
-  const playerData = await getPlayerData(localStorage.getItem("user_id"));
+  const playerData = JSON.parse(localStorage.getItem("userData"));
   const gameHistory = await getGameHistory();
 
   root.innerHTML = `
@@ -29,6 +29,7 @@ export async function Profile(req) {
           </tr>
         </tbody>
       </table>
+      <br>
       <h2>Viimeisimmät pelisi</h2>
       <table id="game-history">
         <thead>

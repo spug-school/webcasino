@@ -26,7 +26,8 @@ export async function Dice(req) {
   root.innerHTML = `
       <div class="game-container">
           <h1>Nopanheitto</h1>
-          <p>Tervetuloa nopanheittoon! Syötä panos, valitse noppien määrä ja arvaa näiden noppien heiton summa!</p>
+          <p>Tervetuloa nopanheittoon!</p>
+          <p>Voittokerroin: noppien määrä x 6</p>
           <div id="game-area">
               <div class="wrap">
                   <div class="left">
@@ -51,19 +52,17 @@ export async function Dice(req) {
                                 placeholder="Syötä panos" 
                                 min="1"
                                 max="${playerBalance}"
-                                required
-                                >
+                                required>
                             </div>
                             <div class="controls">
                                 <label for="dice-amount">Noppien määrä</label>
                                 <input 
                                 type="number" 
                                 id="dice-amount" 
-                            placeholder="Nopat (2-4)" 
-                            min="2" 
+                            placeholder="Nopat (1 - 4)" 
+                            min="1" 
                             max="4"
-                            required
-                            >
+                            required>
                         </div>
                         <div class="controls">
                             <label for="guess">Arvauksesi:</label>

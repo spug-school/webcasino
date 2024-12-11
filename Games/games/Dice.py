@@ -18,7 +18,7 @@ class Dice(Game):
         return random.randint(1, self.sides)
     
     def _determine_outcome(self, guess: int, bet: int, roll: int, dice_amount: int) -> int:
-        return bet * dice_amount if guess == roll else 0
+        return bet * dice_amount * (self.sides/2) if guess == roll else 0
 
     @override
     def start_game(self, bet: int, dice_amount: int, guess: int) -> dict:
@@ -26,13 +26,7 @@ class Dice(Game):
         Game-specific logic for: Dice
         '''
         if self.player.get_balance() < bet:
-            raise ValueError('Insufficient balance to play the game.')
-        
-        if dice_amount < 2 or dice_amount > self.max_dice:
-            raise ValueError(f'Dice amount must be between 2 and {self.max_dice}.')
-        
-        if guess < dice_amount or guess > self.sides * dice_amount:
-            raise ValueError(f'Guess must be between {dice_amount} and {self.sides * dice_amount}.')
+            raise ValueError('Insufficient balance')
         
         self.deduct_bet(bet)
 
