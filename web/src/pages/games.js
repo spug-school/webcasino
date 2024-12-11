@@ -10,7 +10,7 @@ export function Games(req) {
           <a href="/games/dice">
             <img 
               src="/images/games_page/dicegame.png" 
-              alt="Dice"
+              alt="Nopanheitto"
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Nopanheitto</h3>
@@ -22,7 +22,7 @@ export function Games(req) {
           <a href="/games/slots">
             <img 
               src="/images/games_page/slotsgame.png" 
-              alt="Slots"
+              alt="Hedelmäpeli"
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Hedelmäpeli</h3>
@@ -34,7 +34,7 @@ export function Games(req) {
           <a href="/games/coinflip">
             <img 
               src="/images/games_page/coinflipgame.png" 
-              alt="Coin Flip"
+              alt="Kolikonheitto"
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Kolikonheitto</h3>
@@ -46,7 +46,7 @@ export function Games(req) {
           <a href="/games/roulette">
             <img 
               src="/images/games_page/roulettegame.png" 
-              alt="Coin Flip"
+              alt="Ruletti"
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Ruletti</h3>
@@ -58,7 +58,7 @@ export function Games(req) {
           <a href="/games/ventti">
             <img 
               src="/images/games_page/venttigame.png" 
-              alt="Coin Flip"
+              alt="Ventti"
               style="width: 100%; border-radius: 0.5rem;"
             >
             <h3>Ventti</h3>
