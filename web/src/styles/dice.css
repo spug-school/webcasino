@@ -1,0 +1,10 @@
+.dice {
+  width: 75px;
+  height: 75px;
+  background: transparent;
+  border-radius: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  position: relative;
+}

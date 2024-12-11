@@ -1,0 +1,30 @@
+#profile-form-wrapper {
+    display: flex;
+
+    #profile-form {
+        display: flex;
+        flex-direction: row;
+        align-items: end;
+        width: 100%;
+        max-width: 75%;
+    
+        .controls {
+            max-width: 200px;
+            margin-block: 0;
+        }
+    }
+
+    #delete-user-form {
+        display: flex;
+        flex-direction: row;
+        align-items: end;
+        justify-content: flex-end;
+        width: 100%;
+        max-width: 25%;
+    
+        .controls {
+            max-width: 25%;
+            margin-block: 0;
+        }
+    }
+}
