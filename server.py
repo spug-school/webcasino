@@ -215,7 +215,38 @@ def coinflip_play(current_user: Player):
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
-    
+
+@app.route('/api/games/slots', methods=['POST'])
+@token_required
+def slots_play(current_user: Player):
+    """
+    Endpoint to play the Slots game.
+    """
+    data = request.json
+    user = current_user
+
+    try:
+        # Retrieve bet amount from request
+        bet = int(data.get('bet'))
+
+        # Validate bet amount
+        if bet <= 0 or bet > current_user.get_balance():
+            return jsonify({'error': 'Invalid bet amount or insufficient balance'}), 400
+
+        # Create a Slots game instance and play the game
+        playgame = Slots(user, db)
+        outcome = playgame.start_game(bet)
+
+        # Respond with the game outcome
+        return make_response(jsonify({
+            'message': 'Slots game played successfully!',
+            **outcome
+        }), 200)
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {str(e)}'}), 500
 
 @app.route('/api/logout', methods=['POST'])
 @token_required

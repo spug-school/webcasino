@@ -1,0 +1,45 @@
+/* Updated Slots Game Styles */
+#slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.reel {
+    font-size: 2rem; /* Controls the size of the icons */
+    display: flex;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    border: 2px solid #ddd;
+    padding: 0; /* Remove padding that might shift content */
+    width: 60px; /* Ensure consistent width */
+    height: 60px; /* Ensure consistent height */
+    text-align: center;
+    background: #fff;
+    box-sizing: border-box; /* Include border/padding in box size */
+}
+
+.reel:hover {
+    border-color: #bbb;
+    background-color: #f9f9f9;
+}
+
+/* General container to center everything */
+.center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Push everything near the top */
+    padding-top: 2rem; /* Add custom padding to control space above */
+    height: 100vh;
+    text-align: center;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem; /* Adds spacing between elements */
+    text-align: center;
+}
