@@ -18,47 +18,20 @@ class Slots(Game):
         self.symbols = ['🍑', '🍌', '🍒', '🍏', '🍇']
         self.win_multipliers = {2: 1.25, 3: 5, 4: 25}
 
-    def _clear_row(self, lines: int):
-        sys.stdout.write(f'\033[{lines}F')  # Move cursor up by 'lines' lines
-        sys.stdout.flush()
-
-    def _print_table(self, row: list):
-        col_widths = [wcswidth(symbol) + 3 for symbol in row]
-        row_content = "│" + "│".join(f"{symbol:^{width - 1}}" for symbol, width in zip(row, col_widths)) + "│"
-        top_row = "┌" + "┬".join("─" * width for width in col_widths) + "┐"
-        bottom_row = "└" + "┴".join("─" * width for width in col_widths) + "┘"
-
-        print(top_row)
-        print(row_content)
-        print(bottom_row)
-
     def _spin_slot_machine(self) -> list:
         total_spins = self.spins_per_column * self.columns
         final_row = [''] * self.columns
 
-        print("\033[?25l", end='')  # Hide cursor
-        print('\nSpinning the slots!')
-
-        try:
-            for spin in range(total_spins):
-                row_to_print = []
-                for column in range(self.columns):
-                    if spin >= (column + 1) * self.spins_per_column:
-                        row_to_print.append(final_row[column])  # Final symbol
-                    else:
-                        new_symbol = random.choice(self.symbols)
-                        row_to_print.append(new_symbol)
-                        if spin == (column + 1) * self.spins_per_column - 1:
-                            final_row[column] = new_symbol
-
-                if spin > 0:
-                    self._clear_row(3)
-
-                self._print_table(row_to_print)
-                # Removed time delay from here because it makes no sense anymore
-               # time.sleep(0.3 + ((spin + 1) / total_spins) * 0.3)
-        finally:
-            print("\033[?25h", end='')  # Show cursor
+        for spin in range(total_spins):
+            row_to_print = []
+            for column in range(self.columns):
+                if spin >= (column + 1) * self.spins_per_column:
+                    row_to_print.append(final_row[column])  # Final symbol
+                else:
+                    new_symbol = random.choice(self.symbols)
+                    row_to_print.append(new_symbol)
+                    if spin == (column + 1) * self.spins_per_column - 1:
+                        final_row[column] = new_symbol
 
         return final_row
 

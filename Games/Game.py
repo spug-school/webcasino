@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
 from datetime import datetime
-from cli.common.utils import header, get_prompt, box_wrapper as box_wrap
 
 class Game(ABC):
     '''
@@ -47,62 +46,6 @@ class Game(ABC):
         self.player.update_balance(-bet)
         self.player.save()
         return bet
-    
-    # --------------------------------
-    # Main game loop
-    # --------------------------------
-    def run_game(self) -> object:
-        '''
-        Play the game and return the modified player object
-        
-        Returns:
-            object: The modified player object
-        '''
-        while True:
-            self.game_intro(self.player.get_username())
-            
-            # check if the player wants to play the game or not
-            if not self.play_game():
-                break
-            
-            header(self.game_info.get('name').capitalize(), self.player.get_balance())
-            
-            # game-specific logic happens here
-            outcome = self.start_game()
-            
-            # cancel if the outcome is not valid (False or None)
-            # this can be for example if the player cancels the game via
-            # empty bet etc.
-            if not outcome:
-                continue
-            
-            game_won = outcome.get('won')
-            bet = outcome.get('bet')
-            win_amount = outcome.get('win_amount')
-            
-            if outcome.get('won'):
-                print(f'\nOnnittelut! Voitit {outcome.get("win_amount")} pistettä!\n')
-            else:
-                print(f'\nHävisit pelin.\n')
-            
-            # Bulk-update the player values
-            self.update_player_values(
-                won = game_won, 
-                win_amount = win_amount, 
-                save = True
-            )
-            
-            # Save the game to the database
-            self.save_game_to_history(
-                bet = bet, 
-                win_amount = win_amount - bet
-            )
-            
-            # ask the player if they want to play again, 
-            # and break the loop if they don't
-            if not self.play_again(self.player.get_balance()):
-                break
-            
     
     # --------------------------------
     # Database related methods

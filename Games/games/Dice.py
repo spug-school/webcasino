@@ -25,14 +25,17 @@ class Dice(Game):
         '''
         Game-specific logic for: Dice
         '''
-        self.deduct_bet(bet)
-           
+        if self.player.get_balance() < bet:
+            raise ValueError('Insufficient balance to play the game.')
+        
         if dice_amount < 2 or dice_amount > self.max_dice:
             raise ValueError(f'Dice amount must be between 2 and {self.max_dice}.')
         
         if guess < dice_amount or guess > self.sides * dice_amount:
             raise ValueError(f'Guess must be between {dice_amount} and {self.sides * dice_amount}.')
         
+        self.deduct_bet(bet)
+
         dice_rolls = [self._roll_dice() for _ in range(dice_amount)]
         roll_sum = sum(dice_rolls)
         win_amount = self._determine_outcome(guess, bet, roll_sum, dice_amount)

@@ -24,8 +24,11 @@ class Coinflip(Game):
         '''
         Game-specific logic for: CoinFlip
         '''
-        self.deduct_bet(bet)
+        if self.player.get_balance() < bet:
+            raise ValueError('Insufficient balance to play the game.')
         
+        self.deduct_bet(bet)
+
         flip = self._flip_coin()
         win_amount = self._determine_outcome(guess, flip, bet)
         game_won = guess == flip[0]
